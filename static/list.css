@@ -1,0 +1,21 @@
+table {
+    position: relative;
+    border-collapse: collapse;
+    width: 80%;
+    margin: auto;
+}
+th, td {
+    border-bottom: 1px solid gray;
+    padding: 10px;
+    text-align: center;
+}
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+tbody tr:hover {
+    background-color: lightgray;
+}
+a.thumbs:link, a.thumbs:visited{
+    color: black;
+    text-decoration: none;
+}

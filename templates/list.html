@@ -3,26 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <script src='https://kit.fontawesome.com/a076d05399.js'></script>
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='list.css') }}">
     <title>Title</title>
 </head>
 <body>
 <table>
     <thead>
         <tr>
-            {% for column_name in ['id', 'title'] %}
-                <th>{{ column_name }}</th>
-            {% endfor %}
+            <th>Question title</th>
+            <th></th>
+            <th></th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
         {% for question in questions %}
             <tr>
-                {% for key in ['id', 'title'] %}
-                    <td>{{ question[key] }}</td>
-                {% endfor %}
-                <td><i class="far fa-thumbs-up"><i class="far fa-thumbs-down"></td>
-                <td><a href=""><small>answer</small></a></td>
-                <td><a href=""><small>delete</small></a></td>
+                <td>{{ question['title'] }}</td>
+                <td><a href="{{ url_for('question_vote_up', question_id=question['id']) }}" title="Vote up" class="thumbs">
+                        <i class="far fa-thumbs-up"></i>
+                    </a>
+                    <a href="{{ url_for('question_vote_down', question_id=question['id']) }}" title="Vote down" class="thumbs">
+                        <i class="far fa-thumbs-down"></i>
+                    </a>
+                </td>
+                <td><a href="{{ url_for('answer_post', question_id=question['id']) }}"><small>answer</small></a></td>
+                <td><a href="{{ url_for('question_delete', question_id=question['id']) }}"><small>delete</small></a></td>
             </tr>
         {% endfor %}
     </tbody>
