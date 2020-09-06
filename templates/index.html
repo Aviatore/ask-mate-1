@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<table>
+    <thead>
+        <tr>
+            {% for column_name in headers %}
+                <th>{{ column_name }}</th>
+            {% endfor %}
+
+        </tr>
+    </thead>
+    <tbody>
+        {% for question in questions %}
+            <tr>
+                {% for key in headers %}
+                    <td>{{ question[key] }}</td>
+                {% endfor %}
+                <td>vote</td>
+                <td><a href=""><small>delete</small></a></td>
+            </tr>
+        {% endfor %}
+    </tbody>
+
+</table>
+
+</body>
+</html>
