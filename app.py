@@ -1,10 +1,13 @@
 from flask import Flask, render_template, redirect, url_for
 from data_manager import *
+from util import *
 
 
 app = Flask(__name__)
 
 
+# Edit the 'Cache-Control' header to force browser to not cache external files, e.g. css files.
+# The solution is suitable for development only.
 @app.after_request
 def add_header(request):
     request.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
@@ -16,8 +19,9 @@ def add_header(request):
 def list():
     table_headers = ['Question id', 'Question title']
     questions = read_questions()
+    questions_by_time = sort_questions('submission_time', questions, direction='desc')
 
-    return render_template('list.html', headers=table_headers, questions=questions)
+    return render_template('list.html', headers=table_headers, questions=questions_by_time)
 
 
 # Display a question
