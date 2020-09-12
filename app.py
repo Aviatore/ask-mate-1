@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect, url_for
 from data_manager import *
 from util import *
+import datetime
 
 
 app = Flask(__name__)
@@ -17,7 +18,11 @@ def add_header(request):
 # List questions
 @app.route('/list')
 def list():
-    table_headers = ['Question id', 'Question title']
+    table_headers = {
+        'headers': ['Question', 'Number of views', 'Number of votes', 'Submission time'],
+        'keys': ['title', 'message', 'view_number', 'vote_number', 'submission_time']
+    }
+
     questions = read_questions()
     questions_by_time = sort_questions('submission_time', questions, direction='desc')
 
@@ -93,6 +98,17 @@ def answer_vote_up(answer_id):
 @app.route('/answer/<answer_id>/vote_down')
 def answer_vote_down(answer_id):
     return render_template('under_contstruction.html')
+
+
+def time_to_utc(raw_time):
+    time_converted = datetime.datetime.fromtimestamp(raw_time)
+    time_formatted = time_converted.strftime('%d %B %Y, %H:%M').lstrip('0')
+    return time_formatted
+
+
+@app.context_processor
+def util_functions():
+    return dict(time_to_utc=time_to_utc)
 
 
 if __name__ == '__main__':
