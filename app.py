@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, request
 from data_manager import *
 from util import *
 import datetime
@@ -20,13 +20,25 @@ def add_header(request):
 def list():
     table_headers = {
         'headers': ['Question', 'Number of views', 'Number of votes', 'Submission time'],
-        'keys': ['title', 'message', 'view_number', 'vote_number', 'submission_time']
+        'keys': ['title', 'view_number', 'vote_number', 'submission_time'],
+        'directions': [None, None, None, None]
     }
 
     questions = read_questions()
-    questions_by_time = sort_questions('submission_time', questions, direction='desc')
 
-    return render_template('list.html', headers=table_headers, questions=questions_by_time)
+    order_by = request.args.get('order_by')
+    order_direction = request.args.get('order_direction')
+
+    if order_by:
+        questions_sorted = sort_questions(order_by, questions, direction=order_direction)
+        index = table_headers['keys'].index(order_by)
+        table_headers['directions'][index] = order_direction
+    else:
+        questions_sorted = sort_questions('submission_time', questions, direction='desc')
+        index = table_headers['keys'].index('submission_time')
+        table_headers['directions'][index] = 'desc'
+
+    return render_template('list.html', headers=table_headers, questions=questions_sorted, order_by=order_by, order_direction=order_direction)
 
 
 # Display a question
@@ -48,7 +60,7 @@ def answer_post(question_id):
 
 
 # Delete question
-@app.route('/question/<question_id>/delete')
+@app.route('/question/<int:question_id>/delete')
 def question_delete(question_id):
     questions = read_questions()
     questions.remove([question for question in questions if question['id'] == question_id][0])
