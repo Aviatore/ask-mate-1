@@ -27,19 +27,19 @@ def list():
 # Display a question
 @app.route('/question/<question_id>')
 def question_details(question_id):
-    return render_template('under_contstruction.html')
+    return render_template('under_construction.html')
 
 
 # Ask a question
 @app.route('/add-question')
 def question_add():
-    return render_template('under_contstruction.html')
+    return render_template('under_construction.html')
 
 
 # Post an answer
 @app.route('/question/<question_id>/new-answer')
 def answer_post(question_id):
-    return render_template('under_contstruction.html')
+    return render_template('under_construction.html')
 
 
 # Delete question
@@ -56,7 +56,7 @@ def question_delete(question_id):
 # Edit a question
 @app.route('/question/<question_id>/edit')
 def question_edit(question_id):
-    return render_template('under_contstruction.html')
+    return render_template('under_construction.html')
 
 
 # Delete an answer
@@ -74,25 +74,25 @@ def answer_delete(answer_id):
 # Vote-up a question
 @app.route('/question/<question_id>/vote_up')
 def question_vote_up(question_id):
-    return render_template('under_contstruction.html')
+    return render_template('under_construction.html')
 
 
 # Vote-down a question
 @app.route('/question/<question_id>/vote_down')
 def question_vote_down(question_id):
-    return render_template('under_contstruction.html')
+    return render_template('under_construction.html')
 
 
 # Vote-up an answer
 @app.route('/answer/<answer_id>/vote_up')
 def answer_vote_up(answer_id):
-    return render_template('under_contstruction.html')
+    return render_template('under_construction.html')
 
 
 # Vote-down an answer
 @app.route('/answer/<answer_id>/vote_down')
 def answer_vote_down(answer_id):
-    return render_template('under_contstruction.html')
+    return render_template('under_construction.html')
 
 
 if __name__ == '__main__':
