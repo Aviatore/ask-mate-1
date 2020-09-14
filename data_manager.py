@@ -8,7 +8,15 @@ ANSWERS_HEADERS = ['id', 'submission_time', 'vote_number', 'question_id', 'messa
 
 
 def read_questions():
-    return read_csv(QUESTIONS_FILE)
+    questions = read_csv(QUESTIONS_FILE)
+
+    for question in questions:
+        for key in question.keys():
+            if question[key] is not None:
+                if question[key].isdigit():
+                    question[key] = int(question[key])
+
+    return questions
 
 
 def read_answers():
