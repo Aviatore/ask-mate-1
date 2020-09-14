@@ -58,11 +58,12 @@ def question_add():
 def answer_post(question_id):
 
     if request.method == "POST":
-        answer_id = get_id(read_csv())
+        answer_id = get_id(read_answers())
+        answer = request.form["message"]
         return redirect(url_for("question_details(question_id)"))
 
     else:
-        return render_template('under_construction.html')
+        return render_template('new-answer.html')
 
 
 # Delete question

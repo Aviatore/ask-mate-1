@@ -10,10 +10,10 @@ def get_id(data):
     temp = 0
 
     for item in data:
-        if item["id"] > temp:
-            temp = item["id"]
+        if int(item["id"]) > temp:
+            temp = int(item["id"])
 
-    return temp + 1
+    return str(temp + 1)
 
 
 def read_questions():
@@ -36,7 +36,7 @@ def read_answers():
             if question[key] is not None:
                 if question[key].isdigit():
                     question[key] = int(question[key])
-
+    return questions
 
 def write_questions(data):
     write_csv(QUESTIONS_FILE, data, QUESTIONS_HEADERS)
