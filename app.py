@@ -54,9 +54,15 @@ def question_add():
 
 
 # Post an answer
-@app.route('/question/<question_id>/new-answer')
+@app.route('/question/<question_id>/new-answer', methods=["GET", "POST"])
 def answer_post(question_id):
-    return render_template('under_construction.html')
+
+    if request.method == "POST":
+        answer_id = get_id(read_csv())
+        return redirect(url_for("question_details(question_id)"))
+
+    else:
+        return render_template('under_construction.html')
 
 
 # Delete question
