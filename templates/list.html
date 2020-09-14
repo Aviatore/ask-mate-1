@@ -11,25 +11,37 @@
 <table>
     <thead>
         <tr>
-            <th>Question title</th>
-            <th></th>
-            <th></th>
+            {% for header in headers['headers'] %}
+                {% set direction = 'asc' if headers['directions'][loop.index0] == 'desc' or headers['directions'][loop.index0] is none else 'desc' %}
+                <th>
+                    <a href="{{ url_for('list', order_by=headers['keys'][loop.index0], order_direction=direction) }}" title="Sort by {{ header }}">{{ header }}</a>
+                    {% if headers['directions'][loop.index0] == 'asc' %}
+                        <i class="fas fa-sort-down"></i>
+                        {% elif headers['directions'][loop.index0] == 'desc' %}
+                        <i class="fas fa-sort-up"></i>
+                    {% endif %}
+                </th>
+            {% endfor %}
             <th></th>
         </tr>
     </thead>
     <tbody>
         {% for question in questions %}
             <tr>
-                <td>{{ question['title'] }}</td>
-                <td><a href="{{ url_for('question_vote_up', question_id=question['id']) }}" title="Vote up" class="thumbs">
-                        <i class="far fa-thumbs-up"></i>
-                    </a>
-                    <a href="{{ url_for('question_vote_down', question_id=question['id']) }}" title="Vote down" class="thumbs">
-                        <i class="far fa-thumbs-down"></i>
+                <td>
+                    <div class="title"><a href="{{ url_for('question_details', question_id=question['id']) }}" class="title-link">{{ question['title'] }}</a></div>
+                    <div class="message">{{ question['message'] }}</div>
+                </td>
+
+            {% for key in headers['keys'][1:] %}
+                <td>{{ question[key] if key != 'submission_time' else time_to_utc(question[key]) }}</td>
+            {% endfor %}
+
+                <td>
+                    <a href="{{ url_for('question_delete', question_id=question['id']) }}" title="Delete question" class="thumbs">
+                        <i class="far fa-trash-alt icon"></i>
                     </a>
                 </td>
-                <td><a href="{{ url_for('answer_post', question_id=question['id']) }}"><small>answer</small></a></td>
-                <td><a href="{{ url_for('question_delete', question_id=question['id']) }}"><small>delete</small></a></td>
             </tr>
         {% endfor %}
     </tbody>

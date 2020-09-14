@@ -10,7 +10,7 @@ function thumb_toggle() {
 }
 
 function add_toggle() {
-    let thumbs = document.querySelectorAll('i')
+    let thumbs = document.querySelectorAll('i.icon')
 
     for (let i=0; i<thumbs.length; i++) {
         thumbs[i].addEventListener('mouseover', thumb_toggle)
