@@ -2,6 +2,7 @@ from flask import Flask, render_template, redirect, url_for, request
 from data_manager import *
 from util import *
 import datetime
+import time
 
 
 app = Flask(__name__)
@@ -58,9 +59,18 @@ def question_add():
 def answer_post(question_id):
 
     if request.method == "POST":
-        answer_id = get_id(read_answers())
-        answer = request.form["message"]
-        return redirect(url_for("question_details(question_id)"))
+        saved_answers = read_answers()
+        answer = request.form.to_dict()
+        answer["id"] = get_id(read_answers())
+        answer["submission_time"] = str(int(time.time()))
+        answer["vote_number"] = "0"
+        answer["question_id"] = question_id
+
+        saved_answers.append(answer)
+        write_answers(saved_answers)
+
+
+        return redirect(url_for("question_details", question_id=question_id))
 
     else:
         return render_template('new-answer.html')
