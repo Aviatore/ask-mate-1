@@ -15,6 +15,12 @@ def add_header(request):
     return request
 
 
+# Welcome page
+@app.route('/')
+def main_page():
+    return render_template('main_page.html')
+
+
 # List questions
 @app.route('/list')
 def list():
