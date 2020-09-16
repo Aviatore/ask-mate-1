@@ -4,7 +4,6 @@ from util import *
 import datetime
 import time
 
-
 app = Flask(__name__)
 
 
@@ -39,7 +38,8 @@ def list():
         index = table_headers['keys'].index('submission_time')
         table_headers['directions'][index] = 'desc'
 
-    return render_template('list.html', headers=table_headers, questions=questions_sorted, order_by=order_by, order_direction=order_direction)
+    return render_template('list.html', headers=table_headers, questions=questions_sorted, order_by=order_by,
+                           order_direction=order_direction)
 
 
 # Display a question
@@ -57,7 +57,6 @@ def question_add():
 # Post an answer
 @app.route('/question/<question_id>/new-answer', methods=["GET", "POST"])
 def answer_post(question_id):
-
     if request.method == "POST":
         saved_answers = read_answers()
         answer = request.form.to_dict()
@@ -68,7 +67,6 @@ def answer_post(question_id):
 
         saved_answers.append(answer)
         write_answers(saved_answers)
-
 
         return redirect(url_for("question_details", question_id=question_id))
 
@@ -88,9 +86,32 @@ def question_delete(question_id):
 
 
 # Edit a question
-@app.route('/question/<question_id>/edit')
+@app.route('/question/<question_id>/edit', methods=["GET", "POST"])
 def question_edit(question_id):
-    return render_template('under_construction.html')
+    questions = read_questions()
+    question_to_edit = {}
+
+    for question in questions:
+        if str(question["id"]) == str(question_id):
+            question_to_edit = question
+
+    title = question_to_edit["title"]
+    message = question_to_edit["message"]
+
+    if request.method == "POST":
+        new_title = request.form["title"]
+        new_message = request.form["message"]
+        question_to_edit["title"] = new_title
+        question_to_edit["message"] = new_message
+        question_to_edit["submission_time"] = str(int(time.time()))
+        questions.remove(question_to_edit)
+        questions.append(question_to_edit)
+        write_questions(questions)
+
+        return redirect(url_for("question_details", question_id=question_id))
+
+    else:
+        return render_template("edit-question.html", title=title, message=message)
 
 
 # Delete an answer
@@ -100,7 +121,7 @@ def answer_delete(answer_id):
     answer_to_delete = [answer for answer in answers if answer['id'] == answer_id][0]
     answers.remove(answer_to_delete)
 
-    write_answers(answers, QUESTIONS_HEADERS)
+    write_answers(answers)
 
     return redirect(url_for('question_details', question_id=answer_to_delete['question_id']))
 
