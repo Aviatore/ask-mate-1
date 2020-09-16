@@ -34,8 +34,8 @@
         <p>Welcome to <em>AskMate</em>, feel free to ask anything comes to your mind. </p>
         <p>Some mate could help resolve your problem, or maybe you can give a hand to someone else ^^</p>
         <p>So... how it be ? Are we mates ?</p>
-        <button class="button button_ask">Ask Q</button>
-        <button class="button button_answer">Answer Q</button>
+        <button class="button button_ask"><a href="{{ url_for('question_add') }}">Ask Q</a></button>
+        <button class="button button_answer"><a href='{{ url_for('list') }}'>Answer Q</a></button>
     </div>
 </body>
 </html>
