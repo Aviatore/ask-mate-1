@@ -60,7 +60,7 @@ def question_add():
         question["view_number"] = "0"
         print(question)
         saved_questions.append(question)
-        write_answers(saved_questions)
+        write_questions(saved_questions)
 
         return redirect(url_for('list'))
 
