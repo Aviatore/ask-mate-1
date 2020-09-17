@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Post an answer</title>
+    <link type="text/css" rel="stylesheet" href="{{ url_for("static", filename="new-answer.css") }}">
+</head>
+<body>
+<h1>New answer</h1>
+<form action="" method="post">
+    <label id="message" for="message">Your answer</label><br>
+    <textarea rows="10" cols="40" required name="message"></textarea><br>
+    <button type="submit">Submit</button>
+</form>
+</body>
+</html>

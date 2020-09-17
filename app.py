@@ -2,7 +2,7 @@ from flask import Flask, render_template, redirect, url_for, request
 from data_manager import *
 from util import *
 import datetime
-
+import time
 
 app = Flask(__name__)
 
@@ -44,25 +44,40 @@ def list():
         index = table_headers['keys'].index('submission_time')
         table_headers['directions'][index] = 'desc'
 
-    return render_template('list.html', headers=table_headers, questions=questions_sorted, order_by=order_by, order_direction=order_direction)
+    return render_template('list.html', headers=table_headers, questions=questions_sorted, order_by=order_by,
+                           order_direction=order_direction)
 
 
 # Display a question
 @app.route('/question/<question_id>')
 def question_details(question_id):
-    return render_template('under_contstruction.html')
+    return render_template('under_construction.html')
 
 
 # Ask a question
 @app.route('/add-question')
 def question_add():
-    return render_template('under_contstruction.html')
+    return render_template('under_construction.html')
 
 
 # Post an answer
-@app.route('/question/<question_id>/new-answer')
+@app.route('/question/<question_id>/new-answer', methods=["GET", "POST"])
 def answer_post(question_id):
-    return render_template('under_contstruction.html')
+    if request.method == "POST":
+        saved_answers = read_answers()
+        answer = request.form.to_dict()
+        answer["id"] = get_id(read_answers())
+        answer["submission_time"] = str(int(time.time()))
+        answer["vote_number"] = "0"
+        answer["question_id"] = question_id
+
+        saved_answers.append(answer)
+        write_answers(saved_answers)
+
+        return redirect(url_for("question_details", question_id=question_id))
+
+    else:
+        return render_template('new-answer.html')
 
 
 # Delete question
@@ -77,9 +92,32 @@ def question_delete(question_id):
 
 
 # Edit a question
-@app.route('/question/<question_id>/edit')
+@app.route('/question/<question_id>/edit', methods=["GET", "POST"])
 def question_edit(question_id):
-    return render_template('under_contstruction.html')
+    questions = read_questions()
+    question_to_edit = {}
+
+    for question in questions:
+        if str(question["id"]) == str(question_id):
+            question_to_edit = question
+
+    title = question_to_edit["title"]
+    message = question_to_edit["message"]
+
+    if request.method == "POST":
+        new_title = request.form["title"]
+        new_message = request.form["message"]
+        question_to_edit["title"] = new_title
+        question_to_edit["message"] = new_message
+        question_to_edit["submission_time"] = str(int(time.time()))
+        # questions.remove(question_to_edit)
+        # questions.append(question_to_edit)
+        write_questions(questions)
+
+        return redirect(url_for("question_details", question_id=question_id))
+
+    else:
+        return render_template("edit-question.html", title=title, message=message)
 
 
 # Delete an answer
@@ -89,7 +127,7 @@ def answer_delete(answer_id):
     answer_to_delete = [answer for answer in answers if answer['id'] == answer_id][0]
     answers.remove(answer_to_delete)
 
-    write_answers(answers, QUESTIONS_HEADERS)
+    write_answers(answers)
 
     return redirect(url_for('question_details', question_id=answer_to_delete['question_id']))
 
@@ -97,25 +135,25 @@ def answer_delete(answer_id):
 # Vote-up a question
 @app.route('/question/<question_id>/vote_up')
 def question_vote_up(question_id):
-    return render_template('under_contstruction.html')
+    return render_template('under_construction.html')
 
 
 # Vote-down a question
 @app.route('/question/<question_id>/vote_down')
 def question_vote_down(question_id):
-    return render_template('under_contstruction.html')
+    return render_template('under_construction.html')
 
 
 # Vote-up an answer
 @app.route('/answer/<answer_id>/vote_up')
 def answer_vote_up(answer_id):
-    return render_template('under_contstruction.html')
+    return render_template('under_construction.html')
 
 
 # Vote-down an answer
 @app.route('/answer/<answer_id>/vote_down')
 def answer_vote_down(answer_id):
-    return render_template('under_contstruction.html')
+    return render_template('under_construction.html')
 
 
 def time_to_utc(raw_time):
