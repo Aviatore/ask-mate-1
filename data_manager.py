@@ -23,6 +23,7 @@ def read_answers():
     return read_csv(ANSWERS_FILE)
 
 
+
 def write_questions(data):
     write_csv(QUESTIONS_FILE, data, QUESTIONS_HEADERS)
 
