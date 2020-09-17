@@ -55,9 +55,34 @@ def question_details(question_id):
 
 
 # Ask a question
-@app.route('/add-question')
+@app.route('/add-question', methods=["GET", "POST"])
 def question_add():
-    return render_template('under_construction.html')
+    if request.method == "POST":
+        saved_questions = read_questions()
+        question = request.form.to_dict()
+        question["id"] = get_id(read_questions())
+        question["submission_time"] = str(int(time.time()))
+        question["vote_number"] = "0"
+        question["view_number"] = "0"
+        print(question)
+        saved_questions.append(question)
+        write_questions(saved_questions)
+
+        return redirect(url_for('list'))
+
+    else:
+        return render_template('add-question.html')
+
+
+# @app.route('/add-question', methods=["GET", "POST"])
+# def question_add_post():
+#     new_user_question = dict(request.form)
+#     new_id = get_id(read_questions())
+#     new_user_question["id"] = new_id
+#
+#     write_questions([new_user_question])
+#
+#     return redirect(url_for('list'))
 
 
 # Post an answer
