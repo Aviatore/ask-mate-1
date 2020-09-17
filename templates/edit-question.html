@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Edit question</title>
+    <link type="text/css" rel="stylesheet" href="{{ url_for("static", filename="edit-question.css") }}">
 </head>
 <body>
 <h1>Edit Question</h1>
 <form action="" method="post">
-    <label for="title">Title:</label><br>
+    <label id="title" for="title">Title</label><br>
     <textarea cols="100" rows="1" required name="title">{{ title }}</textarea><br>
-    <label for="message">Question:</label><br>
+    <label id="message" for="message">Question</label><br>
     <textarea cols="100" rows="10" required name="message">{{ message }}</textarea><br>
     <button type="submit">Submit</button>
 </form>

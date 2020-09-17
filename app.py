@@ -104,8 +104,8 @@ def question_edit(question_id):
         question_to_edit["title"] = new_title
         question_to_edit["message"] = new_message
         question_to_edit["submission_time"] = str(int(time.time()))
-        questions.remove(question_to_edit)
-        questions.append(question_to_edit)
+        # questions.remove(question_to_edit)
+        # questions.append(question_to_edit)
         write_questions(questions)
 
         return redirect(url_for("question_details", question_id=question_id))
