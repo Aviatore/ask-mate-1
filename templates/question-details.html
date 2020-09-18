@@ -12,6 +12,7 @@
 <p>{{ answer }}</p>
 {% endfor %}
 <footer><a href={{ url_for("answer_post", question_id=question_id) }}>Add an answer</a></footer>
+<footer><a href={{ url_for("question_edit", question_id=question_id) }}>Edit answer</a></footer>
 <footer><a href={{ url_for("list") }}>Back to the list</a> </footer>
 </body>
 </html>
