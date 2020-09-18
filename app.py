@@ -51,7 +51,22 @@ def list():
 # Display a question
 @app.route('/question/<question_id>')
 def question_details(question_id):
-    return render_template('under_construction.html')
+    questions = read_questions()
+    question_title = ""
+    question_message = ""
+    for question in questions:
+        if str(question["id"]) == question_id:
+            question_title = question["title"]
+            question_message = question["message"]
+
+    answers = read_answers()
+    answer_message = []
+    for answer in answers:
+        if str(answer["question_id"]) == question_id:
+            answer_message.append(answer["message"])
+
+    return render_template('question-details.html', question_id=question_id, question_title=question_title,
+                           question_message=question_message, answer_message=answer_message)
 
 
 # Ask a question
@@ -74,18 +89,7 @@ def question_add():
         return render_template('add-question.html')
 
 
-# @app.route('/add-question', methods=["GET", "POST"])
-# def question_add_post():
-#     new_user_question = dict(request.form)
-#     new_id = get_id(read_questions())
-#     new_user_question["id"] = new_id
-#
-#     write_questions([new_user_question])
-#
-#     return redirect(url_for('list'))
-
-
-# Post an answer
+# post answer
 @app.route('/question/<question_id>/new-answer', methods=["GET", "POST"])
 def answer_post(question_id):
     if request.method == "POST":
@@ -135,8 +139,6 @@ def question_edit(question_id):
         question_to_edit["title"] = new_title
         question_to_edit["message"] = new_message
         question_to_edit["submission_time"] = str(int(time.time()))
-        # questions.remove(question_to_edit)
-        # questions.append(question_to_edit)
         write_questions(questions)
 
         return redirect(url_for("question_details", question_id=question_id))

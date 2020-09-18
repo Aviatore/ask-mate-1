@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Question details</title>
+</head>
+<body>
+<h1>{{ question_title }}</h1>
+<p>{{ question_message }}</p>
+<h3>Answers:</h3>
+{% for answer in answer_message %}
+<p>{{ answer }}</p>
+{% endfor %}
+<footer><a href={{ url_for("answer_post", question_id=question_id) }}>Add an answer</a></footer>
+<footer><a href={{ url_for("list") }}>Back to the list</a> </footer>
+</body>
+</html>
