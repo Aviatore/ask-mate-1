@@ -3,6 +3,10 @@ from data_manager import *
 from util import *
 import datetime
 import time
+import os
+
+
+UPLOAD_PATH = 'uploaded'
 
 app = Flask(__name__)
 
@@ -79,6 +83,15 @@ def question_add():
         question["submission_time"] = str(int(time.time()))
         question["vote_number"] = "0"
         question["view_number"] = "0"
+
+        uploaded_file = request.files.get('image')
+        if uploaded_file:
+            file_name = f'{get_id(saved_questions)}_{uploaded_file.filename}'
+
+            file_path = os.path.join(UPLOAD_PATH, 'questions', file_name)
+            uploaded_file.save(file_path)
+            question['image'] = file_path
+
         print(question)
         saved_questions.append(question)
         write_questions(saved_questions)

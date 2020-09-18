@@ -1,57 +1,20 @@
-h1{
-    color: #f2f2f2;
-    position: absolute;
-    top: 5%;
-    left: 45%;
-    border-bottom: double red;
-    border-radius: 15px;
-    padding-bottom: 10px;
-}
-form{
-    position: absolute;
-    top: 15%;
-    left: 32%;
-}
-textarea{
-    background-color: gainsboro;
-    padding: 10px;
-    margin: 25px 0;
-    border: 0;
-    box-shadow:0 0 15px 2px red;
-    border-radius: 10px;
-    width: 90%;
-}
-body{
-    background-color: darkgray;
-}
-label{
-    font-size: larger;
-    font-weight: bold;
+.button {
     font-family: sans-serif;
-    color: #f2f2f2;
+    border-radius: 5px;
+    border: 2px solid white;
+    outline: none;
+    background-color: gray;
+    padding: 10px 15px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: border .4s;
+    box-sizing: border-box;
+    color: white;
+}
+.button:hover {
 
+    border: 2px solid rgba(220,220,220,0.5);
 }
-#title{
-    position: relative;
-    left: 42.5%;
-}
-#message{
-    position: relative;
-    left: 39.5%;
-}
-button{
-    font-size: larger;
-    font-weight: bold;
-    font-family: sans-serif;
-    position: relative;
-    left: 31%;
-    border-radius: 10px;
-    box-shadow: 0 0 15px 2px red;
-    border: 0;
-    margin: 15px 0;
-    width: 30%;
-}
-button:hover{
-    background-color: crimson;
-        box-shadow: 0 0 35px 5px red;
+.button:active {
+    border: 2px solid rgba(220,220,220,0.5);
 }

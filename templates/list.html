@@ -8,7 +8,6 @@
     <title>Title</title>
 </head>
 <body>
-<a href="{{ url_for("question_add") }}"><b>What Is You Question?</b></a>
 <table>
     <thead>
         <tr>
@@ -46,7 +45,14 @@
             </tr>
         {% endfor %}
     </tbody>
-
+    <tfoot>
+        <tr>
+            <td></td><td></td><td></td><td></td>
+            <td>
+                <a href="{{ url_for("question_add") }}" title="Add a new question"><i class="fas fa-plus"></i></a>
+            </td>
+        </tr>
+    </tfoot>
 </table>
 
 </body>
