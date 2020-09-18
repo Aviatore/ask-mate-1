@@ -88,6 +88,9 @@ def question_add():
         if uploaded_file:
             file_name = f'{get_id(saved_questions)}_{uploaded_file.filename}'
 
+            if not os.path.exists(os.path.join(UPLOAD_PATH, 'questions')):
+                os.makedirs(os.path.join(UPLOAD_PATH, 'questions'))
+
             file_path = os.path.join(UPLOAD_PATH, 'questions', file_name)
             uploaded_file.save(file_path)
             question['image'] = file_path
