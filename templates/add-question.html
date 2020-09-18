@@ -9,12 +9,12 @@
 <div id="body">
 <div id="container">
     <h3 class="center">Ask A Question</h3>
-    <form action="" method="POST">
+    <form action={{ url_for('question_add') }} method="POST" enctype="multipart/form-data">
 
         <input id="title" name="title" type="text" size="40" placeholder="Question title" class="center"><br>
 
         <textarea id="message" name="message" placeholder="Type your message here ..." class="center"></textarea><br>
-        <input type="file" id="image" name="image" class="center"><br>
+        <input type="file" id="image" name="image" class="center" accept="image/*"><br>
         <button type="submit" class="center button">Add new question</button>
         <button type="button" class="center button" onclick="window.location.href='{{ url_for('list') }}';">Back to questions list</button>
     </form>
