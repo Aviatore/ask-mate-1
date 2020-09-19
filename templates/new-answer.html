@@ -3,9 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Post an answer</title>
-    <link type="text/css" rel="stylesheet" href="{{ url_for("static", filename="new-answer.css") }}">
+    <link type="text/css" rel="stylesheet" href="{{ url_for("static", filename="add-question.css") }}">
 </head>
 <body>
+<div id="body">
+<div id="container">
+    <h3 class="center">New answer</h3>
+    <form action={{ url_for('answer_post', question_id=question_id) }} method="POST">
+        <textarea required id="message" name="message" placeholder="Type your answer here ..." class="center"></textarea><br>
+        <button type="submit" class="center button">Post new answer</button>
+        <button type="button" class="center button" onclick="window.location.href='{{ url_for('question_details', question_id=question_id) }}';">Back to question details</button>
+    </form>
+
+</div>
+    </div>
+
+
 <h1>New answer</h1>
 <form action="" method="post">
     <label id="message" for="message">Your answer</label><br>

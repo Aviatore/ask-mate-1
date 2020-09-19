@@ -122,7 +122,7 @@ def answer_post(question_id):
         return redirect(url_for("question_details", question_id=question_id))
 
     else:
-        return render_template('new-answer.html')
+        return render_template('new-answer.html', question_id=question_id)
 
 
 # Delete question
