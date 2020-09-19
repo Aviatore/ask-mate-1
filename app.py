@@ -4,6 +4,7 @@ from util import *
 import datetime
 import time
 import os
+from urllib.parse import unquote
 
 
 UPLOAD_DIR = 'static/uploaded/'
@@ -231,7 +232,7 @@ def time_to_utc(raw_time):
 
 def file_size(file_name):
     file_name = file_name.lstrip("/")
-    size_bytes = os.path.getsize(file_name) * 0.001
+    size_bytes = os.path.getsize(unquote(file_name)) * 0.001 # unquote converts url-encoded string into the normal one
     size_kb = f'{size_bytes:.1f}'
 
     return size_kb
