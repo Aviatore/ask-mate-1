@@ -2,9 +2,33 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <script src='https://kit.fontawesome.com/a076d05399.js'></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='question-details.css') }}">
     <title>Question details</title>
 </head>
 <body>
+<div id="body">
+    <div id="container">
+        <h3 class="center">{{ question_data['title'] }}</h3>
+        <i class="far fa-edit" style="font-size: 12px; color: rgb(74, 74, 74);"></i><span id="pub-time">{{ time_to_utc(question_data['submission_time']) }}</span>
+        <p id="message">{{ question_data['message'] }}</p>
+        {% if question_data['image'] != "" %}
+            <img src="{{ url_for('static', filename='uploaded/questions/' + question_data['image']) }}">
+            <figcaption>{{ question_data['image'] }} ({{ file_size(url_for('static', filename='uploaded/questions/' + question_data['image'])) }} kb)</figcaption>
+        {% endif %}
+    </div>
+    {% for answer in answers_data %}
+        <div id="container">
+            <h4 class="center">Re: {{ question_data['title'] }}</h4>
+            <i class="far fa-edit" style="font-size: 12px; color: rgb(74, 74, 74);"></i><span id="pub-time">{{ time_to_utc(answer['submission_time']) }}</span>
+            <p id="message">{{ answer['message'] }}</p>
+        </div>
+    {% endfor %}
+</div>
+
+
+
+
 <h1>{{ question_title }}</h1>
 <p>{{ question_message }}</p>
 <h3>Answers:</h3>

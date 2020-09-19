@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request
+from flask import Flask, render_template, redirect, url_for, request, send_from_directory
 from data_manager import *
 from util import *
 import datetime
@@ -6,10 +6,15 @@ import time
 import os
 
 
-UPLOAD_PATH = 'uploaded'
+UPLOAD_DIR = 'static/uploaded/'
 
 app = Flask(__name__)
 
+if not os.path.exists(os.path.join(UPLOAD_DIR, 'questions')):
+    os.makedirs(os.path.join(UPLOAD_DIR, 'questions'))
+
+if not os.path.exists(os.path.join(UPLOAD_DIR, 'answers')):
+    os.makedirs(os.path.join(UPLOAD_DIR, 'answers'))
 
 # Edit the 'Cache-Control' header to force browser to not cache external files, e.g. css files.
 # The solution is suitable for development only.
@@ -58,19 +63,23 @@ def question_details(question_id):
     questions = read_questions()
     question_title = ""
     question_message = ""
+
+    question_data = None
+
     for question in questions:
         if str(question["id"]) == question_id:
-            question_title = question["title"]
-            question_message = question["message"]
+            question_data = question
+            # question_title = question["title"]
+            # question_message = question["message"]
 
     answers = read_answers()
-    answer_message = []
+    answers_data = []
+
     for answer in answers:
         if str(answer["question_id"]) == question_id:
-            answer_message.append(answer["message"])
+            answers_data.append(answer)
 
-    return render_template('question-details.html', question_id=question_id, question_title=question_title,
-                           question_message=question_message, answer_message=answer_message)
+    return render_template('question-details.html', question_id=question_id, question_data=question_data, answers_data=answers_data)
 
 
 # Ask a question
@@ -88,12 +97,9 @@ def question_add():
         if uploaded_file:
             file_name = f'{get_id(saved_questions)}_{uploaded_file.filename}'
 
-            if not os.path.exists(os.path.join(UPLOAD_PATH, 'questions')):
-                os.makedirs(os.path.join(UPLOAD_PATH, 'questions'))
-
-            file_path = os.path.join(UPLOAD_PATH, 'questions', file_name)
+            file_path = os.path.join(UPLOAD_DIR, 'questions', file_name)
             uploaded_file.save(file_path)
-            question['image'] = file_path
+            question['image'] = file_name
 
         print(question)
         saved_questions.append(question)
@@ -205,9 +211,20 @@ def time_to_utc(raw_time):
     return time_formatted
 
 
+def file_size(file_name):
+    file_name = file_name.lstrip("/")
+    size_bytes = os.path.getsize(file_name) * 0.001
+    size_kb = f'{size_bytes:.1f}'
+
+    return size_kb
+
+
 @app.context_processor
 def util_functions():
-    return dict(time_to_utc=time_to_utc)
+    return dict(
+        time_to_utc=time_to_utc,
+        file_size=file_size
+    )
 
 
 if __name__ == '__main__':
