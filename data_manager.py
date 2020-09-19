@@ -38,6 +38,7 @@ def read_answers():
                     question[key] = int(question[key])
     return questions
 
+
 def write_questions(data):
     write_csv(QUESTIONS_FILE, data, QUESTIONS_HEADERS)
 
