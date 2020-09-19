@@ -122,6 +122,14 @@ def answer_post(question_id):
         answer["vote_number"] = "0"
         answer["question_id"] = question_id
 
+        uploaded_file = request.files.get('image')
+        if uploaded_file:
+            file_name = f'{get_id(saved_answers)}_{uploaded_file.filename}'
+
+            file_path = os.path.join(UPLOAD_DIR, 'answers', file_name)
+            uploaded_file.save(file_path)
+            answer['image'] = file_name
+
         saved_answers.append(answer)
         write_answers(saved_answers)
 
@@ -135,9 +143,13 @@ def answer_post(question_id):
 @app.route('/question/<int:question_id>/delete')
 def question_delete(question_id):
     questions = read_questions()
-    questions.remove([question for question in questions if question['id'] == question_id][0])
+    question_to_delete = [question for question in questions if question['id'] == question_id][0]
+    questions.remove(question_to_delete)
 
     write_questions(questions)
+
+    if question_to_delete['image'] != "":
+        os.remove(os.path.join(UPLOAD_DIR, 'questions', question_to_delete['image']))
 
     return redirect(url_for('list'))
 
@@ -170,13 +182,19 @@ def question_edit(question_id):
 
 
 # Delete an answer
-@app.route('/answers/<answer_id>/delete')
+@app.route('/answers/<int:answer_id>/delete')
 def answer_delete(answer_id):
-    answers = read_questions()
+    answers = read_answers()
     answer_to_delete = [answer for answer in answers if answer['id'] == answer_id][0]
+
+    if answer_to_delete['image'] != "":
+        os.remove(os.path.join(UPLOAD_DIR, 'answers', answer_to_delete['image']))
+
     answers.remove(answer_to_delete)
 
     write_answers(answers)
+
+
 
     return redirect(url_for('question_details', question_id=answer_to_delete['question_id']))
 

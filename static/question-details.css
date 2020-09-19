@@ -1,9 +1,9 @@
-#body {
+.body {
     position: relative;
     width: 80vw;
     margin: auto;
 }
-#container {
+.container {
     position: relative;
     width: 100%;
     background-color: #f2f2f2;
@@ -41,6 +41,20 @@ figcaption {
 img {
     max-height: 150px;
 }
+.button {
+    padding: 6px;
+    background-color: lightgray;
+    outline: none;
+    border: none;
+    font-size: 0.8em;
+    transition: background-color 0.4s;
+    cursor: pointer;
+    box-sizing: border-box;
+    margin-bottom: 2px;
+}
+.button:hover {
+    background-color: darkgray;
+}
 #container_ {
     position: absolute;
     width: 40vw;
@@ -50,4 +64,30 @@ img {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+}
+i {
+    text-decoration: none;
+    font-size: 12px;
+    color: rgb(74, 74, 74);
+}
+i:hover {
+    color: darkred;
+}
+:link, :visited {
+    text-decoration: none;
+}
+.answer {
+    display: inline;
+}
+.answer-header {
+    position: relative;
+}
+.answer-title {
+    position: relative;
+    display: inline-block;
+}
+.answer-cross {
+    position: relative;
+    display: inline-block;
+    float: right;
 }

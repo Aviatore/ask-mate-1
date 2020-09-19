@@ -7,10 +7,13 @@
     <title>Question details</title>
 </head>
 <body>
-<div id="body">
-    <div id="container">
+<div class="body">
+    <div class="container">
         <h3 class="center">{{ question_data['title'] }}</h3>
-        <i class="far fa-edit" style="font-size: 12px; color: rgb(74, 74, 74);"></i><span id="pub-time">{{ time_to_utc(question_data['submission_time']) }}</span>
+        <a href="{{ url_for('question_edit', question_id=question_id) }}">
+            <i class="far fa-edit"></i>
+        </a>
+        <span id="pub-time">{{ time_to_utc(question_data['submission_time']) }}</span>
         <p id="message">{{ question_data['message'] }}</p>
         {% if question_data['image'] != "" %}
             <img src="{{ url_for('static', filename='uploaded/questions/' + question_data['image']) }}">
@@ -18,25 +21,26 @@
         {% endif %}
     </div>
     {% for answer in answers_data %}
-        <div id="container">
-            <h4 class="center">Re: {{ question_data['title'] }}</h4>
-            <i class="far fa-edit" style="font-size: 12px; color: rgb(74, 74, 74);"></i><span id="pub-time">{{ time_to_utc(answer['submission_time']) }}</span>
+        <div class="container">
+            <div class="answer-header">
+                <div class="answer-title">
+                    <h4 class="answer">Re: {{ question_data['title'] }}</h4>
+                </div>
+                <div class="answer-cross">
+                    <a href="{{ url_for('answer_delete', answer_id=answer['id']) }}"><i class="fas fa-times"></i></a>
+                </div>
+            </div>
+            <i class="far fa-edit"></i>
+            <span id="pub-time">{{ time_to_utc(answer['submission_time']) }}</span>
             <p id="message">{{ answer['message'] }}</p>
+            {% if answer['image'] != "" %}
+                <img src="{{ url_for('static', filename='uploaded/answers/' + answer['image']) }}">
+                <figcaption>{{ answer['image'] }} ({{ file_size(url_for('static', filename='uploaded/answers/' + answer['image'])) }} kb)</figcaption>
+            {% endif %}
         </div>
     {% endfor %}
+    <button type="button" class="button" onclick="window.location.href='{{ url_for("answer_post", question_id=question_id) }}'">Add an answer</button>
+    <button type="button" class="button" onclick="window.location.href='{{ url_for("list") }}'">Back to the list</button>
 </div>
-
-
-
-
-<h1>{{ question_title }}</h1>
-<p>{{ question_message }}</p>
-<h3>Answers:</h3>
-{% for answer in answer_message %}
-<p>{{ answer }}</p>
-{% endfor %}
-<footer><a href={{ url_for("answer_post", question_id=question_id) }}>Add an answer</a></footer>
-<footer><a href={{ url_for("question_edit", question_id=question_id) }}>Edit answer</a></footer>
-<footer><a href={{ url_for("list") }}>Back to the list</a> </footer>
 </body>
 </html>
