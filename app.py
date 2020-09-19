@@ -1,15 +1,21 @@
-from flask import Flask, render_template, redirect, url_for, request
+from flask import Flask, render_template, redirect, url_for, request, send_from_directory
 from data_manager import *
 from util import *
 import datetime
 import time
 import os
+from urllib.parse import unquote
 
 
-UPLOAD_PATH = 'uploaded'
+UPLOAD_DIR = 'static/uploaded/'
 
 app = Flask(__name__)
 
+if not os.path.exists(os.path.join(UPLOAD_DIR, 'questions')):
+    os.makedirs(os.path.join(UPLOAD_DIR, 'questions'))
+
+if not os.path.exists(os.path.join(UPLOAD_DIR, 'answers')):
+    os.makedirs(os.path.join(UPLOAD_DIR, 'answers'))
 
 # Edit the 'Cache-Control' header to force browser to not cache external files, e.g. css files.
 # The solution is suitable for development only.
@@ -58,19 +64,23 @@ def question_details(question_id):
     questions = read_questions()
     question_title = ""
     question_message = ""
+
+    question_data = None
+
     for question in questions:
         if str(question["id"]) == question_id:
-            question_title = question["title"]
-            question_message = question["message"]
+            question_data = question
+            # question_title = question["title"]
+            # question_message = question["message"]
 
     answers = read_answers()
-    answer_message = []
+    answers_data = []
+
     for answer in answers:
         if str(answer["question_id"]) == question_id:
-            answer_message.append(answer["message"])
+            answers_data.append(answer)
 
-    return render_template('question-details.html', question_id=question_id, question_title=question_title,
-                           question_message=question_message, answer_message=answer_message)
+    return render_template('question-details.html', question_id=question_id, question_data=question_data, answers_data=answers_data)
 
 
 # Ask a question
@@ -88,12 +98,9 @@ def question_add():
         if uploaded_file:
             file_name = f'{get_id(saved_questions)}_{uploaded_file.filename}'
 
-            if not os.path.exists(os.path.join(UPLOAD_PATH, 'questions')):
-                os.makedirs(os.path.join(UPLOAD_PATH, 'questions'))
-
-            file_path = os.path.join(UPLOAD_PATH, 'questions', file_name)
+            file_path = os.path.join(UPLOAD_DIR, 'questions', file_name)
             uploaded_file.save(file_path)
-            question['image'] = file_path
+            question['image'] = file_name
 
         print(question)
         saved_questions.append(question)
@@ -116,22 +123,34 @@ def answer_post(question_id):
         answer["vote_number"] = "0"
         answer["question_id"] = question_id
 
+        uploaded_file = request.files.get('image')
+        if uploaded_file:
+            file_name = f'{get_id(saved_answers)}_{uploaded_file.filename}'
+
+            file_path = os.path.join(UPLOAD_DIR, 'answers', file_name)
+            uploaded_file.save(file_path)
+            answer['image'] = file_name
+
         saved_answers.append(answer)
         write_answers(saved_answers)
 
         return redirect(url_for("question_details", question_id=question_id))
 
     else:
-        return render_template('new-answer.html')
+        return render_template('new-answer.html', question_id=question_id)
 
 
 # Delete question
 @app.route('/question/<int:question_id>/delete')
 def question_delete(question_id):
     questions = read_questions()
-    questions.remove([question for question in questions if question['id'] == question_id][0])
+    question_to_delete = [question for question in questions if question['id'] == question_id][0]
+    questions.remove(question_to_delete)
 
     write_questions(questions)
+
+    if question_to_delete['image'] != "":
+        os.remove(os.path.join(UPLOAD_DIR, 'questions', question_to_delete['image']))
 
     return redirect(url_for('list'))
 
@@ -164,13 +183,19 @@ def question_edit(question_id):
 
 
 # Delete an answer
-@app.route('/answers/<answer_id>/delete')
+@app.route('/answers/<int:answer_id>/delete')
 def answer_delete(answer_id):
-    answers = read_questions()
+    answers = read_answers()
     answer_to_delete = [answer for answer in answers if answer['id'] == answer_id][0]
+
+    if answer_to_delete['image'] != "":
+        os.remove(os.path.join(UPLOAD_DIR, 'answers', answer_to_delete['image']))
+
     answers.remove(answer_to_delete)
 
     write_answers(answers)
+
+
 
     return redirect(url_for('question_details', question_id=answer_to_delete['question_id']))
 
@@ -205,9 +230,20 @@ def time_to_utc(raw_time):
     return time_formatted
 
 
+def file_size(file_name):
+    file_name = file_name.lstrip("/")
+    size_bytes = os.path.getsize(unquote(file_name)) * 0.001 # unquote converts url-encoded string into the normal one
+    size_kb = f'{size_bytes:.1f}'
+
+    return size_kb
+
+
 @app.context_processor
 def util_functions():
-    return dict(time_to_utc=time_to_utc)
+    return dict(
+        time_to_utc=time_to_utc,
+        file_size=file_size
+    )
 
 
 if __name__ == '__main__':

@@ -29,14 +29,15 @@ def read_questions():
 
 
 def read_answers():
-    questions = read_csv(ANSWERS_FILE)
+    answers = read_csv(ANSWERS_FILE)
 
-    for question in questions:
-        for key in question.keys():
-            if question[key] is not None:
-                if question[key].isdigit():
-                    question[key] = int(question[key])
-    return questions
+    for answer in answers:
+        for key in answer.keys():
+            if answer[key] is not None:
+                if answer[key].isdigit():
+                    answer[key] = int(answer[key])
+    return answers
+
 
 def write_questions(data):
     write_csv(QUESTIONS_FILE, data, QUESTIONS_HEADERS)

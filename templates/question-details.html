@@ -2,17 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <script src='https://kit.fontawesome.com/a076d05399.js'></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='question-details.css') }}">
     <title>Question details</title>
 </head>
 <body>
-<h1>{{ question_title }}</h1>
-<p>{{ question_message }}</p>
-<h3>Answers:</h3>
-{% for answer in answer_message %}
-<p>{{ answer }}</p>
-{% endfor %}
-<footer><a href={{ url_for("answer_post", question_id=question_id) }}>Add an answer</a></footer>
-<footer><a href={{ url_for("question_edit", question_id=question_id) }}>Edit answer</a></footer>
-<footer><a href={{ url_for("list") }}>Back to the list</a> </footer>
+<div class="body">
+    <div class="container">
+        <h3 class="center">{{ question_data['title'] }}</h3>
+        <a href="{{ url_for('question_edit', question_id=question_id) }}">
+            <i class="far fa-edit"></i>
+        </a>
+        <span id="pub-time">{{ time_to_utc(question_data['submission_time']) }}</span>
+        <p id="message">{{ question_data['message'] }}</p>
+        {% if question_data['image'] != "" %}
+            <img src="{{ url_for('static', filename='uploaded/questions/' + question_data['image']) }}">
+            <figcaption>{{ question_data['image'] }} ({{ file_size(url_for('static', filename='uploaded/questions/' + question_data['image'])) }} kb)</figcaption>
+        {% endif %}
+    </div>
+    {% for answer in answers_data %}
+        <div class="container answers">
+            <div class="answer-header">
+                <div class="answer-title">
+                    <h4 class="answer">Re: {{ question_data['title'] }}</h4>
+                </div>
+                <div class="answer-cross">
+                    <a href="{{ url_for('answer_delete', answer_id=answer['id']) }}"><i class="fas fa-times"></i></a>
+                </div>
+            </div>
+            <i class="far fa-edit"></i>
+            <span id="pub-time">{{ time_to_utc(answer['submission_time']) }}</span>
+            <p id="message">{{ answer['message'] }}</p>
+            {% if answer['image'] != "" %}
+                <img src="{{ url_for('static', filename='uploaded/answers/' + answer['image']) }}">
+                <figcaption>{{ answer['image'] }} ({{ file_size(url_for('static', filename='uploaded/answers/' + answer['image'])) }} kb)</figcaption>
+            {% endif %}
+        </div>
+    {% endfor %}
+    <button type="button" class="button" onclick="window.location.href='{{ url_for("answer_post", question_id=question_id) }}'">Add an answer</button>
+    <button type="button" class="button" onclick="window.location.href='{{ url_for("list") }}'">Back to the list</button>
+</div>
 </body>
 </html>
