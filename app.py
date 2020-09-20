@@ -73,6 +73,9 @@ def question_details(question_id):
             # question_title = question["title"]
             # question_message = question["message"]
 
+    question_data['view_number'] += 1
+    write_questions(questions)
+
     answers = read_answers()
     answers_data = []
 
