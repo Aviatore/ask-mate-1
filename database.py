@@ -4,15 +4,33 @@ from psycopg2.extras import RealDictCursor
 import os
 
 
+queries_dict = {
+    'read_questions_all': 'SELECT id, title, message, view_number, vote_number, submission_time FROM question',
+    'read_questions_by_id': 'SELECT id, title, message, view_number, vote_number, submission_time FROM question WHERE id = %(id)s'
+}
+
+DATABASE_HOST = "localhost"
+DATABASE_NAME = "askmate"
+DATABASE_PASSWORD = "wojtek19842041"
+DATABASE_PORT = 5432
+DATABASE_USERNAME = "wojtek"
+
+
+class Queries:
+    def __init__(self, queries):
+        for key in queries:
+            setattr(self, key, queries[key])
+
+
 class DB:
     def __init__(self):
-        self.host = os.environ.get('DATABASE_HOST')
-        self.username = os.environ.get('DATABASE_USERNAME')
-        self.password = os.environ.get('DATABASE_PASSWORD')
-        self.port = os.environ.get('DATABASE_PORT')
-        self.name = os.environ.get('DATABASE_NAME')
+        self.host = DATABASE_HOST
+        self.username = DATABASE_USERNAME
+        self.password = DATABASE_PASSWORD
+        self.port = DATABASE_PORT
+        self.name = DATABASE_NAME
 
-    def execute_query(self, query):
+    def execute_query(self, query, params=None):
         try:
             with ps.connect(
                         host=self.host,
@@ -22,13 +40,15 @@ class DB:
                         dbname=self.name
                     ) as conn:
                 with conn.cursor(cursor_factory=RealDictCursor) as curs:
-                    curs.execute(query)
+                    curs.execute(sql.SQL(query), params)
 
                     return curs.fetchall()
         finally:
             conn.close()
 
 
+db = DB()
+queries = Queries(queries_dict)
 
     # def __query(self, mode, data=None):
     #     self.connect()

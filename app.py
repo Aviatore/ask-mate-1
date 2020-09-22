@@ -5,6 +5,7 @@ import datetime
 import time
 import os
 from urllib.parse import unquote
+from database import db, queries
 
 
 UPLOAD_DIR = 'static/uploaded/'
@@ -40,7 +41,7 @@ def list():
         'directions': [None, None, None, None]
     }
 
-    questions = read_questions()
+    questions = db.execute_query(queries.read_questions_all)
 
     order_by = request.args.get('order_by')
     order_direction = request.args.get('order_direction')
@@ -228,8 +229,7 @@ def answer_vote_down(answer_id):
 
 
 def time_to_utc(raw_time):
-    time_converted = datetime.datetime.fromtimestamp(raw_time)
-    time_formatted = time_converted.strftime('%d %B %Y, %H:%M').lstrip('0')
+    time_formatted = raw_time.strftime('%d %B %Y, %H:%M').lstrip('0')
     return time_formatted
 
 
