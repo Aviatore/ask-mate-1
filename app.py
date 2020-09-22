@@ -62,29 +62,16 @@ def list():
 # Display a question
 @app.route('/question/<question_id>')
 def question_details(question_id):
-    questions = read_questions()
-    question_title = ""
-    question_message = ""
+    question = db.execute_query(queries.read_questions_by_id, {'id': question_id})[0]
 
-    question_data = None
+    if question != "":
+        question['view_number'] += 1
 
-    for question in questions:
-        if str(question["id"]) == question_id:
-            question_data = question
-            # question_title = question["title"]
-            # question_message = question["message"]
+    db.execute_query(queries.write_question_by_id, question)
 
-    question_data['view_number'] += 1
-    write_questions(questions)
+    answers = db.execute_query(queries.read_answers_by_id, {'question_id': question_id})
 
-    answers = read_answers()
-    answers_data = []
-
-    for answer in answers:
-        if str(answer["question_id"]) == question_id:
-            answers_data.append(answer)
-
-    return render_template('question-details.html', question_id=question_id, question_data=question_data, answers_data=answers_data)
+    return render_template('question-details.html', question_id=question_id, question_data=question, answers_data=answers)
 
 
 # Ask a question

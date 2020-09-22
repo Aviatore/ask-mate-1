@@ -4,11 +4,6 @@ from psycopg2.extras import RealDictCursor
 import os
 
 
-queries_dict = {
-    'read_questions_all': 'SELECT id, title, message, view_number, vote_number, submission_time FROM question',
-    'read_questions_by_id': 'SELECT id, title, message, view_number, vote_number, submission_time FROM question WHERE id = %(id)s'
-}
-
 DATABASE_HOST = "localhost"
 DATABASE_NAME = "askmate"
 DATABASE_PASSWORD = "wojtek19842041"
@@ -17,9 +12,17 @@ DATABASE_USERNAME = "wojtek"
 
 
 class Queries:
-    def __init__(self, queries):
-        for key in queries:
-            setattr(self, key, queries[key])
+    def __init__(self):
+        self.read_questions_all = 'SELECT id, title, message, view_number, vote_number, submission_time, image FROM question'
+        self.read_questions_by_id = 'SELECT id, title, message, view_number, vote_number, submission_time, image FROM question WHERE id = %(id)s'
+        self.write_question_by_id = 'UPDATE question ' \
+                                    'SET title=%(title)s, ' \
+                                    'message=%(message)s, ' \
+                                    'view_number=%(view_number)s, ' \
+                                    'vote_number=%(vote_number)s, ' \
+                                    'submission_time=%(submission_time)s, ' \
+                                    'image=%(image)s WHERE id=%(id)s'
+        self.read_answers_by_id = 'SELECT id, question_id, message, vote_number, submission_time, image FROM answer WHERE question_id = %(question_id)s'
 
 
 class DB:
@@ -42,13 +45,18 @@ class DB:
                 with conn.cursor(cursor_factory=RealDictCursor) as curs:
                     curs.execute(sql.SQL(query), params)
 
-                    return curs.fetchall()
+                    try:
+                        output = curs.fetchall()
+                    except ps.ProgrammingError:
+                        output = None
+
+                    return output
         finally:
             conn.close()
 
 
 db = DB()
-queries = Queries(queries_dict)
+queries = Queries()
 
     # def __query(self, mode, data=None):
     #     self.connect()
