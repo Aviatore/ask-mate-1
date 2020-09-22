@@ -67,7 +67,7 @@ def question_details(question_id):
     if question != "":
         question['view_number'] += 1
 
-    db.execute_query(queries.write_question_by_id, question)
+    db.execute_query(queries.update_question_by_id, question)
 
     answers = db.execute_query(queries.read_answers_by_id, {'question_id': question_id})
 
@@ -78,24 +78,28 @@ def question_details(question_id):
 @app.route('/add-question', methods=["GET", "POST"])
 def question_add():
     if request.method == "POST":
-        saved_questions = read_questions()
         question = request.form.to_dict()
-        question["id"] = get_id(read_questions())
-        question["submission_time"] = str(int(time.time()))
-        question["vote_number"] = "0"
-        question["view_number"] = "0"
+        question["submission_time"] = datetime.datetime.now()
+        question["vote_number"] = 0
+        question["view_number"] = 0
+        question['image'] = None
+
+        db.execute_query(queries.add_new_question, question)
+
+        question_last_id_dict = db.execute_query(queries.get_last_id, table='question')[0]
+        question_last_id = question_last_id_dict['id']
+
+        question['id'] = question_last_id
 
         uploaded_file = request.files.get('image')
         if uploaded_file:
-            file_name = f'{get_id(saved_questions)}_{uploaded_file.filename}'
+            file_name = f'{question_last_id}_{uploaded_file.filename}'
 
             file_path = os.path.join(UPLOAD_DIR, 'questions', file_name)
             uploaded_file.save(file_path)
             question['image'] = file_name
 
-        print(question)
-        saved_questions.append(question)
-        write_questions(saved_questions)
+            db.execute_query(queries.update_question_by_id, params=question)
 
         return redirect(url_for('list'))
 

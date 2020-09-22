@@ -15,7 +15,7 @@ class Queries:
     def __init__(self):
         self.read_questions_all = 'SELECT id, title, message, view_number, vote_number, submission_time, image FROM question'
         self.read_questions_by_id = 'SELECT id, title, message, view_number, vote_number, submission_time, image FROM question WHERE id = %(id)s'
-        self.write_question_by_id = 'UPDATE question ' \
+        self.update_question_by_id = 'UPDATE question ' \
                                     'SET title=%(title)s, ' \
                                     'message=%(message)s, ' \
                                     'view_number=%(view_number)s, ' \
@@ -23,7 +23,9 @@ class Queries:
                                     'submission_time=%(submission_time)s, ' \
                                     'image=%(image)s WHERE id=%(id)s'
         self.read_answers_by_id = 'SELECT id, question_id, message, vote_number, submission_time, image FROM answer WHERE question_id = %(question_id)s'
-
+        self.add_new_question = 'INSERT INTO question (submission_time, view_number, vote_number, title, message, image) ' \
+                                'VALUES(%(submission_time)s, %(view_number)s, %(vote_number)s, %(title)s, %(message)s, %(image)s)'
+        self.get_last_id = 'SELECT id FROM {table} ORDER BY id desc limit 1'
 
 class DB:
     def __init__(self):
@@ -33,7 +35,7 @@ class DB:
         self.port = DATABASE_PORT
         self.name = DATABASE_NAME
 
-    def execute_query(self, query, params=None):
+    def execute_query(self, query, params=None, **formats):
         try:
             with ps.connect(
                         host=self.host,
@@ -43,8 +45,12 @@ class DB:
                         dbname=self.name
                     ) as conn:
                 with conn.cursor(cursor_factory=RealDictCursor) as curs:
-                    curs.execute(sql.SQL(query), params)
-
+                    if formats is None:
+                        curs.execute(sql.SQL(query), params)
+                    else:
+                        # The double star (**) expands the dictionary (returned by the function make_identifier())
+                        # as an argument name and value as the value of the argument
+                        curs.execute(sql.SQL(query).format(**self.make_identifier(formats)), params)
                     try:
                         output = curs.fetchall()
                     except ps.ProgrammingError:
@@ -53,6 +59,14 @@ class DB:
                     return output
         finally:
             conn.close()
+
+    def make_identifier(self, formats):
+        output = {}
+
+        for key in formats:
+            output[key] = sql.Identifier(formats[key])
+        # print(output)
+        return output
 
 
 db = DB()
