@@ -62,7 +62,7 @@ def list():
 # Display a question
 @app.route('/question/<question_id>')
 def question_details(question_id):
-    question = db.execute_query(queries.read_questions_by_id, {'id': question_id})[0]
+    question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
 
     if question != "":
         question['view_number'] += 1
@@ -129,14 +129,12 @@ def answer_post(question_id):
 # Delete question
 @app.route('/question/<int:question_id>/delete')
 def question_delete(question_id):
-    questions = read_questions()
-    question_to_delete = [question for question in questions if question['id'] == question_id][0]
-    questions.remove(question_to_delete)
+    question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
 
-    write_questions(questions)
+    if question['image'] != "":
+        os.remove(os.path.join(UPLOAD_DIR, 'questions', question['image']))
 
-    if question_to_delete['image'] != "":
-        os.remove(os.path.join(UPLOAD_DIR, 'questions', question_to_delete['image']))
+    db.execute_query(queries.delete_question_by_id, {'id': question_id})
 
     return redirect(url_for('list'))
 

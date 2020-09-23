@@ -14,7 +14,7 @@ DATABASE_USERNAME = "wojtek"
 class Queries:
     def __init__(self):
         self.read_questions_all = 'SELECT id, title, message, view_number, vote_number, submission_time, image FROM question'
-        self.read_questions_by_id = 'SELECT id, title, message, view_number, vote_number, submission_time, image FROM question WHERE id = %(id)s'
+        self.read_question_by_id = 'SELECT id, title, message, view_number, vote_number, submission_time, image FROM question WHERE id = %(id)s'
         self.update_question_by_id = 'UPDATE question ' \
                                     'SET title=%(title)s, ' \
                                     'message=%(message)s, ' \
@@ -29,6 +29,7 @@ class Queries:
                               'VALUES(%(submission_time)s, %(vote_number)s, %(question_id)s, %(message)s, %(image)s)'
         self.get_last_id = 'SELECT id FROM {table} ORDER BY id desc limit 1'
         self.delete_answer_by_id = 'DELETE FROM answer WHERE id = %(id)s'
+        self.delete_question_by_id = 'DELETE FROM question WHERE id = %(id)s'
         self.read_answer_by_id = 'SELECT id, question_id, message, vote_number, submission_time, image FROM answer WHERE id = %(id)s'
 
 class DB:
