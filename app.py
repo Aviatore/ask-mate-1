@@ -69,7 +69,7 @@ def question_details(question_id):
 
     db.execute_query(queries.update_question_by_id, question)
 
-    answers = db.execute_query(queries.read_answers_by_id, {'question_id': question_id})
+    answers = db.execute_query(queries.read_answers_by_question_id, {'question_id': question_id})
 
     return render_template('question-details.html', question_id=question_id, question_data=question, answers_data=answers)
 
@@ -142,7 +142,7 @@ def question_delete(question_id):
 
 
 # Edit a question
-@app.route('/question/<question_id>/edit', methods=["GET", "POST"])
+@app.route('/question/<int:question_id>/edit', methods=["GET", "POST"])
 def question_edit(question_id):
     questions = read_questions()
     question_to_edit = {}
@@ -171,19 +171,14 @@ def question_edit(question_id):
 # Delete an answer
 @app.route('/answers/<int:answer_id>/delete')
 def answer_delete(answer_id):
-    answers = read_answers()
-    answer_to_delete = [answer for answer in answers if answer['id'] == answer_id][0]
+    answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
 
-    if answer_to_delete['image'] != "":
-        os.remove(os.path.join(UPLOAD_DIR, 'answers', answer_to_delete['image']))
+    if answer['image'] is not None:
+        os.remove(os.path.join(UPLOAD_DIR, 'answers', answer['image']))
 
-    answers.remove(answer_to_delete)
+    db.execute_query(queries.delete_answer_by_id, {'id': answer_id})
 
-    write_answers(answers)
-
-
-
-    return redirect(url_for('question_details', question_id=answer_to_delete['question_id']))
+    return redirect(url_for('question_details', question_id=answer['question_id']))
 
 
 # Vote-up a question
