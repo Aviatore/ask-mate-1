@@ -84,22 +84,15 @@ def question_add():
         question["view_number"] = 0
         question['image'] = None
 
-        db.execute_query(queries.add_new_question, question)
-
-        question_last_id_dict = db.execute_query(queries.get_last_id, table='question')[0]
-        question_last_id = question_last_id_dict['id']
-
-        question['id'] = question_last_id
-
         uploaded_file = request.files.get('image')
         if uploaded_file:
-            file_name = f'{question_last_id}_{uploaded_file.filename}'
+            file_name = f'{time.time()}_{uploaded_file.filename}'
 
             file_path = os.path.join(UPLOAD_DIR, 'questions', file_name)
             uploaded_file.save(file_path)
             question['image'] = file_name
 
-            db.execute_query(queries.update_question_by_id, params=question)
+        db.execute_query(queries.add_new_question, question)
 
         return redirect(url_for('list'))
 
@@ -108,26 +101,24 @@ def question_add():
 
 
 # post answer
-@app.route('/question/<question_id>/new-answer', methods=["GET", "POST"])
+@app.route('/question/<int:question_id>/new-answer', methods=["GET", "POST"])
 def answer_post(question_id):
     if request.method == "POST":
-        saved_answers = read_answers()
         answer = request.form.to_dict()
-        answer["id"] = get_id(read_answers())
-        answer["submission_time"] = str(int(time.time()))
-        answer["vote_number"] = "0"
+        answer["submission_time"] = datetime.datetime.now()
+        answer["vote_number"] = 0
         answer["question_id"] = question_id
+        answer['image'] = None
 
         uploaded_file = request.files.get('image')
         if uploaded_file:
-            file_name = f'{get_id(saved_answers)}_{uploaded_file.filename}'
+            file_name = f'{time.time()}_{uploaded_file.filename}'
 
             file_path = os.path.join(UPLOAD_DIR, 'answers', file_name)
             uploaded_file.save(file_path)
             answer['image'] = file_name
 
-        saved_answers.append(answer)
-        write_answers(saved_answers)
+        db.execute_query(queries.add_new_answer, answer)
 
         return redirect(url_for("question_details", question_id=question_id))
 
