@@ -142,28 +142,18 @@ def question_delete(question_id):
 # Edit a question
 @app.route('/question/<int:question_id>/edit', methods=["GET", "POST"])
 def question_edit(question_id):
-    questions = read_questions()
-    question_to_edit = {}
-
-    for question in questions:
-        if str(question["id"]) == str(question_id):
-            question_to_edit = question
-
-    title = question_to_edit["title"]
-    message = question_to_edit["message"]
+    question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
 
     if request.method == "POST":
-        new_title = request.form["title"]
-        new_message = request.form["message"]
-        question_to_edit["title"] = new_title
-        question_to_edit["message"] = new_message
-        question_to_edit["submission_time"] = str(int(time.time()))
-        write_questions(questions)
+        question["title"] = request.form["title"]
+        question["message"] = request.form["message"]
+        question["submission_time"] = datetime.datetime.now()
+
+        db.execute_query(queries.update_question_by_id, question)
 
         return redirect(url_for("question_details", question_id=question_id))
-
     else:
-        return render_template("edit-question.html", title=title, message=message)
+        return render_template("edit-question.html", title=question["title"], message=question["message"])
 
 
 # Delete an answer
