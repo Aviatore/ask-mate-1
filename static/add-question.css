@@ -85,3 +85,16 @@ img {
 img:hover {
     border: 2px solid black;
 }
+.warning {
+    box-shadow: 0px 0px 3px 2px red;
+    border-width: 1px;
+}
+.text-warning {
+    color: red;
+    font-family: sans-serif;
+    font-size: 10pt;
+    margin-top: 5px;
+}
+.input {
+    margin-top: 10px;
+}

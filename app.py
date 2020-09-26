@@ -79,12 +79,26 @@ def question_details(question_id):
 # Ask a question
 @app.route('/add-question', methods=["GET", "POST"])
 def question_add():
+    warnings = {
+        'title': None,
+        'message': None
+    }
+
     if request.method == "POST":
         question = request.form.to_dict()
         question["submission_time"] = datetime.datetime.now()
         question["vote_number"] = 0
         question["view_number"] = 0
         question['image'] = None
+
+        if question['title'] == '':
+            warnings['title'] = "You must define your question's title"
+        if question['message'] == '':
+            warnings['message'] = "You must type a message"
+
+        if len([f for f in warnings if warnings[f] is not None]) > 0:
+            return render_template('add-question.html', warnings=warnings, question=question)
+            # return redirect(url_for('question_add', warnings=warnings))
 
         uploaded_files = request.files.getlist('image')
         if uploaded_files:
@@ -111,7 +125,7 @@ def question_add():
         return redirect(url_for('list'))
 
     else:
-        return render_template('add-question.html')
+        return render_template('add-question.html', warnings=None, question=None)
 
 
 # post answer
