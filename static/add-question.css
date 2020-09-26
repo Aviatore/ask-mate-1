@@ -73,6 +73,15 @@ h3 {
     background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9);
 }
 #img-prev {
+    position: relative;
     margin-top: 5px;
     border: 0px solid black;
+}
+img {
+    margin-right: 5px;
+    border: 2px solid white;
+    transition: border 0.3s;
+}
+img:hover {
+    border: 2px solid black;
 }

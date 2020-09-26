@@ -10,12 +10,12 @@
 <div id="body">
 <div id="container">
     <h3 class="center">Ask A Question</h3>
-    <form action={{ url_for('question_add') }} method="POST" enctype="multipart/form-data">
+    <form id="form" action={{ url_for('question_add') }} method="POST" enctype="multipart/form-data">
 
         <input required id="title" name="title" type="text" size="40" placeholder="Question title" class="center"><br>
 
         <textarea required id="message" name="message" placeholder="Type your message here ..." class="center"></textarea><br>
-        <input type="file" id="image" name="image" class="center" accept="image/*" onchange="filePrev()">
+        <input type="file" id="image" name="image" class="center" accept="image/*" onchange="filePrev()" multiple>
         <div class="center" style="border: 0px solid black;">
             <div id="input-file" onclick="selectFile()" class="center">Select a file</div>
         </div>

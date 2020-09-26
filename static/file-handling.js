@@ -1,26 +1,42 @@
-function filePrev() {
-    let file = document.getElementById("image").files[0];
+let files = []
 
-    let reader = new FileReader();
-    reader.onload = (event) => {
-        let image = new Image();
-        image.style.height = "50px";
-        image.src = event.target.result;
-        document.getElementById("img-prev").appendChild(image);
+function modifyForm() {
+    let form = document.getElementById("form");
+    form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        event.target.files = files;
+        event.target.submit();
+    });
+}
+
+function filePrev() {
+    let formFiles = document.getElementById("image").files;
+
+    for (let file of formFiles) {
+        let reader = new FileReader();
+
+        reader.onload = (event) => {
+            let image = new Image();
+            image.style.height = "50px";
+            image.src = event.target.result;
+            document.getElementById("img-prev").appendChild(image);
+        }
+
+        reader.readAsDataURL(file);
     }
-    reader.readAsDataURL(file);
 }
 
 function selectFile() {
     let file = document.getElementById("image");
+
+    let imageContainer = document.getElementById("img-prev");
+    let images = imageContainer.querySelectorAll("img");
+
+    for (let image of images) {
+        image.parentNode.removeChild(image);
+    }
+
     file.click();
 }
 
-function createFileUploadObject() {
-    let fileInput = document.createElement("INPUT");
-    fileInput.type = "file";
-    fileInput.id = "image";
-    fileInput.name = "image";
-    fileInput.accept = "image/*";
-
-}
+window.onload = modifyForm;

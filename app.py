@@ -69,6 +69,8 @@ def question_details(question_id):
 
     db.execute_query(queries.update_question_by_id, question)
 
+    question['image'] = question['image'].split(';')
+
     answers = db.execute_query(queries.read_answers_by_question_id, {'question_id': question_id})
 
     return render_template('question-details.html', question_id=question_id, question_data=question, answers_data=answers)
@@ -84,13 +86,25 @@ def question_add():
         question["view_number"] = 0
         question['image'] = None
 
-        uploaded_file = request.files.get('image')
-        if uploaded_file:
-            file_name = f'{time.time()}_{uploaded_file.filename}'
+        uploaded_files = request.files.getlist('image')
+        if uploaded_files:
+            paths = []
+            for file in uploaded_files:
+                file_name = f'{time.time()}_{file.filename}'
+                file_path = os.path.join(UPLOAD_DIR, 'questions', file_name)
+                file.save(file_path)
+                paths.append(file_name)
 
-            file_path = os.path.join(UPLOAD_DIR, 'questions', file_name)
-            uploaded_file.save(file_path)
-            question['image'] = file_name
+            question['image'] = ';'.join(paths)
+
+
+        # uploaded_file = request.files.get('image')
+        # if uploaded_file:
+        #     file_name = f'{time.time()}_{uploaded_file.filename}'
+        #
+        #     file_path = os.path.join(UPLOAD_DIR, 'questions', file_name)
+        #     uploaded_file.save(file_path)
+        #     question['image'] = file_name
 
         db.execute_query(queries.add_new_question, question)
 
@@ -132,7 +146,8 @@ def question_delete(question_id):
     question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
 
     if question['image'] != "":
-        os.remove(os.path.join(UPLOAD_DIR, 'questions', question['image']))
+        for image_path in question['image'].split(';'):
+            os.remove(os.path.join(UPLOAD_DIR, 'questions', image_path))
 
     db.execute_query(queries.delete_question_by_id, {'id': question_id})
 

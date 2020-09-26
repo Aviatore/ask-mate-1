@@ -4,11 +4,11 @@ from psycopg2.extras import RealDictCursor
 import os
 
 
-DATABASE_HOST = "localhost"
-DATABASE_NAME = "askmate"
-DATABASE_PASSWORD = "wojtek19842041"
-DATABASE_PORT = 5432
-DATABASE_USERNAME = "wojtek"
+# DATABASE_HOST = "localhost"
+# DATABASE_NAME = "askmate"
+# DATABASE_PASSWORD = "wojtek19842041"
+# DATABASE_PORT = 5432
+# DATABASE_USERNAME = "wojtek"
 
 
 class Queries:
@@ -34,11 +34,11 @@ class Queries:
 
 class DB:
     def __init__(self):
-        self.host = DATABASE_HOST
-        self.username = DATABASE_USERNAME
-        self.password = DATABASE_PASSWORD
-        self.port = DATABASE_PORT
-        self.name = DATABASE_NAME
+        self.host = os.environ.get("DATABASE_HOST")
+        self.username = os.environ.get("DATABASE_USERNAME")
+        self.password = os.environ.get("DATABASE_PASSWORD")
+        self.port = os.environ.get("DATABASE_PORT")
+        self.name = os.environ.get("DATABASE_NAME")
 
     def execute_query(self, query, params=None, **formats):
         try:

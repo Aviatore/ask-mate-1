@@ -16,8 +16,10 @@
         <span id="pub-time">{{ time_to_utc(question_data['submission_time']) }}</span>
         <p id="message">{{ question_data['message'] }}</p>
         {% if question_data['image'] is not none %}
-            <img src="{{ url_for('static', filename='uploaded/questions/' + question_data['image']) }}">
-            <figcaption>{{ question_data['image'] }} ({{ file_size(url_for('static', filename='uploaded/questions/' + question_data['image'])) }} kb)</figcaption>
+            {% for image_url in question_data['image'] %}
+                <img src="{{ url_for('static', filename='uploaded/questions/' + image_url) }}">
+                <figcaption>{{ image_url }} ({{ file_size(url_for('static', filename='uploaded/questions/' + image_url)) }} kb)</figcaption>
+            {% endfor %}
         {% endif %}
     </div>
     {% for answer in answers_data %}
