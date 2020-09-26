@@ -5,12 +5,14 @@ import datetime
 import time
 import os
 from urllib.parse import unquote
+from werkzeug.utils import secure_filename
 from database import db, queries
 
 
 UPLOAD_DIR = 'static/uploaded/'
 
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024
 
 if not os.path.exists(os.path.join(UPLOAD_DIR, 'questions')):
     os.makedirs(os.path.join(UPLOAD_DIR, 'questions'))
@@ -85,6 +87,8 @@ def question_add():
     }
 
     if request.method == "POST":
+
+
         question = request.form.to_dict()
         question["submission_time"] = datetime.datetime.now()
         question["vote_number"] = 0
@@ -104,7 +108,8 @@ def question_add():
         if uploaded_files:
             paths = []
             for file in uploaded_files:
-                file_name = f'{time.time()}_{file.filename}'
+                file_name_raw = secure_filename(file.filename)
+                file_name = f'{time.time()}_{file_name_raw}'
                 file_path = os.path.join(UPLOAD_DIR, 'questions', file_name)
                 file.save(file_path)
                 paths.append(file_name)
