@@ -50,3 +50,29 @@ h3 {
 #title {
     padding: 5px;
 }
+#image {
+    display: none;
+}
+#input-file {
+    font-family: sans-serif;
+    cursor: pointer;
+    display: inline;
+    border: 1px solid #999;
+    border-radius: 3px;
+    padding: 3px 8px;
+    text-shadow: 1px 1px #fff;
+    text-shadow: 1px 1px #fff;
+    font-weight: 700;
+    font-size: 10pt;
+    background: -webkit-linear-gradient(top, #f9f9f9, #e3e3e3);
+}
+#input-file:hover {
+    border-color: black;
+}
+#input-file:active {
+    background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9);
+}
+#img-prev {
+    margin-top: 5px;
+    border: 0px solid black;
+}

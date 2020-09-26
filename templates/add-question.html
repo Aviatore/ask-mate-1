@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Add Question</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='add-question.css') }}">
+    <script src="{{ url_for('static', filename='file-handling.js') }}"></script>
 </head>
 <body>
 <div id="body">
@@ -14,7 +15,11 @@
         <input required id="title" name="title" type="text" size="40" placeholder="Question title" class="center"><br>
 
         <textarea required id="message" name="message" placeholder="Type your message here ..." class="center"></textarea><br>
-        <input type="file" id="image" name="image" class="center" accept="image/*"><br>
+        <input type="file" id="image" name="image" class="center" accept="image/*" onchange="filePrev()">
+        <div class="center" style="border: 0px solid black;">
+            <div id="input-file" onclick="selectFile()" class="center">Select a file</div>
+        </div>
+        <div id="img-prev" class="center"></div><br>
         <button type="submit" class="center button">Add new question</button>
         <button type="button" class="center button" onclick="window.location.href='{{ url_for('list') }}';">Back to questions list</button>
     </form>

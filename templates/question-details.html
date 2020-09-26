@@ -15,7 +15,7 @@
         </a>
         <span id="pub-time">{{ time_to_utc(question_data['submission_time']) }}</span>
         <p id="message">{{ question_data['message'] }}</p>
-        {% if question_data['image'] != "" %}
+        {% if question_data['image'] is not none %}
             <img src="{{ url_for('static', filename='uploaded/questions/' + question_data['image']) }}">
             <figcaption>{{ question_data['image'] }} ({{ file_size(url_for('static', filename='uploaded/questions/' + question_data['image'])) }} kb)</figcaption>
         {% endif %}
@@ -33,7 +33,7 @@
             <i class="far fa-edit"></i>
             <span id="pub-time">{{ time_to_utc(answer['submission_time']) }}</span>
             <p id="message">{{ answer['message'] }}</p>
-            {% if answer['image'] != "" %}
+            {% if answer['image'] is not none %}
                 <img src="{{ url_for('static', filename='uploaded/answers/' + answer['image']) }}">
                 <figcaption>{{ answer['image'] }} ({{ file_size(url_for('static', filename='uploaded/answers/' + answer['image'])) }} kb)</figcaption>
             {% endif %}

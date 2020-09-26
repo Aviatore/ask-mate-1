@@ -5,6 +5,7 @@ import datetime
 import time
 import os
 from urllib.parse import unquote
+from database import db, queries
 
 
 UPLOAD_DIR = 'static/uploaded/'
@@ -40,7 +41,7 @@ def list():
         'directions': [None, None, None, None]
     }
 
-    questions = read_questions()
+    questions = db.execute_query(queries.read_questions_all)
 
     order_by = request.args.get('order_by')
     order_direction = request.args.get('order_direction')
@@ -61,53 +62,37 @@ def list():
 # Display a question
 @app.route('/question/<question_id>')
 def question_details(question_id):
-    questions = read_questions()
-    question_title = ""
-    question_message = ""
+    question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
 
-    question_data = None
+    if question != "":
+        question['view_number'] += 1
 
-    for question in questions:
-        if str(question["id"]) == question_id:
-            question_data = question
-            # question_title = question["title"]
-            # question_message = question["message"]
+    db.execute_query(queries.update_question_by_id, question)
 
-    question_data['view_number'] += 1
-    write_questions(questions)
+    answers = db.execute_query(queries.read_answers_by_question_id, {'question_id': question_id})
 
-    answers = read_answers()
-    answers_data = []
-
-    for answer in answers:
-        if str(answer["question_id"]) == question_id:
-            answers_data.append(answer)
-
-    return render_template('question-details.html', question_id=question_id, question_data=question_data, answers_data=answers_data)
+    return render_template('question-details.html', question_id=question_id, question_data=question, answers_data=answers)
 
 
 # Ask a question
 @app.route('/add-question', methods=["GET", "POST"])
 def question_add():
     if request.method == "POST":
-        saved_questions = read_questions()
         question = request.form.to_dict()
-        question["id"] = get_id(read_questions())
-        question["submission_time"] = str(int(time.time()))
-        question["vote_number"] = "0"
-        question["view_number"] = "0"
+        question["submission_time"] = datetime.datetime.now()
+        question["vote_number"] = 0
+        question["view_number"] = 0
+        question['image'] = None
 
         uploaded_file = request.files.get('image')
         if uploaded_file:
-            file_name = f'{get_id(saved_questions)}_{uploaded_file.filename}'
+            file_name = f'{time.time()}_{uploaded_file.filename}'
 
             file_path = os.path.join(UPLOAD_DIR, 'questions', file_name)
             uploaded_file.save(file_path)
             question['image'] = file_name
 
-        print(question)
-        saved_questions.append(question)
-        write_questions(saved_questions)
+        db.execute_query(queries.add_new_question, question)
 
         return redirect(url_for('list'))
 
@@ -116,26 +101,24 @@ def question_add():
 
 
 # post answer
-@app.route('/question/<question_id>/new-answer', methods=["GET", "POST"])
+@app.route('/question/<int:question_id>/new-answer', methods=["GET", "POST"])
 def answer_post(question_id):
     if request.method == "POST":
-        saved_answers = read_answers()
         answer = request.form.to_dict()
-        answer["id"] = get_id(read_answers())
-        answer["submission_time"] = str(int(time.time()))
-        answer["vote_number"] = "0"
+        answer["submission_time"] = datetime.datetime.now()
+        answer["vote_number"] = 0
         answer["question_id"] = question_id
+        answer['image'] = None
 
         uploaded_file = request.files.get('image')
         if uploaded_file:
-            file_name = f'{get_id(saved_answers)}_{uploaded_file.filename}'
+            file_name = f'{time.time()}_{uploaded_file.filename}'
 
             file_path = os.path.join(UPLOAD_DIR, 'answers', file_name)
             uploaded_file.save(file_path)
             answer['image'] = file_name
 
-        saved_answers.append(answer)
-        write_answers(saved_answers)
+        db.execute_query(queries.add_new_answer, answer)
 
         return redirect(url_for("question_details", question_id=question_id))
 
@@ -146,61 +129,44 @@ def answer_post(question_id):
 # Delete question
 @app.route('/question/<int:question_id>/delete')
 def question_delete(question_id):
-    questions = read_questions()
-    question_to_delete = [question for question in questions if question['id'] == question_id][0]
-    questions.remove(question_to_delete)
+    question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
 
-    write_questions(questions)
+    if question['image'] != "":
+        os.remove(os.path.join(UPLOAD_DIR, 'questions', question['image']))
 
-    if question_to_delete['image'] != "":
-        os.remove(os.path.join(UPLOAD_DIR, 'questions', question_to_delete['image']))
+    db.execute_query(queries.delete_question_by_id, {'id': question_id})
 
     return redirect(url_for('list'))
 
 
 # Edit a question
-@app.route('/question/<question_id>/edit', methods=["GET", "POST"])
+@app.route('/question/<int:question_id>/edit', methods=["GET", "POST"])
 def question_edit(question_id):
-    questions = read_questions()
-    question_to_edit = {}
-
-    for question in questions:
-        if str(question["id"]) == str(question_id):
-            question_to_edit = question
-
-    title = question_to_edit["title"]
-    message = question_to_edit["message"]
+    question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
 
     if request.method == "POST":
-        new_title = request.form["title"]
-        new_message = request.form["message"]
-        question_to_edit["title"] = new_title
-        question_to_edit["message"] = new_message
-        question_to_edit["submission_time"] = str(int(time.time()))
-        write_questions(questions)
+        question["title"] = request.form["title"]
+        question["message"] = request.form["message"]
+        question["submission_time"] = datetime.datetime.now()
+
+        db.execute_query(queries.update_question_by_id, question)
 
         return redirect(url_for("question_details", question_id=question_id))
-
     else:
-        return render_template("edit-question.html", title=title, message=message)
+        return render_template("edit-question.html", title=question["title"], message=question["message"])
 
 
 # Delete an answer
 @app.route('/answers/<int:answer_id>/delete')
 def answer_delete(answer_id):
-    answers = read_answers()
-    answer_to_delete = [answer for answer in answers if answer['id'] == answer_id][0]
+    answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
 
-    if answer_to_delete['image'] != "":
-        os.remove(os.path.join(UPLOAD_DIR, 'answers', answer_to_delete['image']))
+    if answer['image'] is not None:
+        os.remove(os.path.join(UPLOAD_DIR, 'answers', answer['image']))
 
-    answers.remove(answer_to_delete)
+    db.execute_query(queries.delete_answer_by_id, {'id': answer_id})
 
-    write_answers(answers)
-
-
-
-    return redirect(url_for('question_details', question_id=answer_to_delete['question_id']))
+    return redirect(url_for('question_details', question_id=answer['question_id']))
 
 
 # Vote-up a question
@@ -228,8 +194,7 @@ def answer_vote_down(answer_id):
 
 
 def time_to_utc(raw_time):
-    time_converted = datetime.datetime.fromtimestamp(raw_time)
-    time_formatted = time_converted.strftime('%d %B %Y, %H:%M').lstrip('0')
+    time_formatted = raw_time.strftime('%d %B %Y, %H:%M').lstrip('0')
     return time_formatted
 
 
