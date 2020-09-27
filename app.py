@@ -103,6 +103,8 @@ def question_add():
         if question['message'] == '':
             warnings['message'] = "You must type a message"
 
+        # If at least one warning is set, a new response is rendered with warnings argument
+        # that allow to format problematic form fields.
         if len([f for f in warnings if warnings[f] is not None]) > 0:
             return render_template('add-question.html', warnings=warnings, question=question)
             # return redirect(url_for('question_add', warnings=warnings))
@@ -134,6 +136,8 @@ def answer_post(question_id):
         if answer['message'] == '':
             warnings['message'] = "You must type a message"
 
+        # If a warning is set, a new response is rendered with warnings argument
+        # that allow to format problematic form field.
         if warnings['message'] is not None:
             return render_template('new-answer.html', question_id=question_id, warnings=warnings)
 
@@ -156,6 +160,8 @@ def question_delete(question_id):
     db.execute_query(queries.delete_question_by_id, {'id': question_id})
 
     if question['image'] is not None:
+        # The 'split' method allows to get a list of more than one submitted image files
+        # tha can be displayed on the page.
         for image_path in question['image'].split(';'):
             os.remove(os.path.join(UPLOAD_DIR, 'questions', image_path))
 
@@ -187,9 +193,13 @@ def question_edit(question_id):
         if question['message'] == '':
             warnings['message'] = "You must type a message"
 
+        # If at least one warning is set, a new response is rendered with warnings argument
+        # that allow to format problematic form fields.
         if len([f for f in warnings if warnings[f] is not None]) > 0:
             return render_template('edit-question.html', warnings=warnings, question=question)
 
+        # The function saves submitted files (if any) and saves images names under the 'image' key
+        # in the question dictionary.
         update_image_files(question)
 
         db.execute_query(queries.update_question_by_id, question)
@@ -238,6 +248,11 @@ def answer_vote_down(answer_id):
 
 
 def update_image_files(type):
+    """The function gets submitted files list and saves each file to its destination
+    directory. If more than one file is submitted, file names are joined by a semicolon
+    and saved as a single string to in a database. The argument 'type' is of type
+    dictionary with keys corresponding to the table (question or answer) columns in a database."""
+
     print(f'DEBUG: ok')
     if 'question_id' in type:
         dir = 'answers'
