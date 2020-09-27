@@ -5,14 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Edit question</title>
     <link type="text/css" rel="stylesheet" href="{{ url_for("static", filename="add-question.css") }}">
+    <script src="{{ url_for('static', filename='file-handling.js') }}"></script>
 </head>
 <body>
 <div id="body">
     <div id="container">
         <h3 class="center">Edit Question</h3>
-        <form action="" method="post">
-            <input required id="title" name="title" type="text" size="40" placeholder="Question title" class="center" value="{{ title }}"><br>
-            <textarea required id="message" name="message" placeholder="Type your message here ..." class="center">{{ message }}</textarea><br>
+        <form id="form" action="" method="post" enctype="multipart/form-data">
+            <input required id="title" name="title" type="text" size="40" placeholder="Question title" class="input center {{ "warning" if warnings['title'] }}" value="{{ title }}">
+            {% if warnings['title'] %}
+                <span class="text-warning center">{{ warnings['title'] }}</span>
+            {% endif %}
+
+            <textarea required id="message" name="message" placeholder="Type your message here ..." class="input center {{ "warning" if warnings['message'] }}">{{ message }}</textarea>
+            {% if warnings['message'] %}
+                <span class="text-warning center">{{ warnings['message'] }}</span>
+            {% endif %}
+
+            <input type="file" id="image" name="image" class="center" accept="image/*" onchange="filePrev()" multiple>
+            <div id="input-file-container" class="center input" style="border: 0px solid black;">
+                <div id="input-file" onclick="selectFile()" class="center">Select a file</div>
+            </div>
+            <div id="img-prev" class="center"></div><br>
+
             <button type="submit" class="center button">Submit</button>
             <button type="button" class="center button" onclick="window.location.href='{{ url_for('list') }}';">Back to questions list</button>
         </form>

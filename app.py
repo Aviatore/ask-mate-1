@@ -80,7 +80,7 @@ def question_details(question_id):
         if answer['image'] is not None:
             answer['image'] = answer['image'].split(';')
 
-    return render_template('question-details.html', question_id=question_id, question_data=question, answers_data=answers)
+    return render_template('question-details.html', question_id=question_id, question_data=question, answers_data=answers, )
 
 
 # Ask a question
@@ -107,19 +107,7 @@ def question_add():
             return render_template('add-question.html', warnings=warnings, question=question)
             # return redirect(url_for('question_add', warnings=warnings))
 
-        uploaded_files = request.files.getlist('image')
-        if uploaded_files:
-            paths = []
-            for file in uploaded_files:
-                if file.filename != "":
-                    file_name_raw = secure_filename(file.filename)
-                    file_name = f'{time.time()}_{file_name_raw}'
-                    file_path = os.path.join(UPLOAD_DIR, 'questions', file_name)
-                    file.save(file_path)
-                    paths.append(file_name)
-
-            if len(paths) > 0:
-                question['image'] = ';'.join(paths)
+        update_image_files(question)
 
         db.execute_query(queries.add_new_question, question)
 
@@ -149,19 +137,7 @@ def answer_post(question_id):
         if warnings['message'] is not None:
             return render_template('new-answer.html', question_id=question_id, warnings=warnings)
 
-        uploaded_files = request.files.getlist('image')
-        if uploaded_files:
-            paths = []
-            for file in uploaded_files:
-                if file.filename != "":
-                    file_name_raw = secure_filename(file.filename)
-                    file_name = f'{time.time()}_{file_name_raw}'
-                    file_path = os.path.join(UPLOAD_DIR, 'answers', file_name)
-                    file.save(file_path)
-                    paths.append(file_name)
-
-            if len(paths) > 0:
-                answer['image'] = ';'.join(paths)
+        update_image_files(answer)
 
         db.execute_query(queries.add_new_answer, answer)
 
@@ -194,6 +170,11 @@ def question_delete(question_id):
 # Edit a question
 @app.route('/question/<int:question_id>/edit', methods=["GET", "POST"])
 def question_edit(question_id):
+    warnings = {
+        'title': None,
+        'message': None
+    }
+
     question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
 
     if request.method == "POST":
@@ -201,11 +182,21 @@ def question_edit(question_id):
         question["message"] = request.form["message"]
         question["submission_time"] = datetime.datetime.now()
 
+        if question['title'] == '':
+            warnings['title'] = "You must define your question's title"
+        if question['message'] == '':
+            warnings['message'] = "You must type a message"
+
+        if len([f for f in warnings if warnings[f] is not None]) > 0:
+            return render_template('edit-question.html', warnings=warnings, question=question)
+
+        update_image_files(question)
+
         db.execute_query(queries.update_question_by_id, question)
 
         return redirect(url_for("question_details", question_id=question_id))
     else:
-        return render_template("edit-question.html", title=question["title"], message=question["message"])
+        return render_template("edit-question.html", title=question["title"], message=question["message"], warnings=None)
 
 
 # Delete an answer
@@ -244,6 +235,30 @@ def answer_vote_up(answer_id):
 @app.route('/answer/<answer_id>/vote_down')
 def answer_vote_down(answer_id):
     return render_template('under_construction.html')
+
+
+def update_image_files(type):
+    print(f'DEBUG: ok')
+    if 'question_id' in type:
+        dir = 'answers'
+    else:
+        dir = 'questions'
+
+    uploaded_files = request.files.getlist('image')
+    if uploaded_files:
+        paths = []
+        for file in uploaded_files:
+            print(f'DEBUG: uploaded_files')
+            if file.filename != "":
+                print(f'DEBUG: {file.filename}')
+                file_name_raw = secure_filename(file.filename)
+                file_name = f'{time.time()}_{file_name_raw}'
+                file_path = os.path.join(UPLOAD_DIR, dir, file_name)
+                file.save(file_path)
+                paths.append(file_name)
+
+        if len(paths) > 0:
+            type['image'] = ';'.join(paths)
 
 
 def time_to_utc(raw_time):
