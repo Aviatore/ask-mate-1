@@ -1,5 +1,4 @@
 const MAX_SIZE = 512 * 1024;
-let files = [];
 let tooLarge = false;
 
 function sizeConverter(size) {
@@ -10,7 +9,6 @@ function modifyForm() {
     let form = document.getElementById("form");
     form.addEventListener("submit", (event) => {
         event.preventDefault();
-        event.target.files = files;
 
         if (tooLarge) {
             alert("One of selected files is too large.\nPlease select a new file(s).");
@@ -22,9 +20,8 @@ function modifyForm() {
 }
 
 function filePrev() {
+    tooLarge = false;
     let formFiles = document.getElementById("image").files;
-
-
 
     for (let file of formFiles) {
         let fileIsTooLarge = false;
@@ -42,7 +39,6 @@ function filePrev() {
             }
             fileIsTooLarge = true;
         }
-
 
         let reader = new FileReader();
 

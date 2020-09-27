@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request, send_from_directory
+from flask import Flask, render_template, redirect, url_for, request, send_from_directory, flash
 from data_manager import *
 from util import *
 import datetime
@@ -6,10 +6,10 @@ import time
 import os
 from urllib.parse import unquote
 from werkzeug.utils import secure_filename
-from database import db, queries
+from database import db, queries, DBError
 
 
-UPLOAD_DIR = 'static/uploaded/'
+UPLOAD_DIR = 'uploaded/'
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024
@@ -71,9 +71,14 @@ def question_details(question_id):
 
     db.execute_query(queries.update_question_by_id, question)
 
-    question['image'] = question['image'].split(';')
+    if question['image'] is not None:
+        question['image'] = question['image'].split(';')
 
     answers = db.execute_query(queries.read_answers_by_question_id, {'question_id': question_id})
+
+    for answer in answers:
+        if answer['image'] is not None:
+            answer['image'] = answer['image'].split(';')
 
     return render_template('question-details.html', question_id=question_id, question_data=question, answers_data=answers)
 
@@ -87,8 +92,6 @@ def question_add():
     }
 
     if request.method == "POST":
-
-
         question = request.form.to_dict()
         question["submission_time"] = datetime.datetime.now()
         question["vote_number"] = 0
@@ -108,22 +111,15 @@ def question_add():
         if uploaded_files:
             paths = []
             for file in uploaded_files:
-                file_name_raw = secure_filename(file.filename)
-                file_name = f'{time.time()}_{file_name_raw}'
-                file_path = os.path.join(UPLOAD_DIR, 'questions', file_name)
-                file.save(file_path)
-                paths.append(file_name)
+                if file.filename != "":
+                    file_name_raw = secure_filename(file.filename)
+                    file_name = f'{time.time()}_{file_name_raw}'
+                    file_path = os.path.join(UPLOAD_DIR, 'questions', file_name)
+                    file.save(file_path)
+                    paths.append(file_name)
 
-            question['image'] = ';'.join(paths)
-
-
-        # uploaded_file = request.files.get('image')
-        # if uploaded_file:
-        #     file_name = f'{time.time()}_{uploaded_file.filename}'
-        #
-        #     file_path = os.path.join(UPLOAD_DIR, 'questions', file_name)
-        #     uploaded_file.save(file_path)
-        #     question['image'] = file_name
+            if len(paths) > 0:
+                question['image'] = ';'.join(paths)
 
         db.execute_query(queries.add_new_question, question)
 
@@ -136,6 +132,10 @@ def question_add():
 # post answer
 @app.route('/question/<int:question_id>/new-answer', methods=["GET", "POST"])
 def answer_post(question_id):
+    warnings = {
+        'message': None
+    }
+
     if request.method == "POST":
         answer = request.form.to_dict()
         answer["submission_time"] = datetime.datetime.now()
@@ -143,32 +143,50 @@ def answer_post(question_id):
         answer["question_id"] = question_id
         answer['image'] = None
 
-        uploaded_file = request.files.get('image')
-        if uploaded_file:
-            file_name = f'{time.time()}_{uploaded_file.filename}'
+        if answer['message'] == '':
+            warnings['message'] = "You must type a message"
 
-            file_path = os.path.join(UPLOAD_DIR, 'answers', file_name)
-            uploaded_file.save(file_path)
-            answer['image'] = file_name
+        if warnings['message'] is not None:
+            return render_template('new-answer.html', question_id=question_id, warnings=warnings)
+
+        uploaded_files = request.files.getlist('image')
+        if uploaded_files:
+            paths = []
+            for file in uploaded_files:
+                if file.filename != "":
+                    file_name_raw = secure_filename(file.filename)
+                    file_name = f'{time.time()}_{file_name_raw}'
+                    file_path = os.path.join(UPLOAD_DIR, 'answers', file_name)
+                    file.save(file_path)
+                    paths.append(file_name)
+
+            if len(paths) > 0:
+                answer['image'] = ';'.join(paths)
 
         db.execute_query(queries.add_new_answer, answer)
 
         return redirect(url_for("question_details", question_id=question_id))
 
     else:
-        return render_template('new-answer.html', question_id=question_id)
+        return render_template('new-answer.html', question_id=question_id, warnings=None)
 
 
 # Delete question
 @app.route('/question/<int:question_id>/delete')
 def question_delete(question_id):
     question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
+    quest_answers = db.execute_query(queries.read_answers_by_question_id, {'question_id': question_id})
 
-    if question['image'] != "":
+    db.execute_query(queries.delete_question_by_id, {'id': question_id})
+
+    if question['image'] is not None:
         for image_path in question['image'].split(';'):
             os.remove(os.path.join(UPLOAD_DIR, 'questions', image_path))
 
-    db.execute_query(queries.delete_question_by_id, {'id': question_id})
+    for quest_answer in quest_answers:
+        if quest_answer['image'] is not None:
+            for image_path in quest_answer['image'].split(';'):
+                os.remove(os.path.join(UPLOAD_DIR, 'answers', image_path))
 
     return redirect(url_for('list'))
 
@@ -196,7 +214,8 @@ def answer_delete(answer_id):
     answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
 
     if answer['image'] is not None:
-        os.remove(os.path.join(UPLOAD_DIR, 'answers', answer['image']))
+        for image_path in answer['image'].split(';'):
+            os.remove(os.path.join(UPLOAD_DIR, 'answers', image_path))
 
     db.execute_query(queries.delete_answer_by_id, {'id': answer_id})
 
@@ -232,12 +251,18 @@ def time_to_utc(raw_time):
     return time_formatted
 
 
-def file_size(file_name):
-    file_name = file_name.lstrip("/")
-    size_bytes = os.path.getsize(unquote(file_name)) * 0.001 # unquote converts url-encoded string into the normal one
-    size_kb = f'{size_bytes:.1f}'
+def file_size(directory, file_name):
+    file_name = unquote(file_name) # unquote converts url-encoded string into the normal one
+    file_path = os.path.join(UPLOAD_DIR, directory, file_name)
+    file_size_bytes = os.path.getsize(file_path) * 0.001
+    file_size_kb = f'{file_size_bytes:.1f}'
 
-    return size_kb
+    return file_size_kb
+
+
+@app.route('/get_file/<directory>/<file_name>')
+def get_image(directory, file_name):
+    return send_from_directory(os.path.join(UPLOAD_DIR, directory), filename=file_name)
 
 
 @app.context_processor

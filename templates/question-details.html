@@ -17,8 +17,8 @@
         <p id="message">{{ question_data['message'] }}</p>
         {% if question_data['image'] is not none %}
             {% for image_url in question_data['image'] %}
-                <img src="{{ url_for('static', filename='uploaded/questions/' + image_url) }}">
-                <figcaption>{{ image_url }} ({{ file_size(url_for('static', filename='uploaded/questions/' + image_url)) }} kb)</figcaption>
+                <img src="{{ url_for('get_image', directory='questions', file_name=image_url) }}">
+                <figcaption>{{ image_url }} ({{ file_size('questions', image_url) }} kb)</figcaption>
             {% endfor %}
         {% endif %}
     </div>
@@ -36,8 +36,10 @@
             <span id="pub-time">{{ time_to_utc(answer['submission_time']) }}</span>
             <p id="message">{{ answer['message'] }}</p>
             {% if answer['image'] is not none %}
-                <img src="{{ url_for('static', filename='uploaded/answers/' + answer['image']) }}">
-                <figcaption>{{ answer['image'] }} ({{ file_size(url_for('static', filename='uploaded/answers/' + answer['image'])) }} kb)</figcaption>
+                {% for image_url in answer['image'] %}
+                    <img src="{{ url_for('get_image', directory='answers', file_name=image_url) }}">
+                    <figcaption>{{ image_url }} ({{ file_size('answers', image_url) }} kb)</figcaption>
+                {% endfor %}
             {% endif %}
         </div>
     {% endfor %}
