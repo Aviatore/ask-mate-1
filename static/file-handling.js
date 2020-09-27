@@ -17,6 +17,26 @@ function modifyForm() {
             event.target.submit();
         }
     });
+
+    let checkbox = document.getElementById("image-remove");
+    if (checkbox) {
+        checkbox.addEventListener("change", (event) => {
+        let submit_button = document.getElementById("input-file");
+
+        if (event.target.checked) {
+            console.log("checked");
+            submit_button.classList.remove('input-file');
+            submit_button.classList.add('disabled');
+            submit_button.onclick = null;
+        }
+        else {
+            submit_button.classList.remove('disabled');
+            submit_button.classList.add('input-file')
+            submit_button.onclick = selectFile;
+        }
+    });
+    }
+
 }
 
 function filePrev() {
@@ -44,7 +64,6 @@ function filePrev() {
 
         reader.onload = (event) => {
             let image = new Image();
-            image.style.height = "50px";
 
             if (fileIsTooLarge) {
                 image.style.border = "2px solid red";

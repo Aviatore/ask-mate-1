@@ -44,7 +44,7 @@
         </div>
     {% endfor %}
     <button type="button" class="button" onclick="window.location.href='{{ url_for("answer_post", question_id=question_id) }}'">Add an answer</button>
-    <button type="button" class="button" onclick="window.location.href='{{ url_for("list") }}'">Back to the list</button>
+    <button type="button" class="button" onclick="window.location.href='{{ url_for("question_list") }}'">Back to the list</button>
 </div>
 </body>
 </html>

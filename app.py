@@ -6,7 +6,7 @@ import time
 import os
 from urllib.parse import unquote
 from werkzeug.utils import secure_filename
-from database import db, queries, DBError
+from database import db, queries
 
 
 UPLOAD_DIR = 'uploaded/'
@@ -36,7 +36,7 @@ def main_page():
 
 # List questions
 @app.route('/list')
-def list():
+def question_list():
     table_headers = {
         'headers': ['Question', 'Number of views', 'Number of votes', 'Submission time'],
         'keys': ['title', 'view_number', 'vote_number', 'submission_time'],
@@ -113,7 +113,7 @@ def question_add():
 
         db.execute_query(queries.add_new_question, question)
 
-        return redirect(url_for('list'))
+        return redirect(url_for('question_list'))
 
     else:
         return render_template('add-question.html', warnings=None, question=None)
@@ -170,7 +170,7 @@ def question_delete(question_id):
             for image_path in quest_answer['image'].split(';'):
                 os.remove(os.path.join(UPLOAD_DIR, 'answers', image_path))
 
-    return redirect(url_for('list'))
+    return redirect(url_for('question_list'))
 
 
 # Edit a question
@@ -182,6 +182,8 @@ def question_edit(question_id):
     }
 
     question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
+    if question['image'] is not None:
+        question['image'] = question['image'].split(';')
 
     if request.method == "POST":
         question["title"] = request.form["title"]
@@ -198,15 +200,19 @@ def question_edit(question_id):
         if len([f for f in warnings if warnings[f] is not None]) > 0:
             return render_template('edit-question.html', warnings=warnings, question=question)
 
-        # The function saves submitted files (if any) and saves images names under the 'image' key
-        # in the question dictionary.
-        update_image_files(question)
+        remove_images = request.form.get('image-remove')
+        if remove_images:
+            question['image'] = None
+        else:
+            # The function saves submitted files (if any) and saves images names under the 'image' key
+            # in the question dictionary.
+            update_image_files(question)
 
         db.execute_query(queries.update_question_by_id, question)
 
         return redirect(url_for("question_details", question_id=question_id))
     else:
-        return render_template("edit-question.html", title=question["title"], message=question["message"], warnings=None)
+        return render_template("edit-question.html", question=question, warnings=None)
 
 
 # Delete an answer
@@ -260,8 +266,8 @@ def update_image_files(type):
         dir = 'questions'
 
     uploaded_files = request.files.getlist('image')
+    paths = []
     if uploaded_files:
-        paths = []
         for file in uploaded_files:
             print(f'DEBUG: uploaded_files')
             if file.filename != "":
@@ -272,8 +278,11 @@ def update_image_files(type):
                 file.save(file_path)
                 paths.append(file_name)
 
-        if len(paths) > 0:
-            type['image'] = ';'.join(paths)
+    if len(paths) > 0:
+        print(f'DEBUG: paths len: {len(paths)}')
+        type['image'] = ';'.join(paths)
+    elif isinstance(type['image'], list):
+        type['image'] = ';'.join(type['image'])
 
 
 def time_to_utc(raw_time):

@@ -6,17 +6,9 @@ import os
 
 # DATABASE_HOST = "localhost"
 # DATABASE_NAME = "askmate"
-# DATABASE_PASSWORD = "wojtek19842041"
+# DATABASE_PASSWORD = ""
 # DATABASE_PORT = 5432
 # DATABASE_USERNAME = "wojtek"
-class DBError(Exception):
-    def __init__(self, error):
-        self.error = error
-
-    def __str__(self):
-        return f'An database error occured: {self.error}'
-
-
 
 class Queries:
     def __init__(self):
@@ -69,8 +61,6 @@ class DB:
                         output = None
 
                     return output
-        except ps.DatabaseError as error:
-            raise DBError(error)
         finally:
             conn.close()
 

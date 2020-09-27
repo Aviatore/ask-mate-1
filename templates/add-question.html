@@ -30,12 +30,12 @@
 
         <input type="file" id="image" name="image" class="center" accept="image/*" onchange="filePrev()" multiple>
         <div id="input-file-container" class="center input" style="border: 0px solid black;">
-            <div id="input-file" onclick="selectFile()" class="center">Select a file</div>
+            <div id="input-file" onclick="selectFile()" class="center input-file">Select a file</div>
         </div>
         <div id="img-prev" class="center"></div><br>
 
         <button type="submit" class="center button">Add new question</button>
-        <button type="button" class="center button" onclick="window.location.href='{{ url_for('list') }}';">Back to questions list</button>
+        <button type="button" class="center button" onclick="window.location.href='{{ url_for('question_list') }}';">Back to questions list</button>
     </form>
 
 </div>
