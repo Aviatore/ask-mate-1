@@ -4,14 +4,24 @@
     <meta charset="UTF-8">
     <title>Post an answer</title>
     <link type="text/css" rel="stylesheet" href="{{ url_for("static", filename="add-question.css") }}">
+    <script src="{{ url_for('static', filename='file-handling.js') }}"></script>
 </head>
 <body>
 <div id="body">
 <div id="container">
     <h3 class="center">New answer</h3>
-    <form action={{ url_for('answer_post', question_id=question_id) }} method="POST" enctype="multipart/form-data">
-        <textarea required id="message" name="message" placeholder="Type your answer here ..." class="center"></textarea><br>
-        <input type="file" id="image" name="image" class="center" accept="image/*"><br>
+    <form id="form" action={{ url_for('answer_post', question_id=question_id) }} method="POST" enctype="multipart/form-data">
+        <textarea id="message" name="message" placeholder="Type your answer here ..." class="input center {{ "warning" if warnings['message'] }}"></textarea>
+        {% if warnings['message'] %}
+            <span class="text-warning center">{{ warnings['message'] }}</span>
+        {% endif %}
+
+        <input type="file" id="image" name="image" class="center" accept="image/*" onchange="filePrev()" multiple>
+        <div id="input-file-container" class="center input" style="border: 0px solid black;">
+            <div id="input-file" onclick="selectFile()" class="center input-file">Select a file</div>
+        </div>
+        <div id="img-prev" class="center"></div><br>
+
         <button type="submit" class="center button">Post new answer</button>
         <button type="button" class="center button" onclick="window.location.href='{{ url_for('question_details', question_id=question_id) }}';">Back to question details</button>
     </form>

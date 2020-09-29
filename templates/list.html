@@ -15,7 +15,7 @@
             {% for header in headers['headers'] %}
                 {% set direction = 'asc' if headers['directions'][loop.index0] == 'desc' or headers['directions'][loop.index0] is none else 'desc' %}
                 <th>
-                    <a href="{{ url_for('list', order_by=headers['keys'][loop.index0], order_direction=direction) }}" title="Sort by {{ header }}">{{ header }}</a>
+                    <a href="{{ url_for('question_list', order_by=headers['keys'][loop.index0], order_direction=direction) }}" title="Sort by {{ header }}">{{ header }}</a>
                     {% if headers['directions'][loop.index0] == 'asc' %}
                         <i class="fas fa-sort-down"></i>
                         {% elif headers['directions'][loop.index0] == 'desc' %}
