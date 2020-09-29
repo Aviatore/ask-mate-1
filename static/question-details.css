@@ -40,6 +40,7 @@ figcaption {
 }
 img {
     max-height: 150px;
+    margin-top: 10px;
 }
 .button {
     padding: 6px;
