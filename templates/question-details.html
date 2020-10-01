@@ -45,6 +45,12 @@
                     <figcaption>{{ image_url }} ({{ file_size('answers', image_url) }} kb)</figcaption>
                 {% endfor %}
             {% endif %}
+            <p id="answer_vote_number">
+                Is it helpful ?
+                <a href="{{ url_for('answer_vote_up', answer_id=answer['id'])}}"><button id="vote_up_answer"><b>+</b></button></a>
+                <a href="{{ url_for('answer_vote_down', answer_id=answer['id'])}}"><button id="vote_down_answer"><b>-</b></button></a>
+                {{ answer['vote_number'] }}
+            </p>
         </div>
     {% endfor %}
     <button type="button" class="button" onclick="window.location.href='{{ url_for("answer_post", question_id=question_id) }}'">Add an answer</button>

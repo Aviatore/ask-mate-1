@@ -22,6 +22,11 @@ class Queries:
                                      'submission_time=%(submission_time)s, ' \
                                      'image=%(image)s WHERE id=%(id)s'
         self.read_answers_by_question_id = 'SELECT id, question_id, message, vote_number, submission_time, image FROM answer WHERE question_id = %(question_id)s'
+        self.update_answer_by_id = 'UPDATE answer ' \
+                                   'SET message=%(message)s, ' \
+                                   'vote_number=%(vote_number)s, ' \
+                                   'submission_time=%(submission_time)s, ' \
+                                   'image=%(image)s WHERE id=%(id)s'
         self.add_new_question = 'INSERT INTO question (submission_time, view_number, vote_number, title, message, image) ' \
                                 'VALUES(%(submission_time)s, %(view_number)s, %(vote_number)s, %(title)s, %(message)s, %(image)s)'
         self.add_new_answer = 'INSERT INTO answer (submission_time, vote_number, question_id, message, image) ' \

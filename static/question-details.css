@@ -33,6 +33,11 @@ h3, h4 {
     color: rgb(74, 74, 74);
     white-space: pre-line;
 }
+#answer_vote_number {
+    font-family: sans-serif;
+    font-size: 0.8em;
+    color: rgb(74, 74, 74);
+}
 figcaption {
     font-family: sans-serif;
     font-size: 12px;

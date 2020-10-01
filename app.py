@@ -234,8 +234,7 @@ def answer_delete(answer_id):
 def question_vote_up(question_id):
     question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
 
-    if question != "":
-        question["view_number"] -= 1
+    question["view_number"] -= 1
 
     question["vote_number"] += 1
     db.execute_query(queries.update_question_by_id, question)
@@ -248,10 +247,9 @@ def question_vote_up(question_id):
 def question_vote_down(question_id):
     question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
 
-    if question != "":
-        question["view_number"] -= 1
-
+    question["view_number"] -= 1
     question["vote_number"] -= 1
+
     db.execute_query(queries.update_question_by_id, question)
 
     return redirect(url_for('question_details', question_id=question_id))
@@ -260,13 +258,25 @@ def question_vote_down(question_id):
 # Vote-up an answer
 @app.route('/answer/<answer_id>/vote_up')
 def answer_vote_up(answer_id):
-    return render_template('list.html')
+    question = db.execute_query(queries.read_answers_by_question_id, {'id': answer_id})[0]
+
+    question["view_number"] -= 1
+    question["vote_number"] += 1
+    db.execute_query(queries.update_answer_by_id, question)
+
+    return redirect(url_for('question_details', answer_id=answer_id))
 
 
 # Vote-down an answer
 @app.route('/answer/<answer_id>/vote_down')
 def answer_vote_down(answer_id):
-    return render_template('list.html')
+    question = db.execute_query(queries.read_answers_by_question_id, {'id': answer_id})[0]
+
+    question["view_number"] -= 1
+    question["vote_number"] -= 1
+    db.execute_query(queries.update_answer_by_id, question)
+
+    return redirect(url_for('question_details', answer_id=answer_id))
 
 
 def update_image_files(type):
