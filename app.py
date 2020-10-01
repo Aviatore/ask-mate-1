@@ -246,7 +246,13 @@ def question_vote_up(question_id):
 # Vote-down a question
 @app.route('/question/<question_id>/vote_down')
 def question_vote_down(question_id):
+    question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
 
+    if question != "":
+        question["view_number"] -= 1
+
+    question["vote_number"] -= 1
+    db.execute_query(queries.update_question_by_id, question)
 
     return redirect(url_for('question_details', question_id=question_id))
 
