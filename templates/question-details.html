@@ -14,6 +14,7 @@
             <i class="far fa-edit"></i>
         </a>
         <span id="pub-time">{{ time_to_utc(question_data['submission_time']) }}</span>
+        <button id="vote_up_question"><a href="{{ url_for('question_vote_up', question_id=question_data['id'])}}">+</a></button>
         <p id="message">{{ question_data['message'] }}</p>
         {% if question_data['image'] is not none %}
             {% for image_url in question_data['image'] %}
@@ -21,6 +22,8 @@
                 <figcaption>{{ image_url }} ({{ file_size('questions', image_url) }} kb)</figcaption>
             {% endfor %}
         {% endif %}
+
+        {# COMMENT #}
     </div>
     {% for answer in answers_data %}
         <div class="container answers">
