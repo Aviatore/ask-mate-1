@@ -22,10 +22,10 @@ if not os.path.exists(os.path.join(UPLOAD_DIR, 'answers')):
 
 # Edit the 'Cache-Control' header to force browser to not cache external files, e.g. css files.
 # The solution is suitable for development only.
-@app.after_request
-def add_header(request):
-    request.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
-    return request
+# @app.after_request
+# def add_header(request):
+#     request.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+#     return request
 
 
 # Welcome page
@@ -43,17 +43,20 @@ def question_list():
         'directions': [None, None, None, None]
     }
 
-    questions = db.execute_query(queries.read_questions_all)
-
     order_by = request.args.get('order_by')
     order_direction = request.args.get('order_direction')
 
     if order_by:
-        questions_sorted = sort_questions(order_by, questions, direction=order_direction)
+        if order_direction == 'asc':
+            questions_sorted = db.execute_query(queries.read_questions_all_asc, order_by=order_by)
+        else:
+            questions_sorted = db.execute_query(queries.read_questions_all_desc, order_by=order_by)
+
         index = table_headers['keys'].index(order_by)
         table_headers['directions'][index] = order_direction
     else:
-        questions_sorted = sort_questions('submission_time', questions, direction='desc')
+        questions_sorted = db.execute_query(queries.read_questions_all_desc, order_by=order_by)
+
         index = table_headers['keys'].index('submission_time')
         table_headers['directions'][index] = 'desc'
 

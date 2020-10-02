@@ -12,7 +12,8 @@ import os
 
 class Queries:
     def __init__(self):
-        self.read_questions_all = 'SELECT id, title, message, view_number, vote_number, submission_time, image FROM question'
+        self.read_questions_all_desc = 'SELECT id, title, message, view_number, vote_number, submission_time, image FROM question ORDER BY {order_by} DESC'
+        self.read_questions_all_asc = 'SELECT id, title, message, view_number, vote_number, submission_time, image FROM question ORDER BY {order_by} ASC'
         self.read_question_by_id = 'SELECT id, title, message, view_number, vote_number, submission_time, image FROM question WHERE id = %(id)s'
         self.update_question_by_id = 'UPDATE question ' \
                                      'SET title=%(title)s, ' \
@@ -74,7 +75,7 @@ class DB:
 
         for key in formats:
             output[key] = sql.Identifier(formats[key])
-        # print(output)
+
         return output
 
 
