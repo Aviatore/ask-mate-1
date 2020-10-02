@@ -258,25 +258,23 @@ def question_vote_down(question_id):
 # Vote-up an answer
 @app.route('/answer/<answer_id>/vote_up')
 def answer_vote_up(answer_id):
-    question = db.execute_query(queries.read_answers_by_question_id, {'id': answer_id})[0]
+    answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
 
-    question["view_number"] -= 1
-    question["vote_number"] += 1
-    db.execute_query(queries.update_answer_by_id, question)
+    answer["vote_number"] += 1
+    db.execute_query(queries.update_answer_by_id, answer)
 
-    return redirect(url_for('question_details', answer_id=answer_id))
+    return redirect(url_for('question_details', question_id=answer['question_id']))
 
 
 # Vote-down an answer
 @app.route('/answer/<answer_id>/vote_down')
 def answer_vote_down(answer_id):
-    question = db.execute_query(queries.read_answers_by_question_id, {'id': answer_id})[0]
+    answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
 
-    question["view_number"] -= 1
-    question["vote_number"] -= 1
-    db.execute_query(queries.update_answer_by_id, question)
+    answer["vote_number"] -= 1
+    db.execute_query(queries.update_answer_by_id, answer)
 
-    return redirect(url_for('question_details', answer_id=answer_id))
+    return redirect(url_for('question_details', question_id=answer['question_id']))
 
 
 def update_image_files(type):
