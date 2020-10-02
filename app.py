@@ -80,7 +80,7 @@ def question_details(question_id):
         if answer['image'] is not None:
             answer['image'] = answer['image'].split(';')
 
-    return render_template('question-details.html', question_id=question_id, question_data=question, answers_data=answers, )
+    return render_template('question-details.html', question_id=question_id, question_data=question, answers_data=answers)
 
 
 # Ask a question
@@ -230,27 +230,51 @@ def answer_delete(answer_id):
 
 
 # Vote-up a question
-@app.route('/question/<question_id>/vote_up')
+@app.route('/question/<int:question_id>/vote_up')
 def question_vote_up(question_id):
-    return render_template('under_construction.html')
+    question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
+
+    question["view_number"] -= 1
+
+    question["vote_number"] += 1
+    db.execute_query(queries.update_question_by_id, question)
+
+    return redirect(url_for('question_details', question_id=question_id))
 
 
 # Vote-down a question
 @app.route('/question/<question_id>/vote_down')
 def question_vote_down(question_id):
-    return render_template('under_construction.html')
+    question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
+
+    question["view_number"] -= 1
+    question["vote_number"] -= 1
+
+    db.execute_query(queries.update_question_by_id, question)
+
+    return redirect(url_for('question_details', question_id=question_id))
 
 
 # Vote-up an answer
 @app.route('/answer/<answer_id>/vote_up')
 def answer_vote_up(answer_id):
-    return render_template('under_construction.html')
+    answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
+
+    answer["vote_number"] += 1
+    db.execute_query(queries.update_answer_by_id, answer)
+
+    return redirect(url_for('question_details', question_id=answer['question_id']))
 
 
 # Vote-down an answer
 @app.route('/answer/<answer_id>/vote_down')
 def answer_vote_down(answer_id):
-    return render_template('under_construction.html')
+    answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
+
+    answer["vote_number"] -= 1
+    db.execute_query(queries.update_answer_by_id, answer)
+
+    return redirect(url_for('question_details', question_id=answer['question_id']))
 
 
 def update_image_files(type):
