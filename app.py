@@ -43,7 +43,7 @@ def question_list():
         'directions': [None, None, None, None]
     }
 
-    order_by = request.args.get('order_by')
+    order_by = request.args.get('order_by', 'submission_time')
     order_direction = request.args.get('order_direction')
 
     if order_by:
