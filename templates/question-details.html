@@ -13,7 +13,11 @@
         <a href="{{ url_for('question_edit', question_id=question_id) }}">
             <i class="far fa-edit"></i>
         </a>
-        <span id="pub-time">{{ time_to_utc(question_data['submission_time']) }}</span>
+        <span id="pub-time">{{ time_to_utc(question_data['submission_time']) }}
+        <a href="{{ url_for('question_vote_up', question_id=question_data['id'])}}"><button id="vote_up_question"><b>+</b></button></a>
+        <a href="{{ url_for('question_vote_down', question_id=question_data['id'])}}"><button id="vote_down_question"><b>-</b></button></a>
+        {{ question_data['vote_number'] }}
+        </span>
         <p id="message">{{ question_data['message'] }}</p>
         {% if question_data['image'] is not none %}
             {% for image_url in question_data['image'] %}
@@ -21,6 +25,8 @@
                 <figcaption>{{ image_url }} ({{ file_size('questions', image_url) }} kb)</figcaption>
             {% endfor %}
         {% endif %}
+
+        {# COMMENT #}
     </div>
     {% for answer in answers_data %}
         <div class="container answers">
@@ -41,6 +47,12 @@
                     <figcaption>{{ image_url }} ({{ file_size('answers', image_url) }} kb)</figcaption>
                 {% endfor %}
             {% endif %}
+            <span id="answer_vote_number">
+                Was it helpful?
+                <a href="{{ url_for('answer_vote_up', answer_id=answer['id'])}}"><button id="vote_up_answer"><b>+</b></button></a>
+                <a href="{{ url_for('answer_vote_down', answer_id=answer['id'])}}"><button id="vote_down_answer"><b>-</b></button></a>
+                {{ answer['vote_number'] }}
+            </span>
         </div>
     {% endfor %}
     <button type="button" class="button" onclick="window.location.href='{{ url_for("answer_post", question_id=question_id) }}'">Add an answer</button>
