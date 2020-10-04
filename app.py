@@ -184,7 +184,7 @@ def question_edit(question_id):
     if output['return_code'] == 'form_ok':
         return redirect(url_for("question_details", question_id=question_id))
     elif output['return_code'] == 'form_fail':
-        return render_template('edit-question.html', warnings=output['warnings'], question=output['table_row'])
+        return render_template('edit-question.html', question=output['table_row'], warnings=output['warnings'])
     elif output['return_code'] == 'ok':
         return render_template("edit-question.html", question=output['table_row'], warnings=None)
 
@@ -192,7 +192,14 @@ def question_edit(question_id):
 # Edit an answer
 @app.route('/answer/<int:answer_id>/edit', methods=["GET", "POST"])
 def answer_edit(answer_id):
-    return render_template('edit-answer.html')
+    output = edit_engine(table='answer', id=answer_id)
+
+    if output['return_code'] == 'form_ok':
+        return redirect(url_for("question_details", question_id=output['table_row']['question_id']))
+    elif output['return_code'] == 'form_fail':
+        return render_template('edit-answer.html', answer=output['table_row'], warnings=output['warnings'])
+    elif output['return_code'] == 'ok':
+        return render_template("edit-answer.html", answer=output['table_row'], warnings=None)
 
 
 def edit_engine(table, id):
@@ -211,8 +218,13 @@ def edit_engine(table, id):
 
     table_row = db.execute_query(search_query, {'id': id})[0]
 
+    if table_row['image'] is not None:
+        table_row['image'] = table_row['image'].split(';')
+
     if request.method == "POST":
-        table_row["title"] = request.form["title"]
+        if table == 'question':
+            table_row["title"] = request.form["title"]
+
         table_row["message"] = request.form["message"]
         table_row["submission_time"] = datetime.datetime.now()
 
@@ -246,13 +258,11 @@ def edit_engine(table, id):
 
         output = {
             'return_code': 'form_ok',
+            'table_row': table_row
         }
 
         return output
     else:
-        if table_row['image'] is not None:
-            table_row['image'] = table_row['image'].split(';')
-
         output = {
             'return_code': 'ok',
             'table_row': table_row
