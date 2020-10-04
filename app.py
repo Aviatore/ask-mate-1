@@ -179,43 +179,86 @@ def question_delete(question_id):
 # Edit a question
 @app.route('/question/<int:question_id>/edit', methods=["GET", "POST"])
 def question_edit(question_id):
+    output = edit_engine(table='question', id=question_id)
+
+    if output['return_code'] == 'form_ok':
+        return redirect(url_for("question_details", question_id=question_id))
+    elif output['return_code'] == 'form_fail':
+        return render_template('edit-question.html', warnings=output['warnings'], question=output['table_row'])
+    elif output['return_code'] == 'ok':
+        return render_template("edit-question.html", question=output['table_row'], warnings=None)
+
+
+# Edit an answer
+@app.route('/answer/<int:answer_id>/edit', methods=["GET", "POST"])
+def answer_edit(answer_id):
+    return render_template('edit-answer.html')
+
+
+def edit_engine(table, id):
+    """The function handles edition of both questions and answers"""
+
     warnings = {
         'title': None,
         'message': None
     }
+    if table == 'question':
+        search_query = queries.read_question_by_id
+        update_query = queries.update_question_by_id
+    elif table == 'answer':
+        search_query = queries.read_answer_by_id
+        update_query = queries.update_answer_by_id
 
-    question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
-    if question['image'] is not None:
-        question['image'] = question['image'].split(';')
+    table_row = db.execute_query(search_query, {'id': id})[0]
 
     if request.method == "POST":
-        question["title"] = request.form["title"]
-        question["message"] = request.form["message"]
-        question["submission_time"] = datetime.datetime.now()
+        table_row["title"] = request.form["title"]
+        table_row["message"] = request.form["message"]
+        table_row["submission_time"] = datetime.datetime.now()
 
-        if question['title'] == '':
-            warnings['title'] = "You must define your question's title"
-        if question['message'] == '':
+        if table == 'question':
+            if table_row['title'] == '':
+                warnings['title'] = "You must define your question's title"
+
+        if table_row['message'] == '':
             warnings['message'] = "You must type a message"
 
         # If at least one warning is set, a new response is rendered with warnings argument
         # that allow to format problematic form fields.
         if len([f for f in warnings if warnings[f] is not None]) > 0:
-            return render_template('edit-question.html', warnings=warnings, question=question)
+            output = {
+                'return_code': 'form_fail',
+                'warnings': warnings,
+                'table_row': table_row
+            }
+
+            return output
 
         remove_images = request.form.get('image-remove')
         if remove_images:
-            question['image'] = None
+            table_row['image'] = None
         else:
             # The function saves submitted files (if any) and saves images names under the 'image' key
             # in the question dictionary.
-            update_image_files(question)
+            update_image_files(table_row)
 
-        db.execute_query(queries.update_question_by_id, question)
+        db.execute_query(update_query, table_row)
 
-        return redirect(url_for("question_details", question_id=question_id))
+        output = {
+            'return_code': 'form_ok',
+        }
+
+        return output
     else:
-        return render_template("edit-question.html", question=question, warnings=None)
+        if table_row['image'] is not None:
+            table_row['image'] = table_row['image'].split(';')
+
+        output = {
+            'return_code': 'ok',
+            'table_row': table_row
+        }
+
+        return output
 
 
 # Delete an answer
