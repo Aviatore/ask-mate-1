@@ -1,6 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request, send_from_directory, flash
 from data_manager import *
-from util import *
+from util import parse_search_phrase
 import datetime
 import time
 import os
@@ -329,6 +329,14 @@ def file_size(directory, file_name):
 @app.route('/get_file/<directory>/<file_name>')
 def get_image(directory, file_name):
     return send_from_directory(os.path.join(UPLOAD_DIR, directory), filename=file_name)
+
+
+@app.route('/search')
+def search_question():
+    search_phrase = request.args.get('q')
+
+    quoted, unquoted = parse_search_phrase(search_phrase)
+
 
 
 @app.context_processor
