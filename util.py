@@ -44,4 +44,11 @@ def parse_search_phrase(search_phrase):
         words_no_blanks = [i for i in words if i != '']  # e.g. ['hej', 'ho']
         unquoted_single_words.extend(words_no_blanks)
 
-    return quoted, unquoted
+    return quoted, unquoted_single_words
+
+
+def create_regex(quoted, unquoted):
+    regex_phrase = ''
+
+    for word in quoted:
+        regex_phrase += '()'

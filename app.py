@@ -336,7 +336,16 @@ def search_question():
     search_phrase = request.args.get('q')
 
     quoted, unquoted = parse_search_phrase(search_phrase)
+    print(f'DEBUG: {quoted} {unquoted}')
+    quoted.extend(unquoted)
 
+    merge_phrase_parenthesis = [f'({f})' for f in quoted]
+
+    regex_phrase = '|'.join(merge_phrase_parenthesis)
+
+    print(f'DEBUG: {regex_phrase}')
+
+    return redirect(url_for('main_page'))
 
 
 @app.context_processor

@@ -38,7 +38,7 @@
         <button class="button button_answer"><a href='{{ url_for('question_list') }}'>List Q</a></button>
     </div>
     <div id="search-box">
-        <form action="url_for('search_question')">
+        <form action="{{ url_for('search_question') }}">
             <input type="search" name="q" placeholder="Search ..." />
             <input type="submit" value="Search">
         </form>
