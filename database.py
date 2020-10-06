@@ -36,9 +36,13 @@ class Queries:
         self.delete_answer_by_id = 'DELETE FROM answer WHERE id = %(id)s'
         self.delete_question_by_id = 'DELETE FROM question WHERE id = %(id)s'
         self.read_answer_by_id = 'SELECT id, question_id, message, vote_number, submission_time, image FROM answer WHERE id = %(id)s'
-        self.search_question = """SELECT id, title, message, view_number, vote_number, submission_time, image 
-        FROM question
-        WHERE title ~* %(query)s OR message ~* %(query)s"""
+        self.search_question = """SELECT q.id, q.title, q.message, q.view_number, q.vote_number, q.submission_time, q.image 
+                FROM question as q
+                INNER JOIN answer as a ON (q.id = a.question_id)
+                WHERE q.title ~* %(query)s OR q.message ~* %(query)s OR a.message ~* %(query)s"""
+        self.search_answer = """SELECT id, question_id, message, vote_number, submission_time, image
+                FROM answer
+                WHERE message ~* %(query)s"""
 
 class DB:
     def __init__(self):

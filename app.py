@@ -344,9 +344,11 @@ def search_question():
     regex_phrase = '|'.join(merge_phrase_parenthesis)
 
     questions = db.execute_query(queries.search_question, {'query': regex_phrase})
+    answers = db.execute_query(queries.search_answer, {'query': regex_phrase})
 
     print(f'DEBUG: {regex_phrase}')
-    print(f'DEBUG: {[f["id"] for f in questions]}')
+    print(f'DEBUG: question ids {[f["id"] for f in questions]}')
+    print(f'DEBUG: answer ids {[f["id"] for f in answers]}')
 
     return redirect(url_for('main_page'))
 
