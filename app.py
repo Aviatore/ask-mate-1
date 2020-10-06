@@ -336,14 +336,17 @@ def search_question():
     search_phrase = request.args.get('q')
 
     quoted, unquoted = parse_search_phrase(search_phrase)
-    print(f'DEBUG: {quoted} {unquoted}')
+
     quoted.extend(unquoted)
 
     merge_phrase_parenthesis = [f'({f})' for f in quoted]
 
     regex_phrase = '|'.join(merge_phrase_parenthesis)
 
+    questions = db.execute_query(queries.search_question, {'query': regex_phrase})
+
     print(f'DEBUG: {regex_phrase}')
+    print(f'DEBUG: {[f["id"] for f in questions]}')
 
     return redirect(url_for('main_page'))
 
