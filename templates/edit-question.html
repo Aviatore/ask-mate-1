@@ -2,18 +2,50 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Edit question</title>
-    <link type="text/css" rel="stylesheet" href="{{ url_for("static", filename="edit-question.css") }}">
+    <link type="text/css" rel="stylesheet" href="{{ url_for("static", filename="add-question.css") }}">
+    <script src="{{ url_for('static', filename='file-handling.js') }}"></script>
 </head>
 <body>
-<h1>Edit Question</h1>
-<form action="" method="post">
-    <label id="title" for="title">Title</label><br>
-    <textarea cols="100" rows="1" required name="title">{{ title }}</textarea><br>
-    <label id="message" for="message">Question</label><br>
-    <textarea cols="100" rows="10" required name="message">{{ message }}</textarea><br>
-    <button type="submit">Submit</button>
-</form>
+<div id="body">
+    <div id="container">
+        <h3 class="center">Edit Question</h3>
+        <form id="form" action="" method="post" enctype="multipart/form-data">
+            <input id="title" name="title" type="text" size="40" placeholder="Question title" class="input center {{ "warning" if warnings['title'] }}" value="{{ question['title'] }}">
+            {% if warnings['title'] %}
+                <span class="text-warning center">{{ warnings['title'] }}</span>
+            {% endif %}
 
+            <textarea id="message" name="message" placeholder="Type your message here ..." class="input center {{ "warning" if warnings['message'] }}">{{ question['message'] }}</textarea>
+            {% if warnings['message'] %}
+                <span class="text-warning center">{{ warnings['message'] }}</span>
+            {% endif %}
+
+            <div id="checkbox-container" class="center input">
+                <input type="checkbox" id="image-remove" name="image-remove" value="remove">
+                <label for="image-remove">Remove submitted image(s)</label>
+            </div>
+
+
+
+            <input type="file" id="image" name="image" class="center" accept="image/*" onchange="filePrev()" multiple>
+            <div id="input-file-container" class="center input" style="border: 0px solid black;">
+                <div id="input-file" onclick="selectFile()" class="center input-file">Select a file</div>
+            </div>
+            <div id="img-prev" class="center">
+                {% if question['image'] is not none %}
+                    {% for image_path in question['image'] %}
+                        <img src="{{ url_for('get_image', directory='questions', file_name=image_path) }}">
+                    {% endfor %}
+                {% endif %}
+            </div><br>
+
+            <button type="submit" class="center button">Submit</button>
+            <button type="button" class="center button" onclick="window.location.href='{{ url_for('question_list') }}';">Back to questions list</button>
+        </form>
+    </div>
+
+</div>
 </body>
 </html>

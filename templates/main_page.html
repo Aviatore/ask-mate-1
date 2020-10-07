@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AskMate</title>
+    <style>
+        div {text-align: center;}
+        h1 {position: center;}
+
+        .button {
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        }
+
+        .button_ask {
+            background-color: darkcyan;
+            cursor: help;
+        }
+
+        .button_answer {
+            background-color: #5d94ea;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>Hello Mate!</h1>
+        <p>Welcome to <em>AskMate</em>, feel free to ask anything that comes to your mind. </p>
+        <p>Other mates could help resolve your problem, or maybe you could give someone a hand?  ^^</p>
+        <p>So... how will it be ? Are we mates ?</p>
+        <button class="button button_ask"><a href="{{ url_for('question_add') }}">Ask Q</a></button>
+        <button class="button button_answer"><a href='{{ url_for('question_list') }}'>List Q</a></button>
+    </div>
+</body>
+</html>

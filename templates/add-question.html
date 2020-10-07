@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Question</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='add-question.css') }}">
+    <script src="{{ url_for('static', filename='file-handling.js') }}"></script>
+</head>
+<body>
+<div id="body">
+<div id="container">
+    <h3 class="center">New question</h3>
+    <form id="form" action={{ url_for('question_add') }} method="POST" enctype="multipart/form-data">
+
+        <input id="title" name="title" type="text" size="40" placeholder="Question title"
+               class="input center {{ "warning" if warnings['title'] }}"
+               value="{{ question['title'] if question is not none }}"
+        >
+        {% if warnings['title'] %}
+            <span class="text-warning center">{{ warnings['title'] }}</span>
+        {% endif %}
+
+
+        <textarea id="message" name="message" placeholder="Type your message here ..."
+                  class="input center {{ "warning" if warnings['message'] }}">{{ question['message'] if question is not none }}</textarea>
+        {% if warnings['message'] %}
+            <span class="text-warning center">{{ warnings['message'] }}</span>
+        {% endif %}
+
+
+        <input type="file" id="image" name="image" class="center" accept="image/*" onchange="filePrev()" multiple>
+        <div id="input-file-container" class="center input" style="border: 0px solid black;">
+            <div id="input-file" onclick="selectFile()" class="center input-file">Select a file</div>
+        </div>
+        <div id="img-prev" class="center"></div><br>
+
+        <button type="submit" class="center button">Add new question</button>
+        <button type="button" class="center button" onclick="window.location.href='{{ url_for('question_list') }}';">Back to questions list</button>
+    </form>
+
+</div>
+    </div>
+</body>
+</html>

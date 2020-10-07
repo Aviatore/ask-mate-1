@@ -8,13 +8,14 @@
     <title>Title</title>
 </head>
 <body>
+
 <table>
     <thead>
         <tr>
             {% for header in headers['headers'] %}
                 {% set direction = 'asc' if headers['directions'][loop.index0] == 'desc' or headers['directions'][loop.index0] is none else 'desc' %}
                 <th>
-                    <a href="{{ url_for('list', order_by=headers['keys'][loop.index0], order_direction=direction) }}" title="Sort by {{ header }}">{{ header }}</a>
+                    <a href="{{ url_for('question_list', order_by=headers['keys'][loop.index0], order_direction=direction) }}" title="Sort by {{ header }}">{{ header }}</a>
                     {% if headers['directions'][loop.index0] == 'asc' %}
                         <i class="fas fa-sort-down"></i>
                         {% elif headers['directions'][loop.index0] == 'desc' %}
@@ -22,7 +23,6 @@
                     {% endif %}
                 </th>
             {% endfor %}
-            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -45,7 +45,14 @@
             </tr>
         {% endfor %}
     </tbody>
-
+    <tfoot>
+        <tr>
+            <td></td><td></td><td></td><td></td>
+            <td>
+                <a href="{{ url_for("question_add") }}" title="Add a new question"><i class="fas fa-plus"></i></a>
+            </td>
+        </tr>
+    </tfoot>
 </table>
 
 </body>
