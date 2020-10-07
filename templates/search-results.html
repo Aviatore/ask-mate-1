@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src='https://kit.fontawesome.com/a076d05399.js'></script>
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='search-results.css') }}">
+    <title>Title</title>
+</head>
+<body>
+
+<table>
+    <tbody>
+        {% for question in questions %}
+            <tr>
+                <td>
+                    <div class="title"><a href="{{ url_for('question_details', question_id=question['id']) }}" class="title-link">{{ question['title']|safe }}</a></div>
+                    <div class="message">{{ question['message']|safe }}</div>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>

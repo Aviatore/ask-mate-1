@@ -1,6 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request, send_from_directory, flash
 from data_manager import *
-from util import parse_search_phrase
+from util import parse_search_phrase, format_search_results
 import datetime
 import time
 import os
@@ -346,11 +346,19 @@ def search_question():
     questions = db.execute_query(queries.search_question, {'query': regex_phrase})
     answers = db.execute_query(queries.search_answer, {'query': regex_phrase})
 
-    print(f'DEBUG: {regex_phrase}')
-    print(f'DEBUG: question ids {[f["id"] for f in questions]}')
-    print(f'DEBUG: answer ids {[f["id"] for f in answers]}')
+    for question in questions:
+        question['title'] = format_search_results(question['title'], quoted)
+        print(f'Input: {question["message"]}')
+        out = format_search_results(question['message'], quoted)
+        question['message'] = format_search_results(question['message'], quoted)
+        print(f'Output: {out}')
 
-    return redirect(url_for('main_page'))
+    # print(f'DEBUG: {regex_phrase}')
+    # print(f'DEBUG: question ids {[f["id"] for f in questions]}')
+    # print(f'DEBUG: answer ids {[f["id"] for f in answers]}')
+
+    # return redirect(url_for('main_page'))
+    return render_template('search-results.html', questions=questions, answers=answers)
 
 
 @app.context_processor

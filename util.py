@@ -1,3 +1,6 @@
+import re
+
+
 def sort_questions(by, questions, direction='asc'):
     rev = True if direction == 'desc' else False
 
@@ -52,3 +55,44 @@ def create_regex(quoted, unquoted):
 
     for word in quoted:
         regex_phrase += '()'
+
+
+def mark(msg):
+    return f'<span style="background-color: yellow;">{msg}</span>'
+
+
+def format_search_results(message, quoted_phrases):
+    output = ""
+
+    indexes = []
+
+    for phrase in quoted_phrases:
+        try:
+            indexes.append(message.lower().index(phrase.lower()))
+        except ValueError:
+            pass
+
+    # print(indexes)
+    prev_index = 0
+    for index, index_val in enumerate(indexes):
+        if index_val > prev_index:
+            output += message[prev_index:index_val]
+            to = index_val + len(quoted_phrases[index])
+            output += mark(message[index_val:to])
+            # output += mark(quoted_phrases[index])
+            prev_index += index_val + len(quoted_phrases[index])
+        else:
+            to = index_val + len(quoted_phrases[index])
+            output += mark(message[0:to])
+            # output += mark(quoted_phrases[index])
+            prev_index = len(quoted_phrases[index])
+
+    if prev_index < len(message):
+        output += message[prev_index:]
+
+    if len(output) == 0:
+        output = message
+
+    return output
+
+print(format_search_results("Python ppp", ["python"]))
