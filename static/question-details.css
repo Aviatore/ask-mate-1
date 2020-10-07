@@ -106,3 +106,6 @@ i:hover {
     font-size: 12px;
     color: rgb(74, 74, 74);
 }
+a.title-link:hover {
+    text-decoration: underline;
+}

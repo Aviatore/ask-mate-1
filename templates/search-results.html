@@ -8,7 +8,25 @@
     <title>Title</title>
 </head>
 <body>
+<div class="body">
+    {% for question in questions %}
+        <div class="container question-container">
+            <a href="{{ url_for('question_details', question_id=question['id']) }}" class="title-link"><h3 class="center">{{ question['title']|safe }}</h3></a>
+            <span id="pub-time">{{ time_to_utc(question['submission_time']) }}</span>
+            <p id="message">{{ question['message']|safe }}</p>
+        </div>
+        {% for answer in answers %}
+            {% if answer['question_id'] == question['id'] %}
+                <div class="container answer-container">
+                    <span id="pub-time">{{ time_to_utc(answer['submission_time']) }}</span>
+                    <p id="message">{{ answer['message']|safe }}</p>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+</div>
 
+<!--
 <table>
     <tbody>
         {% for question in questions %}
@@ -18,9 +36,18 @@
                     <div class="message">{{ question['message']|safe }}</div>
                 </td>
             </tr>
+            {% for answer in answers %}
+                {% if answer['question_id'] == question['id'] %}
+                    <tr>
+                        <td>
+                            <div class="message">{{ answer['message']|safe }}</div>
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
         {% endfor %}
     </tbody>
 </table>
-
+-->
 </body>
 </html>

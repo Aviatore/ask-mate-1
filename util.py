@@ -1,4 +1,5 @@
 import re
+import time
 
 
 def sort_questions(by, questions, direction='asc'):
@@ -64,15 +65,31 @@ def mark(msg):
 def format_search_results(message, quoted_phrases):
     output = ""
 
-    indexes = []
+    indexes_dict = {}
 
     for phrase in quoted_phrases:
         try:
-            indexes.append(message.lower().index(phrase.lower()))
+            start = 0
+            while phrase.lower() in message[start:].lower():
+                index = message[start:].lower().index(phrase.lower())
+                start += index + 1
+                indexes_dict[start - 1] = phrase
+
+                # if start == 0:
+                #     indexes_dict[index] = phrase
+                # else:
+                #     indexes_dict[start - 1] = phrase
+                # start += index + 1
+
+                # indexes.append(message.lower().index(phrase.lower()))
+                # print(f'index: {index}')
+                # print(f'start: {start}')
         except ValueError:
             pass
 
-    # print(indexes)
+    indexes = [f[0] for f in sorted(indexes_dict.items(), key=lambda x: x[0])]
+    quoted_phrases = [f[1] for f in sorted(indexes_dict.items(), key=lambda x: x[0])]
+    # print(indexes_dict)
     prev_index = 0
     for index, index_val in enumerate(indexes):
         if index_val > prev_index:
@@ -95,4 +112,7 @@ def format_search_results(message, quoted_phrases):
 
     return output
 
-print(format_search_results("Python ppp", ["python"]))
+
+# msg = "How to make lists in Python?"
+# query = ["Python"]
+# print(format_search_results(msg, query))

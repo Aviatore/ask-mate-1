@@ -339,19 +339,39 @@ def search_question():
 
     quoted.extend(unquoted)
 
-    merge_phrase_parenthesis = [f'({f})' for f in quoted]
+    quoted_copy = quoted.copy()
+    print(quoted_copy)
+    for index1, i in enumerate(quoted):
+        for index2, j in enumerate(quoted):
+            if index1 != index2 and i in j:
+                print(f'{i} is removed')
+                quoted_copy.remove(i)
+                # try:
+                #     quoted_copy.remove(i)
+                # except ValueError:
+                #     print(i)
+                # print(quoted_copy)
+
+
+    merge_phrase_parenthesis = [f'({f})' for f in quoted_copy]
 
     regex_phrase = '|'.join(merge_phrase_parenthesis)
 
     questions = db.execute_query(queries.search_question, {'query': regex_phrase})
     answers = db.execute_query(queries.search_answer, {'query': regex_phrase})
 
-    for question in questions:
-        question['title'] = format_search_results(question['title'], quoted)
-        print(f'Input: {question["message"]}')
-        out = format_search_results(question['message'], quoted)
-        question['message'] = format_search_results(question['message'], quoted)
-        print(f'Output: {out}')
+    for table_type in [answers, questions]:
+        for item in table_type:
+            if 'title' in item:
+                item['title'] = format_search_results(item['title'], quoted_copy)
+            item['message'] = format_search_results(item['message'], quoted_copy)
+
+    # for question in questions:
+    #     question['title'] = format_search_results(question['title'], quoted)
+    #     print(f'Input: {question["message"]}')
+    #     out = format_search_results(question['message'], quoted)
+    #     question['message'] = format_search_results(question['message'], quoted)
+    #     print(f'Output: {out}')
 
     # print(f'DEBUG: {regex_phrase}')
     # print(f'DEBUG: question ids {[f["id"] for f in questions]}')

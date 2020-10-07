@@ -38,7 +38,7 @@ class Queries:
         self.read_answer_by_id = 'SELECT id, question_id, message, vote_number, submission_time, image FROM answer WHERE id = %(id)s'
         self.search_question = """SELECT q.id, q.title, q.message, q.view_number, q.vote_number, q.submission_time, q.image 
                 FROM question as q
-                INNER JOIN answer as a ON (q.id = a.question_id)
+                LEFT JOIN answer as a ON (q.id = a.question_id)
                 WHERE q.title ~* %(query)s OR q.message ~* %(query)s OR a.message ~* %(query)s"""
         self.search_answer = """SELECT id, question_id, message, vote_number, submission_time, image
                 FROM answer
