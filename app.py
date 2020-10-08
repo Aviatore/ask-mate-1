@@ -169,7 +169,9 @@ def question_delete(question_id):
     question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
     quest_answers = db.execute_query(queries.read_answers_by_question_id, {'question_id': question_id})
 
+    db.execute_query(queries.delete_question_tag_links_by_question_id, {'question_id':question_id})
     db.execute_query(queries.delete_question_by_id, {'id': question_id})
+
 
     if question['image'] is not None:
         # The 'split' method allows to get a list of more than one submitted image files
@@ -291,10 +293,10 @@ def answer_vote_down(answer_id):
 @app.route("/question/<question_id>/new-tag", methods=["POST", "GET"])
 def new_tag(question_id):
 
-    question_tags = []
+    all_tags = []
     tags_rows = db.execute_query(queries.read_all_tags)
     for row in tags_rows:
-        question_tags.append(row['name'])
+        all_tags.append(row['name'])
 
     if request.method == "POST":
         tag = request.form.to_dict()
@@ -303,14 +305,28 @@ def new_tag(question_id):
         else:
             name = tag['select_tag']
 
-        if name not in question_tags:
+        if name not in all_tags:
             db.execute_query(queries.add_new_tag, {'name':name})
+            tag_id = db.execute_query(queries.read_tag_id_by_name, {'name':name})[0]['id']
+            db.execute_query(queries.link_tag_question, {'question_id':question_id, 'tag_id':tag_id})
+        else:
+            question_tag_ids = []
+            question_tag_ids_rows = db.execute_query(queries.read_tag_id_by_question_id, {'question_id':question_id})
+            for row in question_tag_ids_rows:
+                question_tag_ids.append(row['tag_id'])
+            question_tags = []
+            for item in question_tag_ids:
+                question_tags.append(db.execute_query(queries.read_tag_by_id, {'tag_id':item})[0]['name'])
+            if name not in question_tags:
+                tag_id = db.execute_query(queries.read_tag_id_by_name, {'name': name})[0]['id']
+                db.execute_query(queries.link_tag_question, {'question_id': question_id, 'tag_id': tag_id})
+
 
         return redirect(url_for('question_details', question_id=question_id))
 
     else:
 
-        return render_template("new_tag.html", question_id=question_id, question_tags=question_tags)
+        return render_template("new_tag.html", question_id=question_id, all_tags=all_tags)
 
 
 def update_image_files(type):

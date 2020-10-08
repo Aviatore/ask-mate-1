@@ -38,8 +38,12 @@ class Queries:
         self.read_answer_by_id = 'SELECT id, question_id, message, vote_number, submission_time, image FROM answer WHERE id = %(id)s'
         self.read_tag_id_by_question_id = 'SELECT tag_id FROM question_tag WHERE question_id=%(question_id)s'
         self.read_tag_by_id = 'SELECT name FROM tag WHERE id=%(tag_id)s'
+        self.read_tag_id_by_name = 'SELECT id FROM tag WHERE name=%(name)s'
         self.read_all_tags = 'SELECT name FROM tag'
         self.add_new_tag = 'INSERT INTO tag (name) VALUES (%(name)s)'
+        self.link_tag_question = 'INSERT INTO question_tag (question_id, tag_id) VALUES (%(question_id)s, %(tag_id)s)'
+        self.read_tag_id_by_question_id = 'SELECT tag_id FROM question_tag WHERE question_id=%(question_id)s'
+        self.delete_question_tag_links_by_question_id = 'DELETE from question_tag WHERE question_id=%(question_id)s'
 
 class DB:
     def __init__(self):

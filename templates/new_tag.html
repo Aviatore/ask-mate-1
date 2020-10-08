@@ -9,7 +9,7 @@
 <form action="" method="POST">
 <select name="select_tag">
     <option selected="selected"></option>
-    {% for tag in question_tags %}
+    {% for tag in all_tags %}
         <option value={{ tag }}>{{ tag }}</option>
     {% endfor %}
 </select>
