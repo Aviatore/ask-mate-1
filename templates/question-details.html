@@ -17,7 +17,14 @@
         <a href="{{ url_for('question_vote_up', question_id=question_data['id'])}}"><button id="vote_up_question"><b>+</b></button></a>
         <a href="{{ url_for('question_vote_down', question_id=question_data['id'])}}"><button id="vote_down_question"><b>-</b></button></a>
         {{ question_data['vote_number'] }}
-        </span>
+        </span><br/>
+    <span>
+        tags:
+        {% for tag in question_tags %}
+        {{ tag }}
+        {% endfor %}
+        <a href="{{ url_for('new_tag', question_id=question_id) }}">Add</a>
+    </span>
         <p id="message">{{ question_data['message'] }}</p>
         {% if question_data['image'] is not none %}
             {% for image_url in question_data['image'] %}

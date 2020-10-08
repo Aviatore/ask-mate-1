@@ -36,6 +36,10 @@ class Queries:
         self.delete_answer_by_id = 'DELETE FROM answer WHERE id = %(id)s'
         self.delete_question_by_id = 'DELETE FROM question WHERE id = %(id)s'
         self.read_answer_by_id = 'SELECT id, question_id, message, vote_number, submission_time, image FROM answer WHERE id = %(id)s'
+        self.read_tag_id_by_question_id = 'SELECT tag_id FROM question_tag WHERE question_id=%(question_id)s'
+        self.read_tag_by_id = 'SELECT name FROM tag WHERE id=%(tag_id)s'
+        self.read_all_tags = 'SELECT name FROM tag'
+        self.add_new_tag = 'INSERT INTO tag (name) VALUES (%(name)s)'
 
 class DB:
     def __init__(self):

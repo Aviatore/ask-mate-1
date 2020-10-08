@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>New Tag</title>
+</head>
+<body>
+<h1>New Tag</h1>
+<form action="" method="POST">
+<select name="select_tag">
+    <option selected="selected"></option>
+    {% for tag in question_tags %}
+        <option value={{ tag }}>{{ tag }}</option>
+    {% endfor %}
+</select>
+or add new:
+<input type="text" name="add_tag">
+<button type="submit">Submit</button>
+</form>
+</body>
+</html>

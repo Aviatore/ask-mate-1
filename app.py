@@ -83,7 +83,16 @@ def question_details(question_id):
         if answer['image'] is not None:
             answer['image'] = answer['image'].split(';')
 
-    return render_template('question-details.html', question_id=question_id, question_data=question, answers_data=answers)
+    #tags
+    tag_id_row = db.execute_query(queries.read_tag_id_by_question_id, {'question_id':question_id})
+    question_tags = []
+    for t_row in tag_id_row:
+       tag_id = t_row['tag_id']
+       question_tag_row = db.execute_query(queries.read_tag_by_id, {'tag_id':tag_id})
+       for qt_row in question_tag_row:
+            question_tags.append(qt_row['name'])
+
+    return render_template('question-details.html', question_id=question_id, question_data=question, answers_data=answers, question_tags = question_tags)
 
 
 # Ask a question
@@ -278,6 +287,30 @@ def answer_vote_down(answer_id):
     db.execute_query(queries.update_answer_by_id, answer)
 
     return redirect(url_for('question_details', question_id=answer['question_id']))
+
+@app.route("/question/<question_id>/new-tag", methods=["POST", "GET"])
+def new_tag(question_id):
+
+    question_tags = []
+    tags_rows = db.execute_query(queries.read_all_tags)
+    for row in tags_rows:
+        question_tags.append(row['name'])
+
+    if request.method == "POST":
+        tag = request.form.to_dict()
+        if tag['add_tag'] != "":
+            name = tag['add_tag']
+        else:
+            name = tag['select_tag']
+
+        if name not in question_tags:
+            db.execute_query(queries.add_new_tag, {'name':name})
+
+        return redirect(url_for('question_details', question_id=question_id))
+
+    else:
+
+        return render_template("new_tag.html", question_id=question_id, question_tags=question_tags)
 
 
 def update_image_files(type):
