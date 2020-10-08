@@ -68,40 +68,32 @@ def format_search_results(message, quoted_phrases):
     indexes_dict = {}
 
     for phrase in quoted_phrases:
-        try:
-            start = 0
-            while phrase.lower() in message[start:].lower():
-                index = message[start:].lower().index(phrase.lower())
-                start += index + 1
-                indexes_dict[start - 1] = phrase
+        start = 0
 
-                # if start == 0:
-                #     indexes_dict[index] = phrase
-                # else:
-                #     indexes_dict[start - 1] = phrase
-                # start += index + 1
+        while phrase.lower() in message[start:].lower():
+            index = message[start:].lower().index(phrase.lower())
+            start += index + 1
+            indexes_dict[start - 1] = phrase
 
-                # indexes.append(message.lower().index(phrase.lower()))
-                # print(f'index: {index}')
-                # print(f'start: {start}')
-        except ValueError:
-            pass
-
+    # Sorted indexes of found phrases
     indexes = [f[0] for f in sorted(indexes_dict.items(), key=lambda x: x[0])]
+
+    # Found phrases sorted by indexes (phrases are positioned in the list according to
+    # their occurrence in the message)
     quoted_phrases = [f[1] for f in sorted(indexes_dict.items(), key=lambda x: x[0])]
-    # print(indexes_dict)
+
     prev_index = 0
     for index, index_val in enumerate(indexes):
         if index_val > prev_index:
-            output += message[prev_index:index_val]
             to = index_val + len(quoted_phrases[index])
+
+            output += message[prev_index:index_val]
+
             output += mark(message[index_val:to])
-            # output += mark(quoted_phrases[index])
             prev_index += index_val + len(quoted_phrases[index])
         else:
             to = index_val + len(quoted_phrases[index])
             output += mark(message[0:to])
-            # output += mark(quoted_phrases[index])
             prev_index = len(quoted_phrases[index])
 
     if prev_index < len(message):

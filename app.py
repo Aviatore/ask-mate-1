@@ -346,12 +346,6 @@ def search_question():
             if index1 != index2 and i in j:
                 print(f'{i} is removed')
                 quoted_copy.remove(i)
-                # try:
-                #     quoted_copy.remove(i)
-                # except ValueError:
-                #     print(i)
-                # print(quoted_copy)
-
 
     merge_phrase_parenthesis = [f'({f})' for f in quoted_copy]
 
@@ -366,18 +360,6 @@ def search_question():
                 item['title'] = format_search_results(item['title'], quoted_copy)
             item['message'] = format_search_results(item['message'], quoted_copy)
 
-    # for question in questions:
-    #     question['title'] = format_search_results(question['title'], quoted)
-    #     print(f'Input: {question["message"]}')
-    #     out = format_search_results(question['message'], quoted)
-    #     question['message'] = format_search_results(question['message'], quoted)
-    #     print(f'Output: {out}')
-
-    # print(f'DEBUG: {regex_phrase}')
-    # print(f'DEBUG: question ids {[f["id"] for f in questions]}')
-    # print(f'DEBUG: answer ids {[f["id"] for f in answers]}')
-
-    # return redirect(url_for('main_page'))
     return render_template('search-results.html', questions=questions, answers=answers)
 
 
