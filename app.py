@@ -33,7 +33,11 @@ if not os.path.exists(os.path.join(UPLOAD_DIR, 'answers')):
 # Welcome page
 @app.route('/')
 def main_page():
-    return render_template('main_page.html')
+    username = None
+    if 'username' in session:
+        username = session['username']
+
+    return render_template('main_page.html', username=username)
 
 
 # List questions
@@ -335,6 +339,8 @@ def login():
         'not_valid': None
     }
 
+
+
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -361,6 +367,15 @@ def login():
         return render_template('login.html', warnings=warnings)
 
     return render_template('login.html', warnings=None)
+
+
+@app.route('/logout')
+def logout():
+    if session:
+        session.pop('username')
+        session.pop('userid')
+
+    return redirect(url_for('main_page'))
 
 
 def update_image_files(type):
