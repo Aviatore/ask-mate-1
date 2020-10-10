@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Question</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='add-question.css') }}">
+    <script src="{{ url_for('static', filename='file-handling.js') }}"></script>
+</head>
+<body>
+<div id="body">
+<div id="container">
+    <h3 class="center">Registration form</h3>
+    <form action="{{ url_for('register') }}" method="post">
+        <input type="text" name="username" placeholder="User name" class="input center {{ "warning" if warnings['username'] }}" />
+        {% if warnings['username'] %}
+            <span class="text-warning center">{{ warnings['username'] }}</span>
+        {% endif %}
+        <input type="email" name="email" placeholder="E-mail" class="input center {{ "warning" if warnings['email'] }}" />
+        {% if warnings['email'] %}
+            <span class="text-warning center">{{ warnings['email'] }}</span>
+        {% endif %}
+        <input type="password" name="password" placeholder="Password" class="input center {{ "warning" if warnings['password'] }}" />
+        {% if warnings['password'] %}
+            <span class="text-warning center">{{ warnings['password'] }}</span>
+        {% endif %}
+        <br>
+        <button type="submit" class="center button">Register</button>
+    </form>
+</div>
+    </div>
+</body>
+</html>
+
+
+
+
+<!--<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='register.css') }}" />
+    <title>Registration page</title>
+</head>
+<body>
+    <div id="body">
+        <div id="container">
+            <form action="url_for('register')" method="post">
+                <input required type="text" name="username" placeholder="User name" /><br>
+                <input required type="email" name="email" placeholder="E-mail" /><br>
+                <input required type="password" name="password" placeholder="Password" /><br>
+                <input type="button" value="Register">
+            </form>
+        </div>
+    </div>
+</body>
+</html>

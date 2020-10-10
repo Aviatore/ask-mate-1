@@ -36,6 +36,11 @@ class Queries:
         self.delete_answer_by_id = 'DELETE FROM answer WHERE id = %(id)s'
         self.delete_question_by_id = 'DELETE FROM question WHERE id = %(id)s'
         self.read_answer_by_id = 'SELECT id, question_id, message, vote_number, submission_time, image FROM answer WHERE id = %(id)s'
+        self.get_user_by_username = 'SELECT user_id, username, email, password, registration_date, reputation ' \
+                                    'FROM users WHERE username = %(username)s'
+        self.add_new_user = 'INSERT INTO users (username, email, password)' \
+                            'VALUES (%(username)s, %(email)s, %(password)s)'
+
 
 class DB:
     def __init__(self):

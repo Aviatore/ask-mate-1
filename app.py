@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request, send_from_directory, flash
+from flask import Flask, render_template, redirect, url_for, request, send_from_directory, session
 from data_manager import *
 from util import *
 import datetime
@@ -7,6 +7,7 @@ import os
 from urllib.parse import unquote
 from werkzeug.utils import secure_filename
 from database import db, queries
+import bcrypt
 
 
 UPLOAD_DIR = 'uploaded/'
@@ -278,6 +279,51 @@ def answer_vote_down(answer_id):
     db.execute_query(queries.update_answer_by_id, answer)
 
     return redirect(url_for('question_details', question_id=answer['question_id']))
+
+
+@app.route('/registration', methods=['GET', 'POST'])
+def register():
+    warnings = {
+        'username': None,
+        'email': None,
+        'password': None
+    }
+    new_user = {
+        'username': None,
+        'email': None,
+        'password': None
+    }
+
+    if request.method == 'POST':
+        new_user['username'] = request.form.get('username')
+        new_user['email'] = request.form.get('email')
+        new_user['password'] = request.form.get('password')
+
+        if new_user['username'] == '':
+            warnings['username'] = "You must define your user name."
+
+        if new_user['email'] == '':
+            warnings['email'] = "You must define you email"
+
+        if new_user['password'] == '':
+            warnings['password'] = "You must define a password."
+
+        if len([f for f in warnings if warnings[f] is not None]) > 0:
+            return render_template('register.html', warnings=warnings)
+
+        user = db.execute_query(queries.get_user_by_username, new_user)
+
+        if len(user) > 0:
+            warnings['username'] = "The provided user name already exists."
+            return render_template('register.html', warnings=warnings)
+
+        new_user['password'] = bcrypt.hashpw(new_user['password'].encode('utf-8'), bcrypt.gensalt())
+
+        db.execute_query(queries.add_new_user, params=new_user)
+
+        return redirect(url_for('main_page'))
+
+    return render_template('register.html', warnings=None)
 
 
 def update_image_files(type):
