@@ -13,6 +13,7 @@ import bcrypt
 UPLOAD_DIR = 'uploaded/'
 
 app = Flask(__name__)
+app.secret_key = os.urandom(16)
 app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024
 
 if not os.path.exists(os.path.join(UPLOAD_DIR, 'questions')):
@@ -324,6 +325,42 @@ def register():
         return redirect(url_for('main_page'))
 
     return render_template('register.html', warnings=None)
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    warnings = {
+        'username': None,
+        'password': None,
+        'not_valid': None
+    }
+
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        if username == '':
+            warnings['username'] = "You must define your user name."
+
+        if password == '':
+            warnings['password'] = "You must define a password."
+
+        if len([f for f in warnings if warnings[f] is not None]) > 0:
+            return render_template('login.html', warnings=warnings)
+
+        user = db.execute_query(queries.get_user_by_username, {'username': username})[0]
+
+        if user and bcrypt.checkpw(password.encode('utf-8'), b'' + user['password']):
+            session['username'] = user['username']
+            session['userid'] = user['user_id']
+
+            return redirect(url_for('main_page'))
+
+        warnings['not_valid'] = "Your user name and/or password is not valid."
+
+        return render_template('login.html', warnings=warnings)
+
+    return render_template('login.html', warnings=None)
 
 
 def update_image_files(type):
