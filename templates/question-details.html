@@ -10,9 +10,15 @@
 <div class="body">
     <div class="container">
         <h3 class="center">{{ question_data['title'] }}</h3>
-        <a href="{{ url_for('question_edit', question_id=question_id) }}">
+
+        {% if session %}
+            <a href="{{ url_for('question_edit', question_id=question_id) }}">
+                <i class="far fa-edit"></i>
+            </a>
+        {% else %}
             <i class="far fa-edit"></i>
-        </a>
+        {% endif %}
+
         <span id="pub-time">{{ time_to_utc(question_data['submission_time']) }}
         <a href="{{ url_for('question_vote_up', question_id=question_data['id'])}}"><button id="vote_up_question"><b>+</b></button></a>
         <a href="{{ url_for('question_vote_down', question_id=question_data['id'])}}"><button id="vote_down_question"><b>-</b></button></a>
@@ -34,11 +40,15 @@
                 <div class="answer-title">
                     <h4 class="answer">Re: {{ question_data['title'] }}</h4>
                 </div>
-                <div class="answer-cross">
-                    <a href="{{ url_for('answer_delete', answer_id=answer['id']) }}"><i class="fas fa-times"></i></a>
-                </div>
+                {% if session %}
+                    <div class="answer-cross">
+                        <a href="{{ url_for('answer_delete', answer_id=answer['id']) }}"><i class="fas fa-times"></i></a>
+                    </div>
+                {% endif %}
             </div>
+
             <i class="far fa-edit"></i>
+
             <span id="pub-time">{{ time_to_utc(answer['submission_time']) }}</span>
             <p id="message">{{ answer['message'] }}</p>
             {% if answer['image'] is not none %}
@@ -55,7 +65,10 @@
             </span>
         </div>
     {% endfor %}
-    <button type="button" class="button" onclick="window.location.href='{{ url_for("answer_post", question_id=question_id) }}'">Add an answer</button>
+
+    {% if session %}
+        <button type="button" class="button" onclick="window.location.href='{{ url_for("answer_post", question_id=question_id) }}'">Add an answer</button>
+    {% endif %}
     <button type="button" class="button" onclick="window.location.href='{{ url_for("question_list") }}'">Back to the list</button>
 </div>
 </body>

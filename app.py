@@ -33,11 +33,7 @@ if not os.path.exists(os.path.join(UPLOAD_DIR, 'answers')):
 # Welcome page
 @app.route('/')
 def main_page():
-    username = None
-    if 'username' in session:
-        username = session['username']
-
-    return render_template('main_page.html', username=username)
+    return render_template('main_page.html')
 
 
 # List questions
