@@ -85,6 +85,8 @@ def question_details(question_id):
         if answer['image'] is not None:
             answer['image'] = answer['image'].split(';')
 
+
+
     return render_template('question-details.html', question_id=question_id, question_data=question, answers_data=answers)
 
 
@@ -115,6 +117,7 @@ def question_add():
             # return redirect(url_for('question_add', warnings=warnings))
 
         update_image_files(question)
+        question['user_id'] = session['user_id']
 
         db.execute_query(queries.add_new_question, question)
 
@@ -147,6 +150,8 @@ def answer_post(question_id):
             return render_template('new-answer.html', question_id=question_id, warnings=warnings)
 
         update_image_files(answer)
+
+        answer['user_id'] = session['user_id']
 
         db.execute_query(queries.add_new_answer, answer)
 
@@ -335,8 +340,6 @@ def login():
         'not_valid': None
     }
 
-
-
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -350,11 +353,12 @@ def login():
         if len([f for f in warnings if warnings[f] is not None]) > 0:
             return render_template('login.html', warnings=warnings)
 
-        user = db.execute_query(queries.get_user_by_username, {'username': username})[0]
+        user = db.execute_query(queries.get_user_by_username, {'username': username})
+        user = user[0] if len(user) > 0 else None
 
         if user and bcrypt.checkpw(password.encode('utf-8'), b'' + user['password']):
             session['username'] = user['username']
-            session['userid'] = user['user_id']
+            session['user_id'] = user['user_id']
 
             return redirect(url_for('main_page'))
 
@@ -369,8 +373,13 @@ def login():
 def logout():
     if session:
         session.pop('username')
-        session.pop('userid')
+        session.pop('user_id')
 
+    return redirect(url_for('main_page'))
+
+
+@app.route('/user/<int:user_id>', methods=['GET'])
+def user_details(user_id):
     return redirect(url_for('main_page'))
 
 
