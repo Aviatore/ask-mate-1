@@ -44,6 +44,16 @@ class Queries:
         self.get_last_id = 'SELECT id FROM {table} ORDER BY id desc limit 1'
         self.delete_answer_by_id = 'DELETE FROM answer WHERE id = %(id)s'
         self.delete_question_by_id = 'DELETE FROM question WHERE id = %(id)s'
+        self.read_tag_id_by_question_id = 'SELECT tag_id FROM question_tag WHERE question_id=%(question_id)s'
+        self.read_tag_by_id = 'SELECT name FROM tag WHERE id=%(tag_id)s'
+        self.read_tag_id_by_name = 'SELECT id FROM tag WHERE name=%(name)s'
+        self.read_all_tags = 'SELECT name FROM tag'
+        self.add_new_tag = 'INSERT INTO tag (name) VALUES (%(name)s)'
+        self.link_tag_question = 'INSERT INTO question_tag (question_id, tag_id) VALUES (%(question_id)s, %(tag_id)s)'
+        self.read_tag_id_by_question_id = 'SELECT tag_id FROM question_tag WHERE question_id=%(question_id)s'
+        self.delete_question_tag_links_by_question_id = 'DELETE FROM question_tag WHERE question_id=%(question_id)s'
+        self.delete_question_tag_links_by_tag_id_question_id = 'DELETE FROM question_tag WHERE tag_id=%(tag_id)s and question_id=%(question_id)s'
+
         self.search_question = """SELECT DISTINCT q.id, q.title, q.message, q.view_number, q.vote_number, q.submission_time, q.image 
                 FROM question as q
                 LEFT JOIN answer as a ON (q.id = a.question_id)

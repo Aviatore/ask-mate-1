@@ -36,7 +36,14 @@
                 <button id="vote_down_question"><b>-</b></button>
             {% endif %}
         {{ question_data['vote_number'] }}
-        </span>
+        </span><br/>
+    <span>
+        tags:
+        {% for tag in question_tags.items() %}
+        {{ tag[1] }} <a href="{{ url_for('delete_tag', question_id=question_id, tag_id=tag[0]) }}">x</a>
+        {% endfor %}
+        <a href="{{ url_for('new_tag', question_id=question_id) }}">Add</a>
+    </span>
         <p id="message">{{ question_data['message'] }}</p>
         {% if question_data['image'] is not none %}
             {% for image_url in question_data['image'] %}
