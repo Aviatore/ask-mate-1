@@ -73,14 +73,25 @@ def format_search_results(message, quoted_phrases):
         while phrase.lower() in message[start:].lower():
             index = message[start:].lower().index(phrase.lower())
             start += index + 1
-            indexes_dict[start - 1] = phrase
+
+            if (start - 1) in indexes_dict:
+                if len(phrase) > len(indexes_dict[start - 1]):
+                    indexes_dict[start - 1] = phrase
+            else:
+                indexes_dict[start - 1] = phrase
+
+    # print(f'DEBUG: Indexes: {indexes_dict}')
 
     # Sorted indexes of found phrases
     indexes = [f[0] for f in sorted(indexes_dict.items(), key=lambda x: x[0])]
 
+    # print(f'DEBUG: Sorted indexes: {indexes}')
+
     # Found phrases sorted by indexes (phrases are positioned in the list according to
     # their occurrence in the message)
     quoted_phrases = [f[1] for f in sorted(indexes_dict.items(), key=lambda x: x[0])]
+
+    # print(f'DEBUG: Sorted phrases: {quoted_phrases}')
 
     prev_index = 0
     for index, index_val in enumerate(indexes):
@@ -90,11 +101,15 @@ def format_search_results(message, quoted_phrases):
             output += message[prev_index:index_val]
 
             output += mark(message[index_val:to])
-            prev_index += index_val + len(quoted_phrases[index])
+            prev_index = index_val + len(quoted_phrases[index])
+        elif index_val < prev_index and prev_index > 0:
+            pass
         else:
             to = index_val + len(quoted_phrases[index])
             output += mark(message[0:to])
             prev_index = len(quoted_phrases[index])
+
+        # print(f'DEBUG: prev_indes: {prev_index}, index_val: {index_val}')
 
     if prev_index < len(message):
         output += message[prev_index:]
@@ -105,6 +120,6 @@ def format_search_results(message, quoted_phrases):
     return output
 
 
-# msg = "How to make lists in Python?"
-# query = ["Python"]
+# msg = "Python is both a snake and a programming language."
+# query = ["python is", "python"]
 # print(format_search_results(msg, query))

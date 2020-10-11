@@ -44,7 +44,7 @@ class Queries:
         self.get_last_id = 'SELECT id FROM {table} ORDER BY id desc limit 1'
         self.delete_answer_by_id = 'DELETE FROM answer WHERE id = %(id)s'
         self.delete_question_by_id = 'DELETE FROM question WHERE id = %(id)s'
-        self.search_question = """SELECT q.id, q.title, q.message, q.view_number, q.vote_number, q.submission_time, q.image 
+        self.search_question = """SELECT DISTINCT q.id, q.title, q.message, q.view_number, q.vote_number, q.submission_time, q.image 
                 FROM question as q
                 LEFT JOIN answer as a ON (q.id = a.question_id)
                 WHERE q.title ~* %(query)s OR q.message ~* %(query)s OR a.message ~* %(query)s"""

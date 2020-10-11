@@ -14,7 +14,6 @@ UPLOAD_DIR = 'uploaded/'
 
 app = Flask(__name__)
 app.secret_key = os.urandom(16)
-print(f'secret key: {app.secret_key}')
 app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024
 
 if not os.path.exists(os.path.join(UPLOAD_DIR, 'questions')):
@@ -522,10 +521,10 @@ def search_question():
     quoted.extend(unquoted)
 
     quoted_copy = quoted.copy()
-    for index1, i in enumerate(quoted):
-        for index2, j in enumerate(quoted):
-            if index1 != index2 and i in j:
-                quoted_copy.remove(i)
+    # for index1, i in enumerate(quoted):
+    #     for index2, j in enumerate(quoted):
+    #         if index1 != index2 and i in j:
+    #             quoted_copy.remove(i)
 
     merge_phrase_parenthesis = [f'({f})' for f in quoted_copy]
 
