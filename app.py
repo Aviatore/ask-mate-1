@@ -65,6 +65,7 @@ def question_list():
 @app.route('/question/<question_id>')
 def question_details(question_id):
     question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
+    comments = db.execute_query(queries.read_comments_by_question_id, {"question_id": question_id})
 
     if question != "":
         question['view_number'] += 1
@@ -80,7 +81,7 @@ def question_details(question_id):
         if answer['image'] is not None:
             answer['image'] = answer['image'].split(';')
 
-    return render_template('question-details.html', question_id=question_id, question_data=question, answers_data=answers)
+    return render_template('question-details.html', question_id=question_id, question_data=question, answers_data=answers, comments=comments)
 
 
 # Ask a question
@@ -235,8 +236,8 @@ def question_vote_up(question_id):
     question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
 
     question["view_number"] -= 1
-
     question["vote_number"] += 1
+
     db.execute_query(queries.update_question_by_id, question)
 
     return redirect(url_for('question_details', question_id=question_id))
@@ -334,6 +335,33 @@ def util_functions():
         time_to_utc=time_to_utc,
         file_size=file_size
     )
+
+# Add comment
+@app.route('/question/<int:question_id>/new-comment', methods=["GET", "POST"])
+def add_comment_to_question(question_id):
+
+    warnings = {'message': None}
+
+    if request.method == "POST":
+        comment = request.form.to_dict()
+        comment["submission_time"] = datetime.datetime.now()
+        comment["edited_count"] = 0
+        comment["question_id"] = question_id
+
+        if comment['message'] == '':
+            warnings['message'] = "You must type a message"
+
+        # If at least one warning is set, a new response is rendered with warnings argument
+        # that allow to format problematic form fields.
+        if warnings["message"] is not None:
+            return render_template('add-comment-to-question.html', warnings=warnings, comment=comment, question_id=question_id)
+
+        db.execute_query(queries.add_comment_to_question, comment)
+
+        return redirect(url_for('question_list'))
+
+    else:
+        return render_template('add-comment-to-question.html', warnings=None, comment=None, question_id=question_id)
 
 
 if __name__ == '__main__':

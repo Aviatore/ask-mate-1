@@ -35,6 +35,9 @@ class Queries:
         self.delete_answer_by_id = 'DELETE FROM answer WHERE id = %(id)s'
         self.delete_question_by_id = 'DELETE FROM question WHERE id = %(id)s'
         self.read_answer_by_id = 'SELECT id, question_id, message, vote_number, submission_time, image FROM answer WHERE id = %(id)s'
+        self.add_comment_to_question = 'INSERT INTO comment (question_id, message, submission_time, edited_count)' \
+                                       'VALUES (%(question_id)s, %(message)s, %(submission_time)s, %(edited_count)s)'
+        self.read_comments_by_question_id = 'SELECT * FROM comment WHERE question_id=%(question_id)s'
 
 class DB:
     def __init__(self):

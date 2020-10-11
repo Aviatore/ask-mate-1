@@ -26,7 +26,16 @@
             {% endfor %}
         {% endif %}
 
+        <a href="{{ url_for('add_comment_to_question', question_id=question_data['id'])}}"><button id="comment"><b>Add comment</b></button></a>
         {# COMMENT #}
+
+        {% for comment in comments%}
+            <div class="comment-container" style="background-color: aquamarine">
+                <span id="pub-time">{{ time_to_utc(comment['submission_time']) }}</span><br>
+                {{ comment['message'] }}
+            </div>
+        {% endfor %}
+
     </div>
     {% for answer in answers_data %}
         <div class="container answers">
