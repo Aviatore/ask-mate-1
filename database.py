@@ -44,10 +44,23 @@ class Queries:
         self.read_answer_by_id = 'SELECT id, question_id, message, vote_number, submission_time, image FROM answer WHERE id = %(id)s'
         self.get_user_by_username = 'SELECT user_id, username, email, password, registration_date, reputation ' \
                                     'FROM users WHERE username = %(username)s'
+        self.get_user_by_user_id = 'SELECT user_id, username, email, registration_date, reputation ' \
+                                    'FROM users WHERE user_id = %(user_id)s'
         self.add_new_user = 'INSERT INTO users (username, email, password)' \
                             'VALUES (%(username)s, %(email)s, %(password)s)'
-
-
+        self.get_all_questions_by_user_id = 'SELECT id, title, message, view_number, vote_number, submission_time, image, user_id ' \
+                                   'FROM question ' \
+                                   'WHERE user_id = %(user_id)s'
+        self.get_all_answers_by_user_id = 'SELECT a.id, a.question_id, a.message, a.vote_number, a.submission_time, a.image, a.user_id, q.title as "question_title" ' \
+                                           'FROM answer as a ' \
+                                          'INNER JOIN question as q ON(q.id = a.question_id)' \
+                                           'WHERE a.user_id = %(user_id)s'
+        self.number_of_questions_by_user_id = 'SELECT COUNT(*) as "questions_num" ' \
+                                              'FROM question ' \
+                                              'WHERE user_id = %(user_id)s'
+        self.number_of_answers_by_user_id = 'SELECT COUNT(*) as "answers_num" ' \
+                                            'FROM answer ' \
+                                            'WHERE user_id = %(user_id)s'
 class DB:
     def __init__(self):
         self.host = os.environ.get("DATABASE_HOST")

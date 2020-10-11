@@ -14,6 +14,7 @@ UPLOAD_DIR = 'uploaded/'
 
 app = Flask(__name__)
 app.secret_key = os.urandom(16)
+print(f'secret key: {app.secret_key}')
 app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024
 
 if not os.path.exists(os.path.join(UPLOAD_DIR, 'questions')):
@@ -378,9 +379,16 @@ def logout():
     return redirect(url_for('main_page'))
 
 
-@app.route('/user/<int:user_id>', methods=['GET'])
+@app.route('/user/<int:user_id>')
 def user_details(user_id):
-    return redirect(url_for('main_page'))
+    questions = db.execute_query(queries.get_all_questions_by_user_id, {'user_id': user_id})
+    questions_number = db.execute_query(queries.number_of_questions_by_user_id, {'user_id': user_id})[0]['questions_num']
+    answers = db.execute_query(queries.get_all_answers_by_user_id, {'user_id': user_id})
+    answers_number = db.execute_query(queries.number_of_answers_by_user_id, {'user_id': user_id})[0]['answers_num']
+    user = db.execute_query(queries.get_user_by_user_id, {'user_id': user_id})[0]
+
+    return render_template('user_page.html', questions=questions, answers=answers, questions_number=questions_number,
+                           answers_number=answers_number, user=user)
 
 
 def update_image_files(type):
