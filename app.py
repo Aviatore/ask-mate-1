@@ -81,7 +81,6 @@ def question_details(question_id):
         if answer['image'] is not None:
             answer['image'] = answer['image'].split(';')
 
-    print(comments)
     return render_template('question-details.html', question_id=question_id, question_data=question, answers_data=answers, comments=comments)
 
 
