@@ -43,7 +43,9 @@ class Queries:
         self.add_new_tag = 'INSERT INTO tag (name) VALUES (%(name)s)'
         self.link_tag_question = 'INSERT INTO question_tag (question_id, tag_id) VALUES (%(question_id)s, %(tag_id)s)'
         self.read_tag_id_by_question_id = 'SELECT tag_id FROM question_tag WHERE question_id=%(question_id)s'
-        self.delete_question_tag_links_by_question_id = 'DELETE from question_tag WHERE question_id=%(question_id)s'
+        self.delete_question_tag_links_by_question_id = 'DELETE FROM question_tag WHERE question_id=%(question_id)s'
+        self.delete_question_tag_links_by_tag_id_question_id = 'DELETE FROM question_tag WHERE tag_id=%(tag_id)s and question_id=%(question_id)s'
+
 
 class DB:
     def __init__(self):

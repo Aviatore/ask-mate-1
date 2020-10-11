@@ -85,12 +85,14 @@ def question_details(question_id):
 
     #tags
     tag_id_row = db.execute_query(queries.read_tag_id_by_question_id, {'question_id':question_id})
-    question_tags = []
+    question_tags = {}
     for t_row in tag_id_row:
        tag_id = t_row['tag_id']
        question_tag_row = db.execute_query(queries.read_tag_by_id, {'tag_id':tag_id})
        for qt_row in question_tag_row:
-            question_tags.append(qt_row['name'])
+           question_tags[tag_id] = qt_row['name']
+
+            # question_tags.append(qt_row['name'])
 
     return render_template('question-details.html', question_id=question_id, question_data=question, answers_data=answers, question_tags = question_tags)
 
@@ -328,6 +330,12 @@ def new_tag(question_id):
 
         return render_template("new_tag.html", question_id=question_id, all_tags=all_tags)
 
+@app.route('/question/<question_id>/tag/<tag_id>/delete', methods=['POST', "GET"])
+def delete_tag(question_id, tag_id):
+    db.execute_query(queries.delete_question_tag_links_by_tag_id_question_id, {'question_id':question_id, 'tag_id':tag_id})
+
+
+    return redirect(url_for('question_details', question_id=question_id))
 
 def update_image_files(type):
     """The function gets submitted files list and saves each file to its destination

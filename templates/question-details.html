@@ -20,8 +20,8 @@
         </span><br/>
     <span>
         tags:
-        {% for tag in question_tags %}
-        {{ tag }}
+        {% for tag in question_tags.items() %}
+        {{ tag[1] }} <a href="{{ url_for('delete_tag', question_id=question_id, tag_id=tag[0]) }}">x</a>
         {% endfor %}
         <a href="{{ url_for('new_tag', question_id=question_id) }}">Add</a>
     </span>
