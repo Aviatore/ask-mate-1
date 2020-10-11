@@ -38,7 +38,9 @@
                     <a href="{{ url_for('answer_delete', answer_id=answer['id']) }}"><i class="fas fa-times"></i></a>
                 </div>
             </div>
-            <i class="far fa-edit"></i>
+            <a href="{{ url_for('answer_edit', answer_id=answer['id']) }}">
+                <i class="far fa-edit"></i>
+            </a>
             <span id="pub-time">{{ time_to_utc(answer['submission_time']) }}</span>
             <p id="message">{{ answer['message'] }}</p>
             {% if answer['image'] is not none %}
