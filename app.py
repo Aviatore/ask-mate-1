@@ -1,6 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request, send_from_directory, flash
 from data_manager import *
-from util import *
+from util import parse_search_phrase, format_search_results
 import datetime
 import time
 import os
@@ -339,7 +339,6 @@ def update_image_files(type):
     and saved as a single string to in a database. The argument 'type' is of type
     dictionary with keys corresponding to the table (question or answer) columns in a database."""
 
-    print(f'DEBUG: ok')
     if 'question_id' in type:
         dir = 'answers'
     else:
@@ -349,9 +348,7 @@ def update_image_files(type):
     paths = []
     if uploaded_files:
         for file in uploaded_files:
-            print(f'DEBUG: uploaded_files')
             if file.filename != "":
-                print(f'DEBUG: {file.filename}')
                 file_name_raw = secure_filename(file.filename)
                 file_name = f'{time.time()}_{file_name_raw}'
                 file_path = os.path.join(UPLOAD_DIR, dir, file_name)
@@ -359,7 +356,6 @@ def update_image_files(type):
                 paths.append(file_name)
 
     if len(paths) > 0:
-        print(f'DEBUG: paths len: {len(paths)}')
         type['image'] = ';'.join(paths)
     elif isinstance(type['image'], list):
         type['image'] = ';'.join(type['image'])
@@ -382,6 +378,36 @@ def file_size(directory, file_name):
 @app.route('/get_file/<directory>/<file_name>')
 def get_image(directory, file_name):
     return send_from_directory(os.path.join(UPLOAD_DIR, directory), filename=file_name)
+
+
+@app.route('/search')
+def search_question():
+    search_phrase = request.args.get('q')
+
+    quoted, unquoted = parse_search_phrase(search_phrase)
+
+    quoted.extend(unquoted)
+
+    quoted_copy = quoted.copy()
+    for index1, i in enumerate(quoted):
+        for index2, j in enumerate(quoted):
+            if index1 != index2 and i in j:
+                quoted_copy.remove(i)
+
+    merge_phrase_parenthesis = [f'({f})' for f in quoted_copy]
+
+    regex_phrase = '|'.join(merge_phrase_parenthesis)
+
+    questions = db.execute_query(queries.search_question, {'query': regex_phrase})
+    answers = db.execute_query(queries.search_answer, {'query': regex_phrase})
+
+    for table_type in [answers, questions]:
+        for item in table_type:
+            if 'title' in item:
+                item['title'] = format_search_results(item['title'], quoted_copy)
+            item['message'] = format_search_results(item['message'], quoted_copy)
+
+    return render_template('search-results.html', questions=questions, answers=answers)
 
 
 @app.context_processor

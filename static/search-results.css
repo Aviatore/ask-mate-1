@@ -5,12 +5,19 @@
 }
 .container {
     position: relative;
-    width: 100%;
     background-color: #f2f2f2;
     box-sizing: border-box;
     border: 1px solid white;
     padding: 10px 10px;
     margin-bottom: 5px;
+}
+.question-container {
+    width: 100%;
+}
+.answer-container {
+    width: 98%;
+    display: inline-block;
+    left: 2%;
 }
 h3, h4 {
     margin-top: 0px;
