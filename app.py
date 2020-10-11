@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request, send_from_directory, session
+from flask import Flask, render_template, redirect, url_for, request, send_from_directory, session, flash
 from data_manager import *
 from util import *
 import datetime
@@ -243,12 +243,16 @@ def answer_delete(answer_id):
 # Vote-up a question
 @app.route('/question/<int:question_id>/vote_up')
 def question_vote_up(question_id):
-    question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
+    if 'user_id' in session:
+        question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
 
-    question["view_number"] -= 1
+        if session['user_id'] not in question['users_id_that_vote']:
+            question["view_number"] -= 1
+            question["vote_number"] += 1
 
-    question["vote_number"] += 1
-    db.execute_query(queries.update_question_by_id, question)
+            question['users_id_that_vote'].append(session['user_id'])
+
+            db.execute_query(queries.update_question_by_id, question)
 
     return redirect(url_for('question_details', question_id=question_id))
 
@@ -256,12 +260,16 @@ def question_vote_up(question_id):
 # Vote-down a question
 @app.route('/question/<question_id>/vote_down')
 def question_vote_down(question_id):
-    question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
+    if 'user_id' in session:
+        question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
 
-    question["view_number"] -= 1
-    question["vote_number"] -= 1
+        if session['user_id'] not in question['users_id_that_vote']:
+            question["view_number"] -= 1
+            question["vote_number"] -= 1
 
-    db.execute_query(queries.update_question_by_id, question)
+            question['users_id_that_vote'].append(session['user_id'])
+
+            db.execute_query(queries.update_question_by_id, question)
 
     return redirect(url_for('question_details', question_id=question_id))
 
@@ -269,10 +277,17 @@ def question_vote_down(question_id):
 # Vote-up an answer
 @app.route('/answer/<answer_id>/vote_up')
 def answer_vote_up(answer_id):
-    answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
+    if 'user_id' in session:
+        answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
+        question = db.execute_query(queries.read_question_by_id, {'id': answer['question_id']})[0]
 
-    answer["vote_number"] += 1
-    db.execute_query(queries.update_answer_by_id, answer)
+        if session['user_id'] not in answer['users_id_that_vote']:
+            answer["vote_number"] += 1
+            question["view_number"] -= 1
+
+            answer['users_id_that_vote'].append(session['user_id'])
+            db.execute_query(queries.update_answer_by_id, answer)
+            db.execute_query(queries.update_question_by_id, question)
 
     return redirect(url_for('question_details', question_id=answer['question_id']))
 
@@ -280,10 +295,17 @@ def answer_vote_up(answer_id):
 # Vote-down an answer
 @app.route('/answer/<answer_id>/vote_down')
 def answer_vote_down(answer_id):
-    answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
+    if 'user_id' in session:
+        answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
+        question = db.execute_query(queries.read_question_by_id, {'id': answer['question_id']})[0]
 
-    answer["vote_number"] -= 1
-    db.execute_query(queries.update_answer_by_id, answer)
+        if session['user_id'] not in answer['users_id_that_vote']:
+            answer["vote_number"] -= 1
+            question["view_number"] -= 1
+
+            answer['users_id_that_vote'].append(session['user_id'])
+            db.execute_query(queries.update_answer_by_id, answer)
+            db.execute_query(queries.update_question_by_id, question)
 
     return redirect(url_for('question_details', question_id=answer['question_id']))
 

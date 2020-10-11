@@ -14,7 +14,7 @@ class Queries:
     def __init__(self):
         self.read_questions_all_desc = 'SELECT id, title, message, view_number, vote_number, submission_time, image FROM question ORDER BY {order_by} DESC'
         self.read_questions_all_asc = 'SELECT id, title, message, view_number, vote_number, submission_time, image FROM question ORDER BY {order_by} ASC'
-        self.read_question_by_id = 'SELECT q.id, q.title, q.message, q.view_number, q.vote_number, q.submission_time, q.image, u.user_id, u.username ' \
+        self.read_question_by_id = 'SELECT q.id, q.title, q.message, q.view_number, q.vote_number, q.submission_time, q.image, q.users_id_that_vote, u.user_id, u.username ' \
                                    'FROM question as q ' \
                                    'INNER JOIN users as u USING (user_id) '\
                                    'WHERE q.id = %(id)s'
@@ -24,15 +24,18 @@ class Queries:
                                      'view_number=%(view_number)s, ' \
                                      'vote_number=%(vote_number)s, ' \
                                      'submission_time=%(submission_time)s, ' \
-                                     'image=%(image)s WHERE id=%(id)s'
-        self.read_answers_by_question_id = 'SELECT a.id, a.question_id, a.message, a.vote_number, a.submission_time, a.image, a.user_id, u.user_id, u.username ' \
+                                     'image=%(image)s, ' \
+                                     'users_id_that_vote=%(users_id_that_vote)s WHERE id=%(id)s'
+        self.read_answers_by_question_id = 'SELECT a.id, a.question_id, a.message, a.vote_number, a.submission_time, a.image, a.user_id, a.users_id_that_vote, u.user_id, u.username ' \
                                            'FROM answer as a ' \
-                                           'INNER JOIN users as u USING (user_ID)' \
-                                           'WHERE a.question_id = %(question_id)s'
+                                           'INNER JOIN users as u USING (user_ID) ' \
+                                           'WHERE a.question_id = %(question_id)s ' \
+                                           'ORDER BY a.submission_time'
         self.update_answer_by_id = 'UPDATE answer ' \
                                    'SET message=%(message)s, ' \
                                    'vote_number=%(vote_number)s, ' \
                                    'submission_time=%(submission_time)s, ' \
+                                   'users_id_that_vote=%(users_id_that_vote)s, ' \
                                    'image=%(image)s WHERE id=%(id)s'
         self.add_new_question = 'INSERT INTO question (submission_time, view_number, vote_number, title, message, image, user_id) ' \
                                 'VALUES(%(submission_time)s, %(view_number)s, %(vote_number)s, %(title)s, %(message)s, %(image)s, %(user_id)s)'
@@ -41,7 +44,7 @@ class Queries:
         self.get_last_id = 'SELECT id FROM {table} ORDER BY id desc limit 1'
         self.delete_answer_by_id = 'DELETE FROM answer WHERE id = %(id)s'
         self.delete_question_by_id = 'DELETE FROM question WHERE id = %(id)s'
-        self.read_answer_by_id = 'SELECT id, question_id, message, vote_number, submission_time, image FROM answer WHERE id = %(id)s'
+        self.read_answer_by_id = 'SELECT id, question_id, message, vote_number, submission_time, image, users_id_that_vote FROM answer WHERE id = %(id)s'
         self.get_user_by_username = 'SELECT user_id, username, email, password, registration_date, reputation ' \
                                     'FROM users WHERE username = %(username)s'
         self.get_user_by_user_id = 'SELECT user_id, username, email, registration_date, reputation ' \

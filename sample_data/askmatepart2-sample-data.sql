@@ -35,6 +35,7 @@ CREATE TABLE question (
     title text,
     message text,
     image text,
+    users_id_that_vote integer[] default array[]::integer[],
     user_id integer,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
@@ -47,6 +48,7 @@ CREATE TABLE answer (
     question_id integer,
     message text,
     image text,
+    users_id_that_vote integer[] default array[]::integer[],
     user_id integer,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
