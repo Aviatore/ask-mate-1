@@ -81,6 +81,7 @@ def question_details(question_id):
         if answer['image'] is not None:
             answer['image'] = answer['image'].split(';')
 
+    print(comments)
     return render_template('question-details.html', question_id=question_id, question_data=question, answers_data=answers, comments=comments)
 
 
@@ -336,7 +337,7 @@ def util_functions():
         file_size=file_size
     )
 
-# Add comment
+# Add comment to question
 @app.route('/question/<int:question_id>/new-comment', methods=["GET", "POST"])
 def add_comment_to_question(question_id):
 
@@ -362,6 +363,35 @@ def add_comment_to_question(question_id):
 
     else:
         return render_template('add-comment-to-question.html', warnings=None, comment=None, question_id=question_id)
+
+
+# Add comment to answer
+@app.route('/answer/<answer_id>/new-comment', methods=["GET", "POST"])
+def add_comment_to_answer(answer_id):
+    answer = db.execute_query(queries.read_answer_by_id, {"id": answer_id})[0]
+    warnings = {'message': None}
+
+    if request.method == "POST":
+        comment = request.form.to_dict()
+        comment["submission_time"] = datetime.datetime.now()
+        comment["edited_count"] = 0
+        comment["answer_id"] = answer_id
+        comment["question_id"] = answer["question_id"]
+
+        if comment['message'] == '':
+            warnings['message'] = "You must type a message"
+
+        # If at least one warning is set, a new response is rendered with warnings argument
+        # that allow to format problematic form fields.
+        if warnings["message"] is not None:
+            return render_template('add-comment-to-answer.html', warnings=warnings, comment=comment, answer_id=answer_id)
+
+        db.execute_query(queries.add_comment_to_answer, comment)
+
+        return redirect(url_for('question_list'))
+
+    else:
+        return render_template('add-comment-to-answer.html', warnings=None, comment=None, answer_id=answer_id)
 
 
 if __name__ == '__main__':

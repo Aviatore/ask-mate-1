@@ -27,16 +27,18 @@
         {% endif %}
 
         <a href="{{ url_for('add_comment_to_question', question_id=question_data['id'])}}"><button id="comment"><b>Add comment</b></button></a>
-        {# COMMENT #}
 
+        {# COMMENT #}
         {% for comment in comments%}
+            {% if comment['answer_id'] is none %}
             <div class="comment-container" style="background-color: aquamarine">
                 <span id="pub-time">{{ time_to_utc(comment['submission_time']) }}</span><br>
                 {{ comment['message'] }}
             </div>
+            {% endif %}
         {% endfor %}
-
     </div>
+
     {% for answer in answers_data %}
         <div class="container answers">
             <div class="answer-header">
@@ -61,7 +63,20 @@
                 <a href="{{ url_for('answer_vote_up', answer_id=answer['id'])}}"><button id="vote_up_answer"><b>+</b></button></a>
                 <a href="{{ url_for('answer_vote_down', answer_id=answer['id'])}}"><button id="vote_down_answer"><b>-</b></button></a>
                 {{ answer['vote_number'] }}
-            </span>
+            </span><br>
+
+        <a href="{{ url_for('add_comment_to_answer', answer_id=answer['id'])}}"><button id="comment"><b>Add comment</b></button></a>
+
+        {# COMMENT DISPLAY #}
+        {% for comment in comments%}
+            {% if comment['answer_id'] == answer['id'] %}
+            <div class="comment-container" style="background-color: aquamarine">
+                <span id="pub-time">{{ time_to_utc(comment['submission_time']) }}</span><br>
+                {{ comment['message'] }}
+            </div>
+            {% endif %}
+        {% endfor %}
+
         </div>
     {% endfor %}
     <button type="button" class="button" onclick="window.location.href='{{ url_for("answer_post", question_id=question_id) }}'">Add an answer</button>

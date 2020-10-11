@@ -38,6 +38,10 @@ class Queries:
         self.add_comment_to_question = 'INSERT INTO comment (question_id, message, submission_time, edited_count)' \
                                        'VALUES (%(question_id)s, %(message)s, %(submission_time)s, %(edited_count)s)'
         self.read_comments_by_question_id = 'SELECT * FROM comment WHERE question_id=%(question_id)s'
+        self.add_comment_to_answer = 'INSERT INTO comment (question_id, answer_id, message, submission_time, edited_count)' \
+                                     'VALUES (%(question_id)s, %(answer_id)s, %(message)s, %(submission_time)s, %(edited_count)s)'
+        self.read_comments_by_answer_id = 'SELECT * FROM comment WHERE answer_id=%(answer_id)s'
+
 
 class DB:
     def __init__(self):
@@ -50,12 +54,12 @@ class DB:
     def execute_query(self, query, params=None, **formats):
         try:
             with ps.connect(
-                        host=self.host,
-                        user=self.username,
-                        password=self.password,
-                        port=self.port,
-                        dbname=self.name
-                    ) as conn:
+                    host=self.host,
+                    user=self.username,
+                    password=self.password,
+                    port=self.port,
+                    dbname=self.name
+            ) as conn:
                 with conn.cursor(cursor_factory=RealDictCursor) as curs:
                     if formats is None:
                         curs.execute(sql.SQL(query), params)
