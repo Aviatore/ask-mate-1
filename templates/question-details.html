@@ -10,12 +10,31 @@
 <div class="body">
     <div class="container">
         <h3 class="center">{{ question_data['title'] }}</h3>
-        <a href="{{ url_for('question_edit', question_id=question_id) }}">
+
+        {% if session and session['user_id'] == question_data['user_id'] %}
+            <a href="{{ url_for('question_edit', question_id=question_id) }}">
+                <i class="far fa-edit"></i>
+            </a>
+        {% else %}
             <i class="far fa-edit"></i>
-        </a>
-        <span id="pub-time">{{ time_to_utc(question_data['submission_time']) }}
-        <a href="{{ url_for('question_vote_up', question_id=question_data['id'])}}"><button id="vote_up_question"><b>+</b></button></a>
-        <a href="{{ url_for('question_vote_down', question_id=question_data['id'])}}"><button id="vote_down_question"><b>-</b></button></a>
+        {% endif %}
+        <span class="pub-time">author:</span><span class="author"><a href="{{ url_for('user_details', user_id=question_data['user_id']) }}">{{ question_data['username'] }}</a></span>
+        <span class="pub-time">{{ time_to_utc(question_data['submission_time']) }}
+            {% if session %}
+                {% if session['user_id'] == question_data['user_id'] %}
+                    <a href="javascript:voteSameUser_alert('question');"><button id="vote_up_question"><b>+</b></button></a>
+                    <a href="javascript:voteSameUser_alert('question');"><button id="vote_down_question"><b>-</b></button></a>
+                {% elif session['user_id'] in question_data.users_id_that_vote %}
+                    <a href="javascript:vote_alert('question');"><button id="vote_up_question"><b>+</b></button></a>
+                    <a href="javascript:vote_alert('question');"><button id="vote_down_question"><b>-</b></button></a>
+                {% else %}
+                    <a href="{{ url_for('question_vote_up', question_id=question_data['id'])}}"><button id="vote_up_question"><b>+</b></button></a>
+                    <a href="{{ url_for('question_vote_down', question_id=question_data['id'])}}"><button id="vote_down_question"><b>-</b></button></a>
+                {% endif %}
+            {% else %}
+                <button id="vote_up_question"><b>+</b></button>
+                <button id="vote_down_question"><b>-</b></button>
+            {% endif %}
         {{ question_data['vote_number'] }}
         </span>
         <p id="message">{{ question_data['message'] }}</p>
@@ -34,14 +53,19 @@
                 <div class="answer-title">
                     <h4 class="answer">Re: {{ question_data['title'] }}</h4>
                 </div>
-                <div class="answer-cross">
-                    <a href="{{ url_for('answer_delete', answer_id=answer['id']) }}"><i class="fas fa-times"></i></a>
-                </div>
+                {% if session %}
+                    <div class="answer-cross">
+                        <a href="{{ url_for('answer_delete', answer_id=answer['id']) }}"><i class="fas fa-times"></i></a>
+                    </div>
+                {% endif %}
             </div>
             <a href="{{ url_for('answer_edit', answer_id=answer['id']) }}">
                 <i class="far fa-edit"></i>
             </a>
-            <span id="pub-time">{{ time_to_utc(answer['submission_time']) }}</span>
+
+            <span class="pub-time">author:</span><span class="author"><a href="{{ url_for('user_details', user_id=answer['user_id']) }}">{{ answer['username'] }}</a></span>
+            <span class="pub-time">{{ time_to_utc(answer['submission_time']) }}</span>
+
             <p id="message">{{ answer['message'] }}</p>
             {% if answer['image'] is not none %}
                 {% for image_url in answer['image'] %}
@@ -51,14 +75,41 @@
             {% endif %}
             <span id="answer_vote_number">
                 Was it helpful?
-                <a href="{{ url_for('answer_vote_up', answer_id=answer['id'])}}"><button id="vote_up_answer"><b>+</b></button></a>
-                <a href="{{ url_for('answer_vote_down', answer_id=answer['id'])}}"><button id="vote_down_answer"><b>-</b></button></a>
+                {% if session %}
+                    {% if session['user_id'] == answer['user_id'] %}
+                        <a href="javascript:voteSameUser_alert('answer');"><button id="vote_up_answer"><b>+</b></button></a>
+                        <a href="javascript:voteSameUser_alert('answer');"><button id="vote_down_answer"><b>-</b></button></a>
+                    {% elif session['user_id'] in answer.users_id_that_vote %}
+                        <a href="javascript:vote_alert('answer');"><button id="vote_up_answer"><b>+</b></button></a>
+                        <a href="javascript:vote_alert('answer');"><button id="vote_down_answer"><b>-</b></button></a>
+                    {% else %}
+                        <a href="{{ url_for('answer_vote_up', answer_id=answer['id'])}}"><button id="vote_up_answer"><b>+</b></button></a>
+                        <a href="{{ url_for('answer_vote_down', answer_id=answer['id'])}}"><button id="vote_down_answer"><b>-</b></button></a>
+                    {% endif %}
+                {% else %}
+                    <button id="vote_up_answer"><b>+</b></button>
+                    <button id="vote_down_answer"><b>-</b></button>
+                {% endif %}
+
                 {{ answer['vote_number'] }}
             </span>
         </div>
     {% endfor %}
-    <button type="button" class="button" onclick="window.location.href='{{ url_for("answer_post", question_id=question_id) }}'">Add an answer</button>
+
+    {% if session %}
+        <button type="button" class="button" onclick="window.location.href='{{ url_for("answer_post", question_id=question_id) }}'">Add an answer</button>
+    {% endif %}
     <button type="button" class="button" onclick="window.location.href='{{ url_for("question_list") }}'">Back to the list</button>
 </div>
+
+<script>
+    function vote_alert(type) {
+        alert('You have already voted for ' + type + '.');
+    }
+
+    function voteSameUser_alert(type) {
+        alert('You cannot vote for your ' + type + '.');
+    }
+</script>
 </body>
 </html>

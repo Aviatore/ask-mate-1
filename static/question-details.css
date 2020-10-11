@@ -18,14 +18,27 @@ h3, h4 {
     font-family: sans-serif;
     color: rgb(74, 74, 74);
 }
-#pub-time {
+.pub-time {
     font-family: sans-serif;
     font-size: 12px;
     color: rgb(74, 74, 74);
     padding-left: 5px;
 }
-#pub-time::before {
+.pub-time::before {
     content: "» ";
+}
+.author {
+    font-family: sans-serif;
+    font-size: 12px;
+    padding-left: 5px;
+    font-weight: bold;
+}
+.author a:link, :visited {
+    text-decoration: none;
+    color: darkred;
+}
+.author a:hover {
+    text-decoration: underline;
 }
 #message {
     font-family: sans-serif;
@@ -108,4 +121,53 @@ i:hover {
 }
 a.title-link:hover {
     text-decoration: underline;
+}
+.block-header {
+    position: relative;
+    width: 100%;
+    background-color: #cdcdcd;
+    box-sizing: border-box;
+    border: 1px solid white;
+    padding: 10px 10px;
+    margin-top: 20px;
+    margin-bottom: 5px;
+    border-radius: 10px 10px 0px 0px;
+    text-align: center;
+}
+.block-header-title {
+    font-family: sans-serif;
+    font-size: 20px;
+    color: rgb(74, 74, 74);
+}
+.block-header-title-user {
+    font-family: sans-serif;
+    color: darkred;
+    font-size: 20px;
+    font-weight: bold;
+}
+.title:hover {
+    text-decoration: underline;
+}
+.username {
+    color: darkred;
+}
+td {
+    font-family: sans-serif;
+    font-size: 15px;
+    padding-bottom: 5px;
+    color: rgb(74, 74, 74);
+}
+.td-id {
+    font-weight: bold;
+}
+.td-data {
+    padding-left: 10px;
+}
+#table-title {
+    display: inline-block;
+    padding-left: 2px;
+    font-family: sans-serif;
+    font-size: 20px;
+    color: rgb(74, 74, 74);
+    margin-bottom: 15px;
 }

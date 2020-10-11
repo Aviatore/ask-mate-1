@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request, send_from_directory, flash
+from flask import Flask, render_template, redirect, url_for, request, send_from_directory, session, flash
 from data_manager import *
 from util import parse_search_phrase, format_search_results
 import datetime
@@ -7,11 +7,14 @@ import os
 from urllib.parse import unquote
 from werkzeug.utils import secure_filename
 from database import db, queries
+import bcrypt
 
 
 UPLOAD_DIR = 'uploaded/'
 
 app = Flask(__name__)
+app.secret_key = os.urandom(16)
+print(f'secret key: {app.secret_key}')
 app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024
 
 if not os.path.exists(os.path.join(UPLOAD_DIR, 'questions')):
@@ -83,6 +86,8 @@ def question_details(question_id):
         if answer['image'] is not None:
             answer['image'] = answer['image'].split(';')
 
+
+
     return render_template('question-details.html', question_id=question_id, question_data=question, answers_data=answers)
 
 
@@ -113,6 +118,7 @@ def question_add():
             # return redirect(url_for('question_add', warnings=warnings))
 
         update_image_files(question)
+        question['user_id'] = session['user_id']
 
         db.execute_query(queries.add_new_question, question)
 
@@ -145,6 +151,8 @@ def answer_post(question_id):
             return render_template('new-answer.html', question_id=question_id, warnings=warnings)
 
         update_image_files(answer)
+
+        answer['user_id'] = session['user_id']
 
         db.execute_query(queries.add_new_answer, answer)
 
@@ -288,12 +296,16 @@ def answer_delete(answer_id):
 # Vote-up a question
 @app.route('/question/<int:question_id>/vote_up')
 def question_vote_up(question_id):
-    question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
+    if 'user_id' in session:
+        question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
 
-    question["view_number"] -= 1
+        if session['user_id'] not in question['users_id_that_vote']:
+            question["view_number"] -= 1
+            question["vote_number"] += 1
 
-    question["vote_number"] += 1
-    db.execute_query(queries.update_question_by_id, question)
+            question['users_id_that_vote'].append(session['user_id'])
+
+            db.execute_query(queries.update_question_by_id, question)
 
     return redirect(url_for('question_details', question_id=question_id))
 
@@ -301,12 +313,16 @@ def question_vote_up(question_id):
 # Vote-down a question
 @app.route('/question/<question_id>/vote_down')
 def question_vote_down(question_id):
-    question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
+    if 'user_id' in session:
+        question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
 
-    question["view_number"] -= 1
-    question["vote_number"] -= 1
+        if session['user_id'] not in question['users_id_that_vote']:
+            question["view_number"] -= 1
+            question["vote_number"] -= 1
 
-    db.execute_query(queries.update_question_by_id, question)
+            question['users_id_that_vote'].append(session['user_id'])
+
+            db.execute_query(queries.update_question_by_id, question)
 
     return redirect(url_for('question_details', question_id=question_id))
 
@@ -314,10 +330,17 @@ def question_vote_down(question_id):
 # Vote-up an answer
 @app.route('/answer/<answer_id>/vote_up')
 def answer_vote_up(answer_id):
-    answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
+    if 'user_id' in session:
+        answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
+        question = db.execute_query(queries.read_question_by_id, {'id': answer['question_id']})[0]
 
-    answer["vote_number"] += 1
-    db.execute_query(queries.update_answer_by_id, answer)
+        if session['user_id'] not in answer['users_id_that_vote']:
+            answer["vote_number"] += 1
+            question["view_number"] -= 1
+
+            answer['users_id_that_vote'].append(session['user_id'])
+            db.execute_query(queries.update_answer_by_id, answer)
+            db.execute_query(queries.update_question_by_id, question)
 
     return redirect(url_for('question_details', question_id=answer['question_id']))
 
@@ -325,12 +348,122 @@ def answer_vote_up(answer_id):
 # Vote-down an answer
 @app.route('/answer/<answer_id>/vote_down')
 def answer_vote_down(answer_id):
-    answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
+    if 'user_id' in session:
+        answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
+        question = db.execute_query(queries.read_question_by_id, {'id': answer['question_id']})[0]
 
-    answer["vote_number"] -= 1
-    db.execute_query(queries.update_answer_by_id, answer)
+        if session['user_id'] not in answer['users_id_that_vote']:
+            answer["vote_number"] -= 1
+            question["view_number"] -= 1
+
+            answer['users_id_that_vote'].append(session['user_id'])
+            db.execute_query(queries.update_answer_by_id, answer)
+            db.execute_query(queries.update_question_by_id, question)
 
     return redirect(url_for('question_details', question_id=answer['question_id']))
+
+
+@app.route('/registration', methods=['GET', 'POST'])
+def register():
+    warnings = {
+        'username': None,
+        'email': None,
+        'password': None
+    }
+    new_user = {
+        'username': None,
+        'email': None,
+        'password': None
+    }
+
+    if request.method == 'POST':
+        new_user['username'] = request.form.get('username')
+        new_user['email'] = request.form.get('email')
+        new_user['password'] = request.form.get('password')
+
+        if new_user['username'] == '':
+            warnings['username'] = "You must define your user name."
+
+        if new_user['email'] == '':
+            warnings['email'] = "You must define you email"
+
+        if new_user['password'] == '':
+            warnings['password'] = "You must define a password."
+
+        if len([f for f in warnings if warnings[f] is not None]) > 0:
+            return render_template('register.html', warnings=warnings)
+
+        user = db.execute_query(queries.get_user_by_username, new_user)
+
+        if len(user) > 0:
+            warnings['username'] = "The provided user name already exists."
+            return render_template('register.html', warnings=warnings)
+
+        new_user['password'] = bcrypt.hashpw(new_user['password'].encode('utf-8'), bcrypt.gensalt())
+
+        db.execute_query(queries.add_new_user, params=new_user)
+
+        return redirect(url_for('main_page'))
+
+    return render_template('register.html', warnings=None)
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    warnings = {
+        'username': None,
+        'password': None,
+        'not_valid': None
+    }
+
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        if username == '':
+            warnings['username'] = "You must define your user name."
+
+        if password == '':
+            warnings['password'] = "You must define a password."
+
+        if len([f for f in warnings if warnings[f] is not None]) > 0:
+            return render_template('login.html', warnings=warnings)
+
+        user = db.execute_query(queries.get_user_by_username, {'username': username})
+        user = user[0] if len(user) > 0 else None
+
+        if user and bcrypt.checkpw(password.encode('utf-8'), b'' + user['password']):
+            session['username'] = user['username']
+            session['user_id'] = user['user_id']
+
+            return redirect(url_for('main_page'))
+
+        warnings['not_valid'] = "Your user name and/or password is not valid."
+
+        return render_template('login.html', warnings=warnings)
+
+    return render_template('login.html', warnings=None)
+
+
+@app.route('/logout')
+def logout():
+    if session:
+        session.pop('username')
+        session.pop('user_id')
+
+    return redirect(url_for('main_page'))
+
+
+@app.route('/user/<int:user_id>')
+def user_details(user_id):
+    questions = db.execute_query(queries.get_all_questions_by_user_id, {'user_id': user_id})
+    questions_number = db.execute_query(queries.number_of_questions_by_user_id, {'user_id': user_id})[0]['questions_num']
+    answers = db.execute_query(queries.get_all_answers_by_user_id, {'user_id': user_id})
+    answers_number = db.execute_query(queries.number_of_answers_by_user_id, {'user_id': user_id})[0]['answers_num']
+    user = db.execute_query(queries.get_user_by_user_id, {'user_id': user_id})[0]
+
+    return render_template('user_page.html', questions=questions, answers=answers, questions_number=questions_number,
+                           answers_number=answers_number, user=user)
 
 
 def update_image_files(type):

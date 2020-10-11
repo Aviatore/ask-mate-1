@@ -30,7 +30,10 @@
 </head>
 <body>
     <div>
-        <h1>Hello Mate!</h1>
+        <div id="login">
+            <button type="button" onclick="location.href='{{ url_for('login') if not session else url_for('logout') }}'">{{ 'Login' if not session else 'Logout' }}</button>
+        </div>
+        <h1>Hello {{ 'Mate!' if not session else session['username'] }}</h1>
         <p>Welcome to <em>AskMate</em>, feel free to ask anything that comes to your mind. </p>
         <p>Other mates could help resolve your problem, or maybe you could give someone a hand?  ^^</p>
         <p>So... how will it be ? Are we mates ?</p>
