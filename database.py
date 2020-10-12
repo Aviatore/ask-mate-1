@@ -90,6 +90,8 @@ class Queries:
         self.number_of_answers_by_user_id = 'SELECT COUNT(*) as "answers_num" ' \
                                             'FROM answer ' \
                                             'WHERE user_id = %(user_id)s'
+        self.read_latest_five_questions = 'SELECT id, title, message, view_number, vote_number, submission_time, image FROM question ORDER BY {order_by} DESC LIMIT 5'
+
 class DB:
     def __init__(self):
         self.host = os.environ.get("DATABASE_HOST")
