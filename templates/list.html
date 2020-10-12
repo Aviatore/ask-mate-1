@@ -23,6 +23,9 @@
                     {% endif %}
                 </th>
             {% endfor %}
+            {% if session %}
+                <th></th>
+            {% endif %}
         </tr>
     </thead>
     <tbody>
@@ -37,22 +40,26 @@
                 <td>{{ question[key] if key != 'submission_time' else time_to_utc(question[key]) }}</td>
             {% endfor %}
 
+            {% if session %}
                 <td>
                     <a href="{{ url_for('question_delete', question_id=question['id']) }}" title="Delete question" class="thumbs">
                         <i class="far fa-trash-alt icon"></i>
                     </a>
                 </td>
+            {% endif %}
             </tr>
         {% endfor %}
     </tbody>
-    <tfoot>
-        <tr>
-            <td></td><td></td><td></td><td></td>
-            <td>
-                <a href="{{ url_for("question_add") }}" title="Add a new question"><i class="fas fa-plus"></i></a>
-            </td>
-        </tr>
-    </tfoot>
+    {% if session %}
+        <tfoot>
+            <tr>
+                <td></td><td></td><td></td><td></td>
+                <td>
+                    <a href="{{ url_for("question_add") }}" title="Add a new question"><i class="fas fa-plus"></i></a>
+                </td>
+            </tr>
+        </tfoot>
+    {% endif %}
 </table>
 
 </body>

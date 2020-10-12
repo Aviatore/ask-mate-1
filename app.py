@@ -1,17 +1,19 @@
-from flask import Flask, render_template, redirect, url_for, request, send_from_directory, flash
+from flask import Flask, render_template, redirect, url_for, request, send_from_directory, session, flash
 from data_manager import *
-from util import *
+from util import parse_search_phrase, format_search_results
 import datetime
 import time
 import os
 from urllib.parse import unquote
 from werkzeug.utils import secure_filename
 from database import db, queries
+import bcrypt
 
 
 UPLOAD_DIR = 'uploaded/'
 
 app = Flask(__name__)
+app.secret_key = os.urandom(16)
 app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024
 
 if not os.path.exists(os.path.join(UPLOAD_DIR, 'questions')):
@@ -68,6 +70,7 @@ def question_list():
 @app.route('/question/<question_id>')
 def question_details(question_id):
     question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
+    comments = db.execute_query(queries.read_comments_by_question_id, {"question_id": question_id})
 
     if question != "":
         question['view_number'] += 1
@@ -83,7 +86,23 @@ def question_details(question_id):
         if answer['image'] is not None:
             answer['image'] = answer['image'].split(';')
 
-    return render_template('question-details.html', question_id=question_id, question_data=question, answers_data=answers)
+    #tags
+    tag_id_row = db.execute_query(queries.read_tag_id_by_question_id, {'question_id':question_id})
+    question_tags = {}
+    for t_row in tag_id_row:
+       tag_id = t_row['tag_id']
+       question_tag_row = db.execute_query(queries.read_tag_by_id, {'tag_id':tag_id})
+       for qt_row in question_tag_row:
+           question_tags[tag_id] = qt_row['name']
+
+            # question_tags.append(qt_row['name'])
+
+    return render_template('question-details.html',
+                           question_id=question_id,
+                           question_data=question,
+                           answers_data=answers,
+                           question_tags=question_tags,
+                           comments=comments)
 
 
 # Ask a question
@@ -113,6 +132,7 @@ def question_add():
             # return redirect(url_for('question_add', warnings=warnings))
 
         update_image_files(question)
+        question['user_id'] = session['user_id']
 
         db.execute_query(queries.add_new_question, question)
 
@@ -146,6 +166,8 @@ def answer_post(question_id):
 
         update_image_files(answer)
 
+        answer['user_id'] = session['user_id']
+
         db.execute_query(queries.add_new_answer, answer)
 
         return redirect(url_for("question_details", question_id=question_id))
@@ -160,6 +182,7 @@ def question_delete(question_id):
     question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
     quest_answers = db.execute_query(queries.read_answers_by_question_id, {'question_id': question_id})
 
+    db.execute_query(queries.delete_question_tag_links_by_question_id, {'question_id':question_id})
     db.execute_query(queries.delete_question_by_id, {'id': question_id})
 
     if question['image'] is not None:
@@ -179,43 +202,96 @@ def question_delete(question_id):
 # Edit a question
 @app.route('/question/<int:question_id>/edit', methods=["GET", "POST"])
 def question_edit(question_id):
+    output = edit_engine(table='question', id=question_id)
+
+    if output['return_code'] == 'form_ok':
+        return redirect(url_for("question_details", question_id=question_id))
+    elif output['return_code'] == 'form_fail':
+        return render_template('edit-question.html', question=output['table_row'], warnings=output['warnings'])
+    elif output['return_code'] == 'ok':
+        return render_template("edit-question.html", question=output['table_row'], warnings=None)
+
+
+# Edit an answer
+@app.route('/answer/<int:answer_id>/edit', methods=["GET", "POST"])
+def answer_edit(answer_id):
+    output = edit_engine(table='answer', id=answer_id)
+
+    if output['return_code'] == 'form_ok':
+        return redirect(url_for("question_details", question_id=output['table_row']['question_id']))
+    elif output['return_code'] == 'form_fail':
+        return render_template('edit-answer.html', answer=output['table_row'], warnings=output['warnings'])
+    elif output['return_code'] == 'ok':
+        return render_template("edit-answer.html", answer=output['table_row'], warnings=None)
+
+
+def edit_engine(table, id):
+    """The function handles edition of both questions and answers"""
+
     warnings = {
         'title': None,
         'message': None
     }
+    if table == 'question':
+        search_query = queries.read_question_by_id
+        update_query = queries.update_question_by_id
+    elif table == 'answer':
+        search_query = queries.read_answer_by_id
+        update_query = queries.update_answer_by_id
 
-    question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
-    if question['image'] is not None:
-        question['image'] = question['image'].split(';')
+    table_row = db.execute_query(search_query, {'id': id})[0]
+
+    if table_row['image'] is not None:
+        table_row['image'] = table_row['image'].split(';')
 
     if request.method == "POST":
-        question["title"] = request.form["title"]
-        question["message"] = request.form["message"]
-        question["submission_time"] = datetime.datetime.now()
+        if table == 'question':
+            table_row["title"] = request.form["title"]
 
-        if question['title'] == '':
-            warnings['title'] = "You must define your question's title"
-        if question['message'] == '':
+        table_row["message"] = request.form["message"]
+        table_row["submission_time"] = datetime.datetime.now()
+
+        if table == 'question':
+            if table_row['title'] == '':
+                warnings['title'] = "You must define your question's title"
+
+        if table_row['message'] == '':
             warnings['message'] = "You must type a message"
 
         # If at least one warning is set, a new response is rendered with warnings argument
         # that allow to format problematic form fields.
         if len([f for f in warnings if warnings[f] is not None]) > 0:
-            return render_template('edit-question.html', warnings=warnings, question=question)
+            output = {
+                'return_code': 'form_fail',
+                'warnings': warnings,
+                'table_row': table_row
+            }
+
+            return output
 
         remove_images = request.form.get('image-remove')
         if remove_images:
-            question['image'] = None
+            table_row['image'] = None
         else:
             # The function saves submitted files (if any) and saves images names under the 'image' key
             # in the question dictionary.
-            update_image_files(question)
+            update_image_files(table_row)
 
-        db.execute_query(queries.update_question_by_id, question)
+        db.execute_query(update_query, table_row)
 
-        return redirect(url_for("question_details", question_id=question_id))
+        output = {
+            'return_code': 'form_ok',
+            'table_row': table_row
+        }
+
+        return output
     else:
-        return render_template("edit-question.html", question=question, warnings=None)
+        output = {
+            'return_code': 'ok',
+            'table_row': table_row
+        }
+
+        return output
 
 
 # Delete an answer
@@ -235,12 +311,16 @@ def answer_delete(answer_id):
 # Vote-up a question
 @app.route('/question/<int:question_id>/vote_up')
 def question_vote_up(question_id):
-    question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
+    if 'user_id' in session:
+        question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
 
-    question["view_number"] -= 1
+        if session['user_id'] not in question['users_id_that_vote']:
+            question["view_number"] -= 1
+            question["vote_number"] += 1
 
-    question["vote_number"] += 1
-    db.execute_query(queries.update_question_by_id, question)
+            question['users_id_that_vote'].append(session['user_id'])
+
+            db.execute_query(queries.update_question_by_id, question)
 
     return redirect(url_for('question_details', question_id=question_id))
 
@@ -248,12 +328,16 @@ def question_vote_up(question_id):
 # Vote-down a question
 @app.route('/question/<question_id>/vote_down')
 def question_vote_down(question_id):
-    question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
+    if 'user_id' in session:
+        question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
 
-    question["view_number"] -= 1
-    question["vote_number"] -= 1
+        if session['user_id'] not in question['users_id_that_vote']:
+            question["view_number"] -= 1
+            question["vote_number"] -= 1
 
-    db.execute_query(queries.update_question_by_id, question)
+            question['users_id_that_vote'].append(session['user_id'])
+
+            db.execute_query(queries.update_question_by_id, question)
 
     return redirect(url_for('question_details', question_id=question_id))
 
@@ -261,10 +345,17 @@ def question_vote_down(question_id):
 # Vote-up an answer
 @app.route('/answer/<answer_id>/vote_up')
 def answer_vote_up(answer_id):
-    answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
+    if 'user_id' in session:
+        answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
+        question = db.execute_query(queries.read_question_by_id, {'id': answer['question_id']})[0]
 
-    answer["vote_number"] += 1
-    db.execute_query(queries.update_answer_by_id, answer)
+        if session['user_id'] not in answer['users_id_that_vote']:
+            answer["vote_number"] += 1
+            question["view_number"] -= 1
+
+            answer['users_id_that_vote'].append(session['user_id'])
+            db.execute_query(queries.update_answer_by_id, answer)
+            db.execute_query(queries.update_question_by_id, question)
 
     return redirect(url_for('question_details', question_id=answer['question_id']))
 
@@ -272,12 +363,166 @@ def answer_vote_up(answer_id):
 # Vote-down an answer
 @app.route('/answer/<answer_id>/vote_down')
 def answer_vote_down(answer_id):
-    answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
+    if 'user_id' in session:
+        answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
+        question = db.execute_query(queries.read_question_by_id, {'id': answer['question_id']})[0]
 
-    answer["vote_number"] -= 1
-    db.execute_query(queries.update_answer_by_id, answer)
+        if session['user_id'] not in answer['users_id_that_vote']:
+            answer["vote_number"] -= 1
+            question["view_number"] -= 1
+
+            answer['users_id_that_vote'].append(session['user_id'])
+            db.execute_query(queries.update_answer_by_id, answer)
+            db.execute_query(queries.update_question_by_id, question)
 
     return redirect(url_for('question_details', question_id=answer['question_id']))
+
+@app.route("/question/<question_id>/new-tag", methods=["POST", "GET"])
+def new_tag(question_id):
+
+    all_tags = []
+    tags_rows = db.execute_query(queries.read_all_tags)
+    for row in tags_rows:
+        all_tags.append(row['name'])
+
+    if request.method == "POST":
+        tag = request.form.to_dict()
+        if tag['add_tag'] != "":
+            name = tag['add_tag']
+        else:
+            name = tag['select_tag']
+
+        if name not in all_tags:
+            db.execute_query(queries.add_new_tag, {'name':name})
+            tag_id = db.execute_query(queries.read_tag_id_by_name, {'name':name})[0]['id']
+            db.execute_query(queries.link_tag_question, {'question_id':question_id, 'tag_id':tag_id})
+        else:
+            question_tag_ids = []
+            question_tag_ids_rows = db.execute_query(queries.read_tag_id_by_question_id, {'question_id':question_id})
+            for row in question_tag_ids_rows:
+                question_tag_ids.append(row['tag_id'])
+            question_tags = []
+            for item in question_tag_ids:
+                question_tags.append(db.execute_query(queries.read_tag_by_id, {'tag_id':item})[0]['name'])
+            if name not in question_tags:
+                tag_id = db.execute_query(queries.read_tag_id_by_name, {'name': name})[0]['id']
+                db.execute_query(queries.link_tag_question, {'question_id': question_id, 'tag_id': tag_id})
+
+
+        return redirect(url_for('question_details', question_id=question_id))
+
+    else:
+
+        return render_template("new_tag.html", question_id=question_id, all_tags=all_tags)
+
+@app.route('/question/<question_id>/tag/<tag_id>/delete', methods=['POST', "GET"])
+def delete_tag(question_id, tag_id):
+    db.execute_query(queries.delete_question_tag_links_by_tag_id_question_id, {'question_id':question_id, 'tag_id':tag_id})
+
+
+    return redirect(url_for('question_details', question_id=question_id))
+
+@app.route('/registration', methods=['GET', 'POST'])
+def register():
+    warnings = {
+        'username': None,
+        'email': None,
+        'password': None
+    }
+    new_user = {
+        'username': None,
+        'email': None,
+        'password': None
+    }
+
+    if request.method == 'POST':
+        new_user['username'] = request.form.get('username')
+        new_user['email'] = request.form.get('email')
+        new_user['password'] = request.form.get('password')
+
+        if new_user['username'] == '':
+            warnings['username'] = "You must define your user name."
+
+        if new_user['email'] == '':
+            warnings['email'] = "You must define you email"
+
+        if new_user['password'] == '':
+            warnings['password'] = "You must define a password."
+
+        if len([f for f in warnings if warnings[f] is not None]) > 0:
+            return render_template('register.html', warnings=warnings)
+
+        user = db.execute_query(queries.get_user_by_username, new_user)
+
+        if len(user) > 0:
+            warnings['username'] = "The provided user name already exists."
+            return render_template('register.html', warnings=warnings)
+
+        new_user['password'] = bcrypt.hashpw(new_user['password'].encode('utf-8'), bcrypt.gensalt())
+
+        db.execute_query(queries.add_new_user, params=new_user)
+
+        return redirect(url_for('main_page'))
+
+    return render_template('register.html', warnings=None)
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    warnings = {
+        'username': None,
+        'password': None,
+        'not_valid': None
+    }
+
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        if username == '':
+            warnings['username'] = "You must define your user name."
+
+        if password == '':
+            warnings['password'] = "You must define a password."
+
+        if len([f for f in warnings if warnings[f] is not None]) > 0:
+            return render_template('login.html', warnings=warnings)
+
+        user = db.execute_query(queries.get_user_by_username, {'username': username})
+        user = user[0] if len(user) > 0 else None
+
+        if user and bcrypt.checkpw(password.encode('utf-8'), b'' + user['password']):
+            session['username'] = user['username']
+            session['user_id'] = user['user_id']
+
+            return redirect(url_for('main_page'))
+
+        warnings['not_valid'] = "Your user name and/or password is not valid."
+
+        return render_template('login.html', warnings=warnings)
+
+    return render_template('login.html', warnings=None)
+
+
+@app.route('/logout')
+def logout():
+    if session:
+        session.pop('username')
+        session.pop('user_id')
+
+    return redirect(url_for('main_page'))
+
+
+@app.route('/user/<int:user_id>')
+def user_details(user_id):
+    questions = db.execute_query(queries.get_all_questions_by_user_id, {'user_id': user_id})
+    questions_number = db.execute_query(queries.number_of_questions_by_user_id, {'user_id': user_id})[0]['questions_num']
+    answers = db.execute_query(queries.get_all_answers_by_user_id, {'user_id': user_id})
+    answers_number = db.execute_query(queries.number_of_answers_by_user_id, {'user_id': user_id})[0]['answers_num']
+    user = db.execute_query(queries.get_user_by_user_id, {'user_id': user_id})[0]
+
+    return render_template('user_page.html', questions=questions, answers=answers, questions_number=questions_number,
+                           answers_number=answers_number, user=user)
 
 
 def update_image_files(type):
@@ -286,7 +531,6 @@ def update_image_files(type):
     and saved as a single string to in a database. The argument 'type' is of type
     dictionary with keys corresponding to the table (question or answer) columns in a database."""
 
-    print(f'DEBUG: ok')
     if 'question_id' in type:
         dir = 'answers'
     else:
@@ -296,9 +540,7 @@ def update_image_files(type):
     paths = []
     if uploaded_files:
         for file in uploaded_files:
-            print(f'DEBUG: uploaded_files')
             if file.filename != "":
-                print(f'DEBUG: {file.filename}')
                 file_name_raw = secure_filename(file.filename)
                 file_name = f'{time.time()}_{file_name_raw}'
                 file_path = os.path.join(UPLOAD_DIR, dir, file_name)
@@ -306,7 +548,6 @@ def update_image_files(type):
                 paths.append(file_name)
 
     if len(paths) > 0:
-        print(f'DEBUG: paths len: {len(paths)}')
         type['image'] = ';'.join(paths)
     elif isinstance(type['image'], list):
         type['image'] = ';'.join(type['image'])
@@ -331,12 +572,98 @@ def get_image(directory, file_name):
     return send_from_directory(os.path.join(UPLOAD_DIR, directory), filename=file_name)
 
 
+@app.route('/search')
+def search_question():
+    search_phrase = request.args.get('q')
+
+    quoted, unquoted = parse_search_phrase(search_phrase)
+
+    quoted.extend(unquoted)
+
+    quoted_copy = quoted.copy()
+    # for index1, i in enumerate(quoted):
+    #     for index2, j in enumerate(quoted):
+    #         if index1 != index2 and i in j:
+    #             quoted_copy.remove(i)
+
+    merge_phrase_parenthesis = [f'({f})' for f in quoted_copy]
+
+    regex_phrase = '|'.join(merge_phrase_parenthesis)
+
+    questions = db.execute_query(queries.search_question, {'query': regex_phrase})
+    answers = db.execute_query(queries.search_answer, {'query': regex_phrase})
+
+    for table_type in [answers, questions]:
+        for item in table_type:
+            if 'title' in item:
+                item['title'] = format_search_results(item['title'], quoted_copy)
+            item['message'] = format_search_results(item['message'], quoted_copy)
+
+    return render_template('search-results.html', questions=questions, answers=answers)
+
+
 @app.context_processor
 def util_functions():
     return dict(
         time_to_utc=time_to_utc,
         file_size=file_size
     )
+
+# Add comment to question
+@app.route('/question/<int:question_id>/new-comment', methods=["GET", "POST"])
+def add_comment_to_question(question_id):
+
+    warnings = {'message': None}
+
+    if request.method == "POST":
+        comment = request.form.to_dict()
+        comment["submission_time"] = datetime.datetime.now()
+        comment["edited_count"] = 0
+        comment["question_id"] = question_id
+
+        if comment['message'] == '':
+            warnings['message'] = "You must type a message"
+
+        # If at least one warning is set, a new response is rendered with warnings argument
+        # that allow to format problematic form fields.
+        if warnings["message"] is not None:
+            return render_template('add-comment-to-question.html', warnings=warnings, comment=comment, question_id=question_id)
+
+        db.execute_query(queries.add_comment_to_question, comment)
+
+        return redirect(url_for('question_list'))
+
+    else:
+        return render_template('add-comment-to-question.html', warnings=None, comment=None, question_id=question_id)
+
+
+# Add comment to answer
+@app.route('/answer/<answer_id>/new-comment', methods=["GET", "POST"])
+def add_comment_to_answer(answer_id):
+    answer = db.execute_query(queries.read_answer_by_id, {"id": answer_id})[0]
+    warnings = {'message': None}
+
+    if request.method == "POST":
+        comment = request.form.to_dict()
+        comment["submission_time"] = datetime.datetime.now()
+        comment["edited_count"] = 0
+        comment["answer_id"] = answer_id
+        comment["question_id"] = answer["question_id"]
+
+        if comment['message'] == '':
+            warnings['message'] = "You must type a message"
+
+        # If at least one warning is set, a new response is rendered with warnings argument
+        # that allow to format problematic form fields.
+        if warnings["message"] is not None:
+            return render_template('add-comment-to-answer.html', warnings=warnings, comment=comment, answer_id=answer_id)
+
+        db.execute_query(queries.add_comment_to_answer, comment)
+
+        return redirect(url_for('question_list'))
+
+    else:
+        return render_template('add-comment-to-answer.html', warnings=None, comment=None, answer_id=answer_id)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src='https://kit.fontawesome.com/a076d05399.js'></script>
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='search-results.css') }}">
+    <title>Title</title>
+</head>
+<body>
+<div class="body">
+    {% for question in questions %}
+        <div class="container question-container">
+            <a href="{{ url_for('question_details', question_id=question['id']) }}" class="title-link"><h3 class="center">{{ question['title']|safe }}</h3></a>
+            <span id="pub-time">{{ time_to_utc(question['submission_time']) }}</span>
+            <p id="message">{{ question['message']|safe }}</p>
+        </div>
+        {% for answer in answers %}
+            {% if answer['question_id'] == question['id'] %}
+                <div class="container answer-container">
+                    <span id="pub-time">{{ time_to_utc(answer['submission_time']) }}</span>
+                    <p id="message">{{ answer['message']|safe }}</p>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+</div>
+
+<!--
+<table>
+    <tbody>
+        {% for question in questions %}
+            <tr>
+                <td>
+                    <div class="title"><a href="{{ url_for('question_details', question_id=question['id']) }}" class="title-link">{{ question['title']|safe }}</a></div>
+                    <div class="message">{{ question['message']|safe }}</div>
+                </td>
+            </tr>
+            {% for answer in answers %}
+                {% if answer['question_id'] == question['id'] %}
+                    <tr>
+                        <td>
+                            <div class="message">{{ answer['message']|safe }}</div>
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    </tbody>
+</table>
+-->
+</body>
+</html>

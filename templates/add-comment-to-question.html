@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add comment</title>
+    <link type="text/css" rel="stylesheet" href="{{ url_for("static", filename="add-question.css") }}">
+    <script src="{{ url_for('static', filename='file-handling.js') }}"></script>
+</head>
+<body>
+    <div id="body">
+<div id="container">
+    <h3 class="center">New comment</h3>
+    <form id="form" action={{ url_for('add_comment_to_question', question_id=question_id) }} method="POST">
+        <textarea id="message" name="message" placeholder="Type your comment here ..." class="input center {{ "warning" if warnings['message'] }}"></textarea>
+        {% if warnings['message'] %}
+            <span class="text-warning center">{{ warnings['message'] }}</span>
+        {% endif %}
+
+        <button type="submit" class="center button">Post new comment</button>
+        <button type="button" class="center button" onclick="window.location.href='{{ url_for('question_details', question_id=question_id) }}';">Back to question details</button>
+    </form>
+</div>
+</div>
+</body>
+</html>
