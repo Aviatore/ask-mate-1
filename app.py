@@ -33,7 +33,18 @@ if not os.path.exists(os.path.join(UPLOAD_DIR, 'answers')):
 # Welcome page
 @app.route('/')
 def main_page():
-    return render_template('main_page.html')
+    table_headers = {
+        'headers': ['Question', 'Number of views', 'Number of votes', 'Submission time'],
+        'keys': ['title', 'view_number', 'vote_number', 'submission_time'],
+        'directions': [None, None, None, None]
+    }
+
+    order_by = 'submission_time'
+    latest_questions = db.execute_query(queries.read_latest_five_questions, order_by=order_by)
+    index = table_headers['keys'].index('submission_time')
+    table_headers['directions'][index] = 'desc'
+
+    return render_template('main_page.html', headers=table_headers, questions=latest_questions, order_by=order_by)
 
 
 # List questions
