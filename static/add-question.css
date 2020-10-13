@@ -47,9 +47,8 @@ h3 {
     height: 10em;
     padding: 5px;
 }
-#title {
-    padding: 5px;
-}
+
+
 #image {
     display: none;
 }
@@ -110,6 +109,9 @@ img:hover {
 }
 .input {
     margin-top: 10px;
+}
+.input:not([id="input-file-container"]) {
+    padding: 5px;
 }
 #checkbox-container {
     position: relative;

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src='https://kit.fontawesome.com/a076d05399.js'></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='question-details.css') }}">
+    <title>Question details</title>
+</head>
+<body>
+<div class="body">
+    <span id="table-title">User information:</span>
+    <table>
+        <tr>
+            <td class="td-id">User id</td>
+            <td class="td-data">{{ user.user_id }}</td>
+        </tr>
+        <tr>
+            <td class="td-id">User name</td>
+            <td class="td-data">{{ user.username }}</td>
+        </tr>
+        <tr>
+            <td class="td-id">Registration date</td>
+            <td class="td-data">{{ time_to_utc(user.registration_date) }}</td>
+        </tr>
+        <tr>
+            <td class="td-id">Count of asked questions</td>
+            <td class="td-data">{{ questions_number }}</td>
+        </tr>
+        <tr>
+            <td class="td-id">Count of comments</td>
+            <td class="td-data">{{ answers_number }}</td>
+        </tr>
+        <tr>
+            <td class="td-id">Reputation</td>
+            <td class="td-data">{{ user.reputation }}</td>
+        </tr>
+    </table>
+
+    <div class="block-header">
+        <span class="block-header-title-user">{{ user['username'] }}'s</span> <span class="block-header-title">questions</span>
+    </div>
+    {% if questions|length == 0 %}
+        <div class="container">
+            <h3 class="center title"></h3></a>
+            <p id="message"><span class="username">{{ user['username'] }}</span> hasn't asked any question yet.</p>
+        </div>
+    {% else %}
+        {% for question in questions %}
+            <div class="container">
+                <a href="{{ url_for('question_details', question_id=question['id']) }}"><h3 class="center title">{{ question['title'] }}</h3></a>
+                <i class="far fa-edit"></i>
+                <span class="pub-time">author:</span><span class="author"><a href="{{ url_for('user_details', user_id=question['user_id']) }}">{{ user['username'] }}</a></span>
+                <span class="pub-time">{{ time_to_utc(question['submission_time']) }}</span>
+                <p id="message">{{ question['message'] }}</p>
+                {% if question['image'] is not none %}
+                    {% for image_url in question['image'] %}
+                        <img src="{{ url_for('get_image', directory='questions', file_name=image_url) }}">
+                        <figcaption>{{ image_url }} ({{ file_size('questions', image_url) }} kb)</figcaption>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="block-header">
+        <span class="block-header-title-user">{{ user['username'] }}'s</span> <span class="block-header-title">answers</span>
+    </div>
+    {% if answers|length == 0 %}
+        <div class="container">
+            <h3 class="center title"></h3></a>
+            <p id="message"><span class="username">{{ user['username'] }}</span> hasn't answered any question yet.</p>
+        </div>
+    {% else %}
+        {% for answer in answers %}
+            <div class="container answers">
+                <a href="{{ url_for('question_details', question_id=answer['question_id']) }}"><h3 class="title">Re: {{ answer['question_title'] }}</h3></a>
+                <i class="far fa-edit"></i>
+                <span class="pub-time">author:</span><span class="author"><a href="{{ url_for('user_details', user_id=answer['user_id']) }}">{{ user['username'] }}</a></span>
+                <span class="pub-time">{{ time_to_utc(answer['submission_time']) }}</span>
+                <p id="message">{{ answer['message'] }}</p>
+                {% if answer['image'] is not none %}
+                    {% for image_url in answer['image'] %}
+                        <img src="{{ url_for('get_image', directory='questions', file_name=image_url) }}">
+                        <figcaption>{{ image_url }} ({{ file_size('questions', image_url) }} kb)</figcaption>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+</div>
+
+</body>
+</html>
