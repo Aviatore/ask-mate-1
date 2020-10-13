@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request, send_from_directory, session, flash
+from flask import Flask, render_template, redirect, url_for, request, send_from_directory, session, flash, make_response
 from data_manager import *
 from util import parse_search_phrase, format_search_results
 import datetime
@@ -506,13 +506,19 @@ def login():
             session['username'] = user['username']
             session['user_id'] = user['user_id']
 
-            return redirect(url_for('main_page'))
+            # return redirect(url_for('main_page'))
+            return redirect(request.cookies.get('prev_page'))
+
 
         warnings['not_valid'] = "Your user name and/or password is not valid."
 
         return render_template('login.html', warnings=warnings)
 
-    return render_template('login.html', warnings=None)
+    response = make_response(render_template('login.html', warnings=None))
+    response.set_cookie('prev_page', request.referrer)
+
+    return response
+    # return render_template('login.html', warnings=None)
 
 
 @app.route('/logout')

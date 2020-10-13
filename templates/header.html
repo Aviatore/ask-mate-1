@@ -1,0 +1,16 @@
+<div id="h-container">
+</div>
+<div id="h-menu">
+    <ul class="h-list right">
+        {% if session %}
+            <a href="{{ url_for('logout') }}"><li class="h-list-item">Logout</li></a>
+        {% else %}
+            <a href="{{ url_for('login') }}"><li class="h-list-item">Login</li></a>
+        {% endif %}
+    </ul>
+    <ul class="h-list">
+        <a href="{{ url_for('main_page') }}"><li class="h-list-item">Main page</li></a>
+        <a href="{{ url_for('question_list') }}"><li class="h-list-item">Question list</li></a>
+        <a href="#"><li class="h-list-item">Users</li></a>
+    </ul>
+</div>
