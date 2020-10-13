@@ -108,13 +108,17 @@ def question_details(question_id):
 
             # question_tags.append(qt_row['name'])
 
-    return render_template('question-details.html',
+    response = make_response(render_template('question-details.html',
                            question_id=question_id,
                            question_data=question,
                            answers_data=answers,
                            question_tags=question_tags,
                            comments=comments)
+                             )
 
+    response.delete_cookie('prev_page')
+
+    return response
 
 # Ask a question
 @app.route('/add-question', methods=["GET", "POST"])
