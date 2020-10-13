@@ -51,3 +51,7 @@ div.message {
     font-family: sans-serif;
     font-size: 1vw;
 }
+
+div.user_id {
+    text-align: center;
+}

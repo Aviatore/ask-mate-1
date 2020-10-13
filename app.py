@@ -76,6 +76,22 @@ def question_list():
     return render_template('list.html', headers=table_headers, questions=questions_sorted, order_by=order_by,
                            order_direction=order_direction)
 
+# List users
+@app.route('/users')
+def users_list():
+    table_headers = {
+        'headers': ['User id', 'Username', 'Registration date', 'Reputation'],
+        'keys': ['user_id', 'username', 'registration_date', 'reputation'],
+        'directions': [None, None, None, None]
+    }
+
+    order_by = 'user_id'
+    all_users = db.execute_query(queries.get_all_users, order_by=order_by)
+    index = table_headers['keys'].index('user_id')
+    table_headers['directions'][index] = 'desc'
+
+    return render_template('users_list.html', headers=table_headers, users=all_users, order_by=order_by)
+
 
 # Display a question
 @app.route('/question/<question_id>')

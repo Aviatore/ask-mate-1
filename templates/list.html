@@ -53,14 +53,17 @@
     {% if session %}
         <tfoot>
             <tr>
-                <td></td><td></td><td></td><td></td>
+                <td></td><td></td><td></td>
+                <td>
+                    <a href="{{ url_for("main_page") }}" title="Back to main menu">Back to main menu <i class="fas fa-undo"></i></a>
+                </td>
                 <td>
                     <a href="{{ url_for("question_add") }}" title="Add a new question"><i class="fas fa-plus"></i></a>
                 </td>
+
             </tr>
         </tfoot>
     {% endif %}
 </table>
-
 </body>
 </html>

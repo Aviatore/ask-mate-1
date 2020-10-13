@@ -74,12 +74,14 @@ class Queries:
         self.get_user_by_username = 'SELECT user_id, username, email, password, registration_date, reputation ' \
                                     'FROM users WHERE username = %(username)s'
         self.get_user_by_user_id = 'SELECT user_id, username, email, registration_date, reputation ' \
-                                    'FROM users WHERE user_id = %(user_id)s'
+                                   'FROM users WHERE user_id = %(user_id)s'
+        self.get_all_users = 'SELECT user_id, username, registration_date, reputation ' \
+                             'FROM users'
         self.add_new_user = 'INSERT INTO users (username, email, password)' \
                             'VALUES (%(username)s, %(email)s, %(password)s)'
         self.get_all_questions_by_user_id = 'SELECT id, title, message, view_number, vote_number, submission_time, image, user_id ' \
-                                   'FROM question ' \
-                                   'WHERE user_id = %(user_id)s'
+                                            'FROM question ' \
+                                            'WHERE user_id = %(user_id)s'
         self.get_all_answers_by_user_id = 'SELECT a.id, a.question_id, a.message, a.vote_number, a.submission_time, a.image, a.user_id, q.title as "question_title" ' \
                                            'FROM answer as a ' \
                                           'INNER JOIN question as q ON(q.id = a.question_id)' \
