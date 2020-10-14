@@ -1,11 +1,13 @@
 #search-box {
     position: relative;
-    background: #685454;
+    backgrounds: #685454;
+    background: #614d4d;
     text-align: right;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
+    padding-top: 5px;
 }
 #search-box input[type='submit'] {
-    margin: 0 10px 10px 0px;
+    margin: 0 10px 5px 0px;
 }
 #search-box input[type='search']:focus {
     outline: none;
