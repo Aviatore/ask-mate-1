@@ -6,72 +6,25 @@
     <script src='https://kit.fontawesome.com/a076d05399.js'></script>
     <script src="{{ url_for('static', filename='scripts.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='list.css') }}">
-    <style>
-        div {text-align: center;}
-        h1 {position: center;}
-
-        #search-box {
-            margin: 1rem;
-        }
-
-        .message {text-align: left;
-            padding: 0.5rem;
-        }
-
-        .welcome_text {
-            position: relative;
-            border-collapse: collapse;
-            width: 80%;
-            margin: auto;
-            font-family: sans-serif;
-            font-size: 1vw;
-        }
-
-        .button {
-            border: none;
-            color: white;
-            padding: 15px 32px;
-            text-align: center;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-        }
-
-        .button_ask {
-            background-color: darkcyan;
-            cursor: help;
-        }
-
-        .button_answer {
-            background-color: #5d94ea;
-            cursor: pointer;
-        }
-
-        .latest_questions {
-            margin-top: 2em;
-            text-align: left;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='header.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='search-field.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main-page.css') }}">
 </head>
 <body>
-    <div class="welcome_text">
-        <div id="login">
-            <button type="button" onclick="location.href='{{ url_for('login') if not session else url_for('logout') }}'">{{ 'Login' if not session else 'Logout' }}</button>
-            <button type="button" onclick="location.href='{{ url_for('register') if not session else url_for('main_page') }}'">{{ 'Registration' if not session else ':)' }}</button>
+<div class="body">
+    {% include "header.html" %}
+
+    <div class="welcome_container">
+        <div class="welcome_content">
+            <h1>Hello {{ 'Mate!' if not session else session['username'] }}</h1>
+            <p>Welcome to <em>AskMate</em>, feel free to ask anything that comes to your mind. </p>
+            <p>Other mates could help resolve your problem, or maybe you could give someone a hand?  ^^</p>
+            <p>So... how will it be ? Are we mates ?</p>
+            <button class="button button_ask"><a href="{{ url_for('question_add') }}">Ask Q</a></button>
+            <button class="button button_answer"><a href='{{ url_for('question_list') }}'>List Q</a></button>
         </div>
-        <h1>Hello {{ 'Mate!' if not session else session['username'] }}</h1>
-        <p>Welcome to <em>AskMate</em>, feel free to ask anything that comes to your mind. </p>
-        <p>Other mates could help resolve your problem, or maybe you could give someone a hand?  ^^</p>
-        <p>So... how will it be ? Are we mates ?</p>
-        <button class="button button_ask"><a href="{{ url_for('question_add') }}">Ask Q</a></button>
-        <button class="button button_answer"><a href='{{ url_for('question_list') }}'>List Q</a></button>
     </div>
-    <div id="search-box">
-        <form action="{{ url_for('search_question') }}">
-            <input type="search" name="q" placeholder="Search ..." />
-            <input type="submit" value="Search">
-        </form>
-    </div>
+
     <div class="latest_questions">
         <table>
             <thead>
@@ -103,5 +56,6 @@
             </tbody>
         </table>
     </div>
+</div>
 </body>
 </html>

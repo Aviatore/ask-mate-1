@@ -1,0 +1,12 @@
+#search-box {
+    position: relative;
+    background: #685454;
+    text-align: right;
+    margin-bottom: 10px;
+}
+#search-box input[type='submit'] {
+    margin: 0 10px 10px 0px;
+}
+#search-box input[type='search']:focus {
+    outline: none;
+}

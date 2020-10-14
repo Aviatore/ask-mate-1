@@ -1,0 +1,15 @@
+.welcome_container {
+    position: relative;
+    height: 450px;
+    background-image: url("img/main-bcg.jpg");
+    background-size: cover;
+    background-position: bottom;
+    font-family: sans-serif;
+}
+.welcome_content {
+    position: absolute;
+    margin-left: 50px;
+}
+.welcome_content h1 {
+    font-size: 5em;
+}
