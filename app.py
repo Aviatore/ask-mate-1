@@ -44,8 +44,10 @@ def main_page():
     index = table_headers['keys'].index('submission_time')
     table_headers['directions'][index] = 'desc'
 
-    return render_template('main_page.html', headers=table_headers, questions=latest_questions, order_by=order_by)
+    response = make_response(render_template('main_page.html', headers=table_headers, questions=latest_questions, order_by=order_by))
+    response.delete_cookie('prev_page')
 
+    return response
 
 # List questions
 @app.route('/list')
@@ -73,8 +75,13 @@ def question_list():
         index = table_headers['keys'].index('submission_time')
         table_headers['directions'][index] = 'desc'
 
-    return render_template('list.html', headers=table_headers, questions=questions_sorted, order_by=order_by,
+    response = make_response(render_template('list.html', headers=table_headers, questions=questions_sorted, order_by=order_by,
                            order_direction=order_direction)
+                             )
+
+    response.delete_cookie('prev_page')
+
+    return response
 
 
 # Display a question
