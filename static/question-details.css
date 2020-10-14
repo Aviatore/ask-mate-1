@@ -40,7 +40,7 @@ h3, h4 {
 .author a:hover {
     text-decoration: underline;
 }
-#message {
+.message {
     font-family: sans-serif;
     font-size: 0.9em;
     color: rgb(74, 74, 74);
@@ -199,4 +199,15 @@ td {
     font-size: 12px;
     color: rgb(74, 74, 74);
     padding-left: 5px;
+}
+.comment-container {
+    position: relative;
+    width: 100%;
+    background-color: #b9e6d3;
+    box-sizing: border-box;
+    padding: 5px 5px;
+    margin-top: 5px;
+}
+.btn-comment {
+    margin-top: 10px;
 }

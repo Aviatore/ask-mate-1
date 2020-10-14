@@ -666,7 +666,7 @@ def add_comment_to_question(question_id):
 
         db.execute_query(queries.add_comment_to_question, comment)
 
-        return redirect(url_for('question_list'))
+        return redirect(url_for('question_details', question_id=question_id))
 
     else:
         return render_template('add-comment-to-question.html', warnings=None, comment=None, question_id=question_id)
@@ -695,7 +695,7 @@ def add_comment_to_answer(answer_id):
 
         db.execute_query(queries.add_comment_to_answer, comment)
 
-        return redirect(url_for('question_list'))
+        return redirect(url_for('question_details', question_id=answer['question_id']))
 
     else:
         return render_template('add-comment-to-answer.html', warnings=None, comment=None, answer=answer)
