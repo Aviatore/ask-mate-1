@@ -5,10 +5,18 @@
     <script src='https://kit.fontawesome.com/a076d05399.js'></script>
     <script src="{{ url_for('static', filename='scripts.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='search-results.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='header.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='search-field.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='question-details.css') }}">
     <title>Title</title>
 </head>
 <body>
 <div class="body">
+    {% include "header.html" %}
+
+    <div class="block-header">
+        <span class="block-header-title">Search results</span>
+    </div>
     {% for question in questions %}
         <div class="container question-container">
             <a href="{{ url_for('question_details', question_id=question['id']) }}" class="title-link"><h3 class="center">{{ question['title']|safe }}</h3></a>
@@ -26,28 +34,5 @@
     {% endfor %}
 </div>
 
-<!--
-<table>
-    <tbody>
-        {% for question in questions %}
-            <tr>
-                <td>
-                    <div class="title"><a href="{{ url_for('question_details', question_id=question['id']) }}" class="title-link">{{ question['title']|safe }}</a></div>
-                    <div class="message">{{ question['message']|safe }}</div>
-                </td>
-            </tr>
-            {% for answer in answers %}
-                {% if answer['question_id'] == question['id'] %}
-                    <tr>
-                        <td>
-                            <div class="message">{{ answer['message']|safe }}</div>
-                        </td>
-                    </tr>
-                {% endif %}
-            {% endfor %}
-        {% endfor %}
-    </tbody>
-</table>
--->
 </body>
 </html>
