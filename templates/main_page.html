@@ -9,6 +9,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='header.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='search-field.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main-page.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='question-details.css') }}">
 </head>
 <body>
 <div class="body">
@@ -27,34 +28,45 @@
     </div>
 
     <div class="latest_questions">
+    <div class="block-header">
+        <span class="block-header-title">Top 10 questions</span>
+    </div>
         <table>
-            <thead>
-                <tr>
-                    {% for header in headers['headers'] %}
-                        <th>
-                            {{ header }}
-                            {% if headers['directions'][loop.index0] == 'asc' %}
-                                <i class="fas fa-sort-down"></i>
-                                {% elif headers['directions'][loop.index0] == 'desc' %}
-                                <i class="fas fa-sort-up"></i>
-                            {% endif %}
-                        </th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for question in questions %}
+            {% if questions|length == 0 %}
+                {% if session %}
+                    <span id="no-question-msg">There is no questions yet. Please, feel free to ask one!</span>
+                {% else %}
+                    <span id="no-question-msg">There is no questions yet. Please, create a new account to ask a question!</span>
+                {% endif %}
+            {% else %}
+                <thead>
                     <tr>
-                        <td>
-                            <div class="title"><a href="{{ url_for('question_details', question_id=question['id']) }}" class="title-link">{{ question['title'] }}</a></div>
-                            <div class="message">{{ question['message'] }}</div>
-                        </td>
-                    {% for key in headers['keys'][1:] %}
-                        <td>{{ question[key] if key != 'submission_time' else time_to_utc(question[key]) }}</td>
-                    {% endfor %}
+                        {% for header in headers['headers'] %}
+                            <th>
+                                {{ header }}
+                                {% if headers['directions'][loop.index0] == 'asc' %}
+                                    <i class="fas fa-sort-down"></i>
+                                    {% elif headers['directions'][loop.index0] == 'desc' %}
+                                    <i class="fas fa-sort-up"></i>
+                                {% endif %}
+                            </th>
+                        {% endfor %}
                     </tr>
-                {% endfor %}
-            </tbody>
+                </thead>
+                <tbody>
+                    {% for question in questions %}
+                        <tr>
+                            <td>
+                                <div class="title"><a href="{{ url_for('question_details', question_id=question['id']) }}" class="title-link">{{ question['title'] }}</a></div>
+                                <div class="message">{{ question['message'] }}</div>
+                            </td>
+                        {% for key in headers['keys'][1:] %}
+                            <td>{{ question[key] if key != 'submission_time' else time_to_utc(question[key]) }}</td>
+                        {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            {% endif %}
         </table>
     </div>
 </div>
