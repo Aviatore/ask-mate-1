@@ -42,11 +42,12 @@
         {{ question_data['vote_number'] }}
         </span><br/>
     <span>
-        tags:
+        <span class="tag-txt">tags:</span>
         {% for tag in question_tags.items() %}
-        {{ tag[1] }} <a href="{{ url_for('delete_tag', question_id=question_id, tag_id=tag[0]) }}">x</a>
+            <div class="tag">{{ tag[1] }} <a href="{{ url_for('delete_tag', question_id=question_id, tag_id=tag[0]) }}"><i class="fas fa-times"></i></a></div>
+
         {% endfor %}
-        <a href="{{ url_for('new_tag', question_id=question_id) }}">Add</a>
+        <a href="{{ url_for('new_tag', question_id=question_id) }}"><div class="new-tag">Add</div></a>
     </span>
         <p id="message">{{ question_data['message'] }}</p>
         {% if question_data['image'] is not none %}
