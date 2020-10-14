@@ -33,6 +33,9 @@
 .dropdown:hover .dropdown-content {
     height: 200px;
 }
+.dropdown > a {
+    color: #18d918;
+}
 .dropdown-content {
     position: absolute;
     right: 0;
@@ -40,7 +43,7 @@
     width: 200px;
     height: 0px;
     overflow: hidden;
-    transition: height 1s;
+    transition: height .5s;
 }
 .h-list-vert {
     position: absolute;

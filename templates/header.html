@@ -6,10 +6,11 @@
         {% if session %}
              <li class="h-list-item user">
                 <div class="dropdown">
-                    <a href="{{ url_for('register') }}">{{ session['username'] }}</a>
+                    <a href="{{ url_for('register') }}">Logged in: {{ session['username'] }}</a>
                     <div class="dropdown-content">
                         <ul class="h-list-vert " >
                             <a href="{{ url_for('user_details', user_id=session['user_id']) }}"><li class="h-list-vert-item" >User details</li></a>
+                            <a href="#"><li class="h-list-vert-item">All users</li></a>
                             <a href="{{ url_for('logout') }}"><li class="h-list-vert-item" >Logout</li></a>
                         </ul>
                     </div>
@@ -27,7 +28,7 @@
     <ul class="h-list">
         <a href="{{ url_for('main_page') }}"><li class="h-list-item">Main page</li></a>
         <a href="{{ url_for('question_list') }}"><li class="h-list-item">Question list</li></a>
-        <a href="#"><li class="h-list-item">Users</li></a>
+
     </ul>
 
     {% include 'search-field.html' %}
