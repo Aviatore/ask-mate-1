@@ -134,3 +134,7 @@ img:hover {
 .title > h3 {
     color: white;
 }
+.tag-txt {
+    font-family: sans-serif;
+    margin-top: 10px;
+}
