@@ -79,9 +79,13 @@
                     </div>
                 {% endif %}
             </div>
-            <a href="{{ url_for('answer_edit', answer_id=answer['id']) }}">
+            {% if session and session['user_id'] == answer['user_id'] %}
+                <a href="{{ url_for('answer_edit', answer_id=answer['id']) }}">
+                    <i class="far fa-edit"></i>
+                </a>
+            {% else %}
                 <i class="far fa-edit"></i>
-            </a>
+            {% endif %}
 
             <span class="pub-time">author:</span><span class="author"><a href="{{ url_for('user_details', user_id=answer['user_id']) }}">{{ answer['username'] }}</a></span>
             <span class="pub-time">{{ time_to_utc(answer['submission_time']) }}</span>

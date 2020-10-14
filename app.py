@@ -8,6 +8,7 @@ from urllib.parse import unquote
 from werkzeug.utils import secure_filename
 from database import db, queries
 import bcrypt
+import base64
 
 
 UPLOAD_DIR = 'uploaded/'
@@ -44,10 +45,8 @@ def main_page():
     index = table_headers['keys'].index('submission_time')
     table_headers['directions'][index] = 'desc'
 
-    response = make_response(render_template('main_page.html', headers=table_headers, questions=latest_questions, order_by=order_by))
-    response.delete_cookie('prev_page')
+    return render_template('main_page.html', headers=table_headers, questions=latest_questions, order_by=order_by)
 
-    return response
 
 # List questions
 @app.route('/list')
@@ -75,13 +74,8 @@ def question_list():
         index = table_headers['keys'].index('submission_time')
         table_headers['directions'][index] = 'desc'
 
-    response = make_response(render_template('list.html', headers=table_headers, questions=questions_sorted, order_by=order_by,
+    return render_template('list.html', headers=table_headers, questions=questions_sorted, order_by=order_by,
                            order_direction=order_direction)
-                             )
-
-    response.delete_cookie('prev_page')
-
-    return response
 
 
 # Display a question
@@ -115,17 +109,13 @@ def question_details(question_id):
 
             # question_tags.append(qt_row['name'])
 
-    response = make_response(render_template('question-details.html',
+    return render_template('question-details.html',
                            question_id=question_id,
                            question_data=question,
                            answers_data=answers,
                            question_tags=question_tags,
                            comments=comments)
-                             )
 
-    response.delete_cookie('prev_page')
-
-    return response
 
 # Ask a question
 @app.route('/add-question', methods=["GET", "POST"])
@@ -517,16 +507,14 @@ def login():
             session['username'] = user['username']
             session['user_id'] = user['user_id']
 
-            # return redirect(url_for('main_page'))
-            return redirect(request.cookies.get('prev_page'))
-
+            return redirect(get_prev_url())
 
         warnings['not_valid'] = "Your user name and/or password is not valid."
 
         return render_template('login.html', warnings=warnings)
 
     response = make_response(render_template('login.html', warnings=None))
-    response.set_cookie('prev_page', request.referrer)
+    response.set_cookie('prev_page', base64_encode(request.referrer))
 
     return response
     # return render_template('login.html', warnings=None)
@@ -537,6 +525,8 @@ def logout():
     if session:
         session.pop('username')
         session.pop('user_id')
+
+    # return redirect(request.cookies.get('prev_page', url_for('main_page')))
 
     return redirect(url_for('main_page'))
 
@@ -593,6 +583,23 @@ def file_size(directory, file_name):
     file_size_kb = f'{file_size_bytes:.1f}'
 
     return file_size_kb
+
+
+def base64_encode(message):
+    return base64.b64encode(message.encode('utf-8'))
+
+
+def base64_decode(message):
+    return base64.b64decode(message).decode('utf-8')
+
+
+def get_prev_url():
+    prev_url = request.cookies.get('prev_page')
+
+    if prev_url:
+        return base64_decode(prev_url)
+
+    return url_for('main_page')
 
 
 @app.route('/get_file/<directory>/<file_name>')
