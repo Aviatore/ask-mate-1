@@ -691,14 +691,14 @@ def add_comment_to_answer(answer_id):
         # If at least one warning is set, a new response is rendered with warnings argument
         # that allow to format problematic form fields.
         if warnings["message"] is not None:
-            return render_template('add-comment-to-answer.html', warnings=warnings, comment=comment, answer_id=answer_id)
+            return render_template('add-comment-to-answer.html', warnings=warnings, comment=comment, answer=answer)
 
         db.execute_query(queries.add_comment_to_answer, comment)
 
         return redirect(url_for('question_list'))
 
     else:
-        return render_template('add-comment-to-answer.html', warnings=None, comment=None, answer_id=answer_id)
+        return render_template('add-comment-to-answer.html', warnings=None, comment=None, answer=answer)
 
 
 if __name__ == '__main__':
