@@ -58,7 +58,7 @@
         {% for comment in comments%}
             {% if comment['answer_id'] is none %}
             <div class="comment-container" style="background-color: aquamarine">
-                <span id="pub-time">{{ time_to_utc(comment['submission_time']) }}</span><br>
+               <span class="pub-time">{{ time_to_utc(comment['submission_time']) }}</span><br>
                 {{ comment['message'] }}
             </div>
             {% endif %}
@@ -118,7 +118,7 @@
         {% for comment in comments%}
             {% if comment['answer_id'] == answer['id'] %}
             <div class="comment-container" style="background-color: aquamarine">
-                <span id="pub-time">{{ time_to_utc(comment['submission_time']) }}</span><br>
+                <span class="pub-time">{{ time_to_utc(comment['submission_time']) }}</span><br>
                 {{ comment['message'] }}
             </div>
             {% endif %}

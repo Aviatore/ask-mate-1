@@ -45,11 +45,11 @@ class Queries:
         self.delete_answer_by_id = 'DELETE FROM answer WHERE id = %(id)s'
         self.delete_question_by_id = 'DELETE FROM question WHERE id = %(id)s'
         self.read_answer_by_id = 'SELECT id, question_id, message, vote_number, submission_time, image FROM answer WHERE id = %(id)s'
-        self.add_comment_to_question = 'INSERT INTO comment (question_id, message, submission_time, edited_count)' \
-                                       'VALUES (%(question_id)s, %(message)s, %(submission_time)s, %(edited_count)s)'
+        self.add_comment_to_question = 'INSERT INTO comment (question_id, message, submission_time, edited_count, user_id)' \
+                                       'VALUES (%(question_id)s, %(message)s, %(submission_time)s, %(edited_count)s, %(user_id)s)'
         self.read_comments_by_question_id = 'SELECT * FROM comment WHERE question_id=%(question_id)s'
-        self.add_comment_to_answer = 'INSERT INTO comment (question_id, answer_id, message, submission_time, edited_count)' \
-                                     'VALUES (%(question_id)s, %(answer_id)s, %(message)s, %(submission_time)s, %(edited_count)s)'
+        self.add_comment_to_answer = 'INSERT INTO comment (question_id, answer_id, message, submission_time, edited_count, user_id)' \
+                                     'VALUES (%(question_id)s, %(answer_id)s, %(message)s, %(submission_time)s, %(edited_count)s, %(user_id)s)'
         self.read_comments_by_answer_id = 'SELECT * FROM comment WHERE answer_id=%(answer_id)s'
 
         self.read_tag_id_by_question_id = 'SELECT tag_id FROM question_tag WHERE question_id=%(question_id)s'
@@ -83,9 +83,9 @@ class Queries:
                                             'FROM question ' \
                                             'WHERE user_id = %(user_id)s'
         self.get_all_answers_by_user_id = 'SELECT a.id, a.question_id, a.message, a.vote_number, a.submission_time, a.image, a.user_id, q.title as "question_title" ' \
-                                           'FROM answer as a ' \
+                                          'FROM answer as a ' \
                                           'INNER JOIN question as q ON(q.id = a.question_id)' \
-                                           'WHERE a.user_id = %(user_id)s'
+                                          'WHERE a.user_id = %(user_id)s'
         self.number_of_questions_by_user_id = 'SELECT COUNT(*) as "questions_num" ' \
                                               'FROM question ' \
                                               'WHERE user_id = %(user_id)s'

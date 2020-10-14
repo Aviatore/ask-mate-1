@@ -651,6 +651,8 @@ def add_comment_to_question(question_id):
         if comment['message'] == '':
             warnings['message'] = "You must type a message"
 
+        comment['user_id'] = session['user_id']
+
         # If at least one warning is set, a new response is rendered with warnings argument
         # that allow to format problematic form fields.
         if warnings["message"] is not None:
@@ -679,6 +681,8 @@ def add_comment_to_answer(answer_id):
 
         if comment['message'] == '':
             warnings['message'] = "You must type a message"
+
+        comment['user_id'] = session['user_id']
 
         # If at least one warning is set, a new response is rendered with warnings argument
         # that allow to format problematic form fields.
