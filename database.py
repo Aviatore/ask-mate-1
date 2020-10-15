@@ -91,7 +91,9 @@ class Queries:
                                             'FROM answer ' \
                                             'WHERE user_id = %(user_id)s'
         self.read_latest_five_questions = 'SELECT id, title, message, view_number, vote_number, submission_time, image FROM question ORDER BY {order_by} DESC LIMIT 5'
-
+        self.add_reputation = 'UPDATE users SET reputation = (reputation + %(rep_value)s) WHERE user_id = %(user_id)s'
+        self.read_user_id_by_question_id = 'SELECT user_id FROM question WHERE id = %(id)s'
+        self.read_user_id_by_answer_id = 'SELECT user_id FROM answer WHERE id = %(id)s'
 class DB:
     def __init__(self):
         self.host = os.environ.get("DATABASE_HOST")

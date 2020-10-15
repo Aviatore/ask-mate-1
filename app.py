@@ -333,6 +333,11 @@ def question_vote_up(question_id):
 
             db.execute_query(queries.update_question_by_id, question)
 
+
+            rep_value = 5
+            question_user_id = db.execute_query(queries.read_user_id_by_question_id, {'id':question_id})[0]['user_id']
+            db.execute_query(queries.add_reputation, {'rep_value':rep_value, 'user_id':question_user_id})
+
     return redirect(url_for('question_details', question_id=question_id))
 
 
@@ -349,6 +354,10 @@ def question_vote_down(question_id):
             question['users_id_that_vote'].append(session['user_id'])
 
             db.execute_query(queries.update_question_by_id, question)
+
+            rep_value = -2
+            question_user_id = db.execute_query(queries.read_user_id_by_question_id, {'id':question_id})[0]['user_id']
+            db.execute_query(queries.add_reputation, {'rep_value':rep_value, 'user_id':question_user_id})
 
     return redirect(url_for('question_details', question_id=question_id))
 
@@ -368,6 +377,11 @@ def answer_vote_up(answer_id):
             db.execute_query(queries.update_answer_by_id, answer)
             db.execute_query(queries.update_question_by_id, question)
 
+            rep_value = 10
+            asnwer_user_id = db.execute_query(queries.read_user_id_by_answer_id, {'id':answer_id})[0]['user_id']
+            db.execute_query(queries.add_reputation, {'rep_value':rep_value, 'user_id':asnwer_user_id})
+
+
     return redirect(url_for('question_details', question_id=answer['question_id']))
 
 
@@ -385,6 +399,10 @@ def answer_vote_down(answer_id):
             answer['users_id_that_vote'].append(session['user_id'])
             db.execute_query(queries.update_answer_by_id, answer)
             db.execute_query(queries.update_question_by_id, question)
+
+            rep_value = -2
+            asnwer_user_id = db.execute_query(queries.read_user_id_by_answer_id, {'id':answer_id})[0]['user_id']
+            db.execute_query(queries.add_reputation, {'rep_value':rep_value, 'user_id':asnwer_user_id})
 
     return redirect(url_for('question_details', question_id=answer['question_id']))
 
