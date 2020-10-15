@@ -92,7 +92,28 @@ class Queries:
         self.number_of_answers_by_user_id = 'SELECT COUNT(*) as "answers_num" ' \
                                             'FROM answer ' \
                                             'WHERE user_id = %(user_id)s'
+        self.number_of_comments_by_user_id = 'SELECT COUNT(*) as "comment_num" ' \
+                                             'FROM comment ' \
+                                             'WHERE user_id = %(user_id)s'
         self.read_latest_five_questions = 'SELECT id, title, message, view_number, vote_number, submission_time, image FROM question ORDER BY {order_by} DESC LIMIT 5'
+        self.get_id_by_questions = 'SELECT DISTINCT user_id FROM question'
+        self.get_questions_count_by_user_id = 'SELECT users.user_id, COUNT(question.user_id) AS question_count ' \
+                                              'FROM users INNER JOIN question ' \
+                                              '     ON users.user_id = question.user_id ' \
+                                              'GROUP BY users.user_id ' \
+                                              'ORDER BY users.user_id'
+        self.get_answers_count_by_user_id = 'SELECT users.user_id, COUNT(answer.user_id) AS answer_count ' \
+                                            'FROM users ' \
+                                            'INNER JOIN answer ' \
+                                            '    ON users.user_id = answer.user_id ' \
+                                            'GROUP BY users.user_id '  \
+                                            'ORDER BY users.user_id'
+        self.get_comments_count_by_user_id = 'SELECT users.user_id, COUNT(comment.user_id) AS comment_count ' \
+                                             'FROM users ' \
+                                             'INNER JOIN comment ' \
+                                             '    ON users.user_id = comment.user_id ' \
+                                             'GROUP BY users.user_id ' \
+                                             'ORDER BY users.user_id '
 
 class DB:
     def __init__(self):

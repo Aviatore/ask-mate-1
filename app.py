@@ -80,17 +80,21 @@ def question_list():
 @app.route('/users')
 def users_list():
     table_headers = {
-        'headers': ['User id', 'Username', 'Registration date', 'Reputation'],
-        'keys': ['user_id', 'username', 'registration_date', 'reputation'],
+        'headers': ['User id', 'Username', 'Registration date', 'Reputation', 'Questions asked', 'Answers added', 'Commented posts'],
+        'keys': ['user_id', 'username', 'registration_date', 'reputation', 'asked_questions', 'answers', 'comments'],
         'directions': [None, None, None, None]
     }
 
     order_by = 'user_id'
     all_users = db.execute_query(queries.get_all_users, order_by=order_by)
+    question_count = db.execute_query(queries.get_questions_count_by_user_id)
+    answer_count = db.execute_query(queries.get_answers_count_by_user_id)
+    comment_count = db.execute_query(queries.get_comments_count_by_user_id)
     index = table_headers['keys'].index('user_id')
     table_headers['directions'][index] = 'desc'
 
-    return render_template('users_list.html', headers=table_headers, users=all_users, order_by=order_by)
+    return render_template('users_list.html', headers=table_headers, users=all_users, order_by=order_by,
+                           question_count=question_count, answer_count=answer_count, comment_count=comment_count)
 
 
 # Display a question

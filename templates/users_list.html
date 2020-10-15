@@ -32,6 +32,9 @@
                         </td>
                     {% for key in headers['keys'][1:] %}
                         <td>{{ user[key] if key != 'submission_time' else time_to_utc(user[key]) }}</td>
+{#                        <td>{{ question_count|selectattr('user_id', user['user_id']) }}</td>#}
+{#                        <td>{{ answer_count|selectattr('user_id', user['user_id']) }}</td>#}
+{#                        <td>{{ comment_count|selectattr('user_id', user['user_id']) }}</td>#}
                     {% endfor %}
                     </tr>
                 {% endfor %}
