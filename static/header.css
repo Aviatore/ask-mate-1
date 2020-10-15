@@ -2,8 +2,10 @@
     position: relative;
     width: 100%;
     height: 100px;
-    background-image: url("img/header_.svg");
+    background-image: url("img/header.png");
     background-repeat: no-repeat;
+    background-size: contain;
+    background-position-y: 10px;
     background-color: #685454;
     box-sizing: border-box;
     padding: 10px 10px;
