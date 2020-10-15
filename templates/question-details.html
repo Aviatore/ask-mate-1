@@ -26,21 +26,31 @@
         <span class="pub-time">{{ time_to_utc(question_data['submission_time']) }}
             {% if session %}
                 {% if session['user_id'] == question_data['user_id'] %}
-                    <a href="javascript:voteSameUser_alert('question');"><button id="vote_up_question"><b>+</b></button></a>
-                    <a href="javascript:voteSameUser_alert('question');"><button id="vote_down_question"><b>-</b></button></a>
+                    <a href="#"><button class="vote_up_question"><b>+</b></button></a>
+                    <a href="#"><button class="vote_down_question"><b>-</b></button></a>
                 {% elif session['user_id'] in question_data.users_id_that_vote %}
-                    <a href="javascript:vote_alert('question');"><button id="vote_up_question"><b>+</b></button></a>
-                    <a href="javascript:vote_alert('question');"><button id="vote_down_question"><b>-</b></button></a>
+                    <a href="#"><button class="vote_up_question"><b>+</b></button></a>
+                    <a href="#"><button class="vote_down_question"><b>-</b></button></a>
                 {% else %}
                     <a href="{{ url_for('question_vote_up', question_id=question_data['id'])}}"><button id="vote_up_question"><b>+</b></button></a>
                     <a href="{{ url_for('question_vote_down', question_id=question_data['id'])}}"><button id="vote_down_question"><b>-</b></button></a>
                 {% endif %}
             {% else %}
-                <button id="vote_up_question"><b>+</b></button>
-                <button id="vote_down_question"><b>-</b></button>
+                <a href="#"><button class="vote_up_question"><b>+</b></button></a>
+                <a href="#"><button class="vote_down_question"><b>-</b></button></a>
             {% endif %}
         {{ question_data['vote_number'] }}
-        </span><br/>
+        </span>
+        <span class="tag-txt warning">
+            {% if session['user_id'] == question_data['user_id'] %}
+                You cannot vote for your question!
+            {% elif session['user_id'] in question_data.users_id_that_vote %}
+                You have already voted for that question!
+            {% else %}
+                You must be logged in to vote!
+            {% endif %}
+        </span>
+        <br/>
     <span>
         <span class="tag-txt">tags:</span>
 
@@ -112,22 +122,32 @@
                 Was it helpful?
                 {% if session %}
                     {% if session['user_id'] == answer['user_id'] %}
-                        <a href="javascript:voteSameUser_alert('answer');"><button id="vote_up_answer"><b>+</b></button></a>
-                        <a href="javascript:voteSameUser_alert('answer');"><button id="vote_down_answer"><b>-</b></button></a>
+                        <a href="#"><button class="vote_up_answer"><b>+</b></button></a>
+                        <a href="#"><button class="vote_down_answer"><b>-</b></button></a>
                     {% elif session['user_id'] in answer.users_id_that_vote %}
-                        <a href="javascript:vote_alert('answer');"><button id="vote_up_answer"><b>+</b></button></a>
-                        <a href="javascript:vote_alert('answer');"><button id="vote_down_answer"><b>-</b></button></a>
+                        <a href="#"><button class="vote_up_answer"><b>+</b></button></a>
+                        <a href="#"><button class="vote_down_answer"><b>-</b></button></a>
                     {% else %}
-                        <a href="{{ url_for('answer_vote_up', answer_id=answer['id'])}}"><button id="vote_up_answer"><b>+</b></button></a>
-                        <a href="{{ url_for('answer_vote_down', answer_id=answer['id'])}}"><button id="vote_down_answer"><b>-</b></button></a>
+                        <a href="{{ url_for('answer_vote_up', answer_id=answer['id'])}}"><button class="vote_up_answer"><b>+</b></button></a>
+                        <a href="{{ url_for('answer_vote_down', answer_id=answer['id'])}}"><button class="vote_down_answer"><b>-</b></button></a>
                     {% endif %}
                 {% else %}
-                    <button id="vote_up_answer"><b>+</b></button>
-                    <button id="vote_down_answer"><b>-</b></button>
+                    <a href="#"><button class="vote_up_answer"><b>+</b></button></a>
+                    <a href="#"><button class="vote_down_answer"><b>-</b></button></a>
                 {% endif %}
 
                 {{ answer['vote_number'] }}
-            </span><br>
+            </span>
+            <span class="tag-txt warning">
+                {% if session['user_id'] == answer['user_id'] %}
+                    You cannot vote for your answer!
+                {% elif session['user_id'] in answer.users_id_that_vote %}
+                    You have already voted for that answer!
+                {% else %}
+                    You must be logged in to vote!
+                {% endif %}
+            </span>
+            <br>
 
         <a href="{{ url_for('add_comment_to_answer', answer_id=answer['id'])}}"><button class="btn-comment"><b>Add comment</b></button></a>
 
@@ -151,13 +171,55 @@
 </div>
 
 <script>
-    function vote_alert(type) {
-        alert('You have already voted for ' + type + '.');
+
+document.getElementsByClassName("vote_up_question")[0].addEventListener(
+    "click",
+    function() {
+        let element = this.parentNode.parentNode.nextElementSibling;
+        element.style.opacity = 1;
+        setTimeout(fadeOut, 2000, element);
+    }
+);
+
+document.getElementsByClassName("vote_down_question")[0].addEventListener(
+    "click",
+    function() {
+        let element = this.parentNode.parentNode.nextElementSibling;
+        element.style.opacity = 1;
+        setTimeout(fadeOut, 2000, element);
+    }
+);
+
+{% for answer in answers_data %}
+
+    for (let element of document.getElementsByClassName("vote_up_answer")) {
+        element.addEventListener(
+            "click",
+            function() {
+                let element = this.parentNode.parentNode.nextElementSibling;
+                element.style.opacity = 1;
+                setTimeout(fadeOut, 2000, element);
+            }
+        );
     }
 
-    function voteSameUser_alert(type) {
-        alert('You cannot vote for your ' + type + '.');
+    for (let element of document.getElementsByClassName("vote_down_answer")) {
+        element.addEventListener(
+            "click",
+            function() {
+                let element = this.parentNode.parentNode.nextElementSibling;
+                element.style.opacity = 1;
+                setTimeout(fadeOut, 2000, element);
+            }
+        );
     }
+
+{% endfor %}
+
+
+function fadeOut(element) {
+    element.style.opacity = 0;
+}
 </script>
 </body>
 </html>

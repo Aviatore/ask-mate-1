@@ -211,3 +211,8 @@ td {
 .btn-comment {
     margin-top: 10px;
 }
+.warning {
+    color: red;
+    opacity: 0;
+    transition: opacity .5s;
+}
