@@ -9,6 +9,7 @@ from werkzeug.utils import secure_filename
 from database import db, queries
 import bcrypt
 import base64
+from functools import wraps
 
 
 UPLOAD_DIR = 'uploaded/'
@@ -16,6 +17,19 @@ UPLOAD_DIR = 'uploaded/'
 app = Flask(__name__)
 app.secret_key = os.urandom(16)
 app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024
+
+
+def login_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if 'user_id' in session:
+            print('user logged in')
+            return func(*args, **kwargs)
+        print('user is not logged in')
+        return redirect(url_for('login'))
+
+    return wrapper
+
 
 if not os.path.exists(os.path.join(UPLOAD_DIR, 'questions')):
     os.makedirs(os.path.join(UPLOAD_DIR, 'questions'))
@@ -129,6 +143,7 @@ def question_details(question_id):
 
 # Ask a question
 @app.route('/add-question', methods=["GET", "POST"])
+@login_required
 def question_add():
     warnings = {
         'title': None,
@@ -166,6 +181,7 @@ def question_add():
 
 # post answer
 @app.route('/question/<int:question_id>/new-answer', methods=["GET", "POST"])
+@login_required
 def answer_post(question_id):
     warnings = {
         'message': None
@@ -200,6 +216,7 @@ def answer_post(question_id):
 
 # Delete question
 @app.route('/question/<int:question_id>/delete')
+@login_required
 def question_delete(question_id):
     question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
     quest_answers = db.execute_query(queries.read_answers_by_question_id, {'question_id': question_id})
@@ -223,6 +240,7 @@ def question_delete(question_id):
 
 # Edit a question
 @app.route('/question/<int:question_id>/edit', methods=["GET", "POST"])
+@login_required
 def question_edit(question_id):
     output = edit_engine(table='question', id=question_id)
 
@@ -236,6 +254,7 @@ def question_edit(question_id):
 
 # Edit an answer
 @app.route('/answer/<int:answer_id>/edit', methods=["GET", "POST"])
+@login_required
 def answer_edit(answer_id):
     output = edit_engine(table='answer', id=answer_id)
 
@@ -318,6 +337,7 @@ def edit_engine(table, id):
 
 # Delete an answer
 @app.route('/answers/<int:answer_id>/delete')
+@login_required
 def answer_delete(answer_id):
     answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
 
@@ -332,6 +352,7 @@ def answer_delete(answer_id):
 
 # Vote-up a question
 @app.route('/question/<int:question_id>/vote_up')
+@login_required
 def question_vote_up(question_id):
     if 'user_id' in session:
         question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
@@ -349,6 +370,7 @@ def question_vote_up(question_id):
 
 # Vote-down a question
 @app.route('/question/<question_id>/vote_down')
+@login_required
 def question_vote_down(question_id):
     if 'user_id' in session:
         question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
@@ -366,6 +388,7 @@ def question_vote_down(question_id):
 
 # Vote-up an answer
 @app.route('/answer/<answer_id>/vote_up')
+@login_required
 def answer_vote_up(answer_id):
     if 'user_id' in session:
         answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
@@ -384,6 +407,7 @@ def answer_vote_up(answer_id):
 
 # Vote-down an answer
 @app.route('/answer/<answer_id>/vote_down')
+@login_required
 def answer_vote_down(answer_id):
     if 'user_id' in session:
         answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
@@ -401,6 +425,7 @@ def answer_vote_down(answer_id):
 
 
 @app.route("/question/<question_id>/new-tag", methods=["POST", "GET"])
+@login_required
 def new_tag(question_id):
 
     all_tags = []
@@ -439,6 +464,7 @@ def new_tag(question_id):
 
 
 @app.route('/question/<question_id>/tag/<tag_id>/delete', methods=['POST', "GET"])
+@login_required
 def delete_tag(question_id, tag_id):
     db.execute_query(queries.delete_question_tag_links_by_tag_id_question_id, {'question_id':question_id, 'tag_id':tag_id})
 
@@ -525,7 +551,13 @@ def login():
         return render_template('login.html', warnings=warnings)
 
     response = make_response(render_template('login.html', warnings=None))
-    response.set_cookie('prev_page', base64_encode(request.referrer))
+
+    prev_url = request.referrer
+    if prev_url:
+        response.set_cookie('prev_page', base64_encode(prev_url))
+    else:
+        prev_url = url_for('main_page')
+        response.set_cookie('prev_page', base64_encode(prev_url))
 
     return response
     # return render_template('login.html', warnings=None)
@@ -723,6 +755,9 @@ def add_comment_to_answer(answer_id):
 
     else:
         return render_template('add-comment-to-answer.html', warnings=None, comment=None, answer=answer)
+
+
+
 
 
 if __name__ == '__main__':
