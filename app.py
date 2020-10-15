@@ -45,8 +45,10 @@ def main_page():
     index = table_headers['keys'].index('submission_time')
     table_headers['directions'][index] = 'desc'
 
-    return render_template('main_page.html', headers=table_headers, questions=latest_questions, order_by=order_by)
+    response = make_response(render_template('main_page.html', headers=table_headers, questions=latest_questions, order_by=order_by))
+    response.set_cookie('prev_page', base64_encode(url_for('main_page')))
 
+    return response
 
 # List questions
 @app.route('/list')
@@ -74,8 +76,12 @@ def question_list():
         index = table_headers['keys'].index('submission_time')
         table_headers['directions'][index] = 'desc'
 
-    return render_template('list.html', headers=table_headers, questions=questions_sorted, order_by=order_by,
-                           order_direction=order_direction)
+    response = make_response(render_template('list.html', headers=table_headers, questions=questions_sorted, order_by=order_by,
+                           order_direction=order_direction))
+
+    response.set_cookie('prev_page', base64_encode(url_for('question_list')))
+
+    return response
 
 
 # Display a question
@@ -109,12 +115,16 @@ def question_details(question_id):
 
             # question_tags.append(qt_row['name'])
 
-    return render_template('question-details.html',
+    response = make_response(render_template('question-details.html',
                            question_id=question_id,
                            question_data=question,
                            answers_data=answers,
                            question_tags=question_tags,
-                           comments=comments)
+                           comments=comments))
+
+    response.set_cookie('prev_page', base64_encode(url_for('question_details', question_id=question_id)))
+
+    return response
 
 
 # Ask a question
@@ -389,6 +399,7 @@ def answer_vote_down(answer_id):
 
     return redirect(url_for('question_details', question_id=answer['question_id']))
 
+
 @app.route("/question/<question_id>/new-tag", methods=["POST", "GET"])
 def new_tag(question_id):
 
@@ -420,19 +431,19 @@ def new_tag(question_id):
                 tag_id = db.execute_query(queries.read_tag_id_by_name, {'name': name})[0]['id']
                 db.execute_query(queries.link_tag_question, {'question_id': question_id, 'tag_id': tag_id})
 
-
         return redirect(url_for('question_details', question_id=question_id))
 
     else:
 
         return render_template("new_tag.html", question_id=question_id, all_tags=all_tags)
 
+
 @app.route('/question/<question_id>/tag/<tag_id>/delete', methods=['POST', "GET"])
 def delete_tag(question_id, tag_id):
     db.execute_query(queries.delete_question_tag_links_by_tag_id_question_id, {'question_id':question_id, 'tag_id':tag_id})
 
-
     return redirect(url_for('question_details', question_id=question_id))
+
 
 @app.route('/registration', methods=['GET', 'POST'])
 def register():
@@ -526,9 +537,15 @@ def logout():
         session.pop('username')
         session.pop('user_id')
 
-    # return redirect(request.cookies.get('prev_page', url_for('main_page')))
+    prev_url = request.cookies.get('prev_page')
+    if prev_url:
+        prev_url = base64_decode(prev_url)
+    else:
+        prev_url = url_for('main_page')
 
-    return redirect(url_for('main_page'))
+    return redirect(prev_url)
+
+    # return redirect(url_for('main_page'))
 
 
 @app.route('/user/<int:user_id>')
@@ -539,8 +556,12 @@ def user_details(user_id):
     answers_number = db.execute_query(queries.number_of_answers_by_user_id, {'user_id': user_id})[0]['answers_num']
     user = db.execute_query(queries.get_user_by_user_id, {'user_id': user_id})[0]
 
-    return render_template('user_page.html', questions=questions, answers=answers, questions_number=questions_number,
-                           answers_number=answers_number, user=user)
+    response = make_response(render_template('user_page.html', questions=questions, answers=answers, questions_number=questions_number,
+                           answers_number=answers_number, user=user))
+
+    response.delete_cookie('prev_page')
+
+    return response
 
 
 def update_image_files(type):
@@ -634,7 +655,10 @@ def search_question():
                 item['title'] = format_search_results(item['title'], quoted_copy)
             item['message'] = format_search_results(item['message'], quoted_copy)
 
-    return render_template('search-results.html', questions=questions, answers=answers)
+    response = make_response(render_template('search-results.html', questions=questions, answers=answers))
+    response.set_cookie('prev_page', base64_encode(url_for('search_question', q=search_phrase)))
+
+    return response
 
 
 @app.context_processor
