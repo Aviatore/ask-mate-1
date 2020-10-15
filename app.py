@@ -98,14 +98,14 @@ def question_details(question_id):
         if answer['image'] is not None:
             answer['image'] = answer['image'].split(';')
 
-    #tags
-    tag_id_row = db.execute_query(queries.read_tag_id_by_question_id, {'question_id':question_id})
+    # tags
+    tag_id_row = db.execute_query(queries.read_tag_id_by_question_id, {'question_id': question_id})
     question_tags = {}
     for t_row in tag_id_row:
-       tag_id = t_row['tag_id']
-       question_tag_row = db.execute_query(queries.read_tag_by_id, {'tag_id':tag_id})
-       for qt_row in question_tag_row:
-           question_tags[tag_id] = qt_row['name']
+        tag_id = t_row['tag_id']
+        question_tag_row = db.execute_query(queries.read_tag_by_id, {'tag_id': tag_id})
+        for qt_row in question_tag_row:
+            question_tags[tag_id] = qt_row['name']
 
             # question_tags.append(qt_row['name'])
 
