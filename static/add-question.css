@@ -120,7 +120,6 @@ img:hover {
 }
 #checkbox-container label {
     position: relative;
-    vartical-align: sub;
 }
 .title {
     position: relative;

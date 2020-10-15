@@ -45,7 +45,7 @@
             </div><br>
 
             <button type="submit" class="center button">Submit</button>
-            <button type="button" class="center button" onclick="window.location.href='{{ url_for('question_list') }}';">Back to questions list</button>
+            <button type="button" class="center button" onclick="window.location.href='{{ url_for('question_details', question_id=question['id']) }}';">Back to question details</button>
         </form>
     </div>
 
