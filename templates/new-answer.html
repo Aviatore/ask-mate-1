@@ -9,7 +9,10 @@
 <body>
 <div id="body">
 <div id="container">
-    <h3 class="center">New answer</h3>
+    <div class="title">
+        <h3 class="center">New answer</h3>
+    </div>
+
     <form id="form" action={{ url_for('answer_post', question_id=question_id) }} method="POST" enctype="multipart/form-data">
         <textarea id="message" name="message" placeholder="Type your answer here ..." class="input center {{ "warning" if warnings['message'] }}"></textarea>
         {% if warnings['message'] %}

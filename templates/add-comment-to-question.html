@@ -9,7 +9,11 @@
 <body>
     <div id="body">
 <div id="container">
-    <h3 class="center">New comment</h3>
+    <div class="title">
+        <h3 class="center">Add comment to question</h3>
+    </div>
+
+
     <form id="form" action={{ url_for('add_comment_to_question', question_id=question_id) }} method="POST">
         <textarea id="message" name="message" placeholder="Type your comment here ..." class="input center {{ "warning" if warnings['message'] }}"></textarea>
         {% if warnings['message'] %}

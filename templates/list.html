@@ -5,62 +5,69 @@
     <script src='https://kit.fontawesome.com/a076d05399.js'></script>
     <script src="{{ url_for('static', filename='scripts.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='list.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='header.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='search-field.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='question-details.css') }}">
     <title>Title</title>
 </head>
 <body>
-
-<table>
-    <thead>
-        <tr>
-            {% for header in headers['headers'] %}
-                {% set direction = 'asc' if headers['directions'][loop.index0] == 'desc' or headers['directions'][loop.index0] is none else 'desc' %}
-                <th>
-                    <a href="{{ url_for('question_list', order_by=headers['keys'][loop.index0], order_direction=direction) }}" title="Sort by {{ header }}">{{ header }}</a>
-                    {% if headers['directions'][loop.index0] == 'asc' %}
-                        <i class="fas fa-sort-down"></i>
-                        {% elif headers['directions'][loop.index0] == 'desc' %}
-                        <i class="fas fa-sort-up"></i>
-                    {% endif %}
-                </th>
-            {% endfor %}
-            {% if session %}
-                <th></th>
-            {% endif %}
-        </tr>
-    </thead>
-    <tbody>
-        {% for question in questions %}
+<div class="body">
+    {% include 'header.html' %}
+    <div class="block-header">
+        <span class="block-header-title">Questions</span>
+    </div>
+    <table>
+        <thead>
             <tr>
-                <td>
-                    <div class="title"><a href="{{ url_for('question_details', question_id=question['id']) }}" class="title-link">{{ question['title'] }}</a></div>
-                    <div class="message">{{ question['message'] }}</div>
-                </td>
+                {% for header in headers['headers'] %}
+                    {% set direction = 'asc' if headers['directions'][loop.index0] == 'desc' or headers['directions'][loop.index0] is none else 'desc' %}
+                    <th>
+                        <a href="{{ url_for('question_list', order_by=headers['keys'][loop.index0], order_direction=direction) }}" title="Sort by {{ header }}">{{ header }}</a>
+                        {% if headers['directions'][loop.index0] == 'asc' %}
+                            <i class="fas fa-sort-down"></i>
+                            {% elif headers['directions'][loop.index0] == 'desc' %}
+                            <i class="fas fa-sort-up"></i>
+                        {% endif %}
+                    </th>
+                {% endfor %}
+                {% if session %}
+                    <th></th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for question in questions %}
+                <tr>
+                    <td>
+                        <div class="title"><a href="{{ url_for('question_details', question_id=question['id']) }}" class="title-link">{{ question['title'] }}</a></div>
+                        <div class="message">{{ question['message'] }}</div>
+                    </td>
 
-            {% for key in headers['keys'][1:] %}
-                <td>{{ question[key] if key != 'submission_time' else time_to_utc(question[key]) }}</td>
+                {% for key in headers['keys'][1:] %}
+                    <td>{{ question[key] if key != 'submission_time' else time_to_utc(question[key]) }}</td>
+                {% endfor %}
+
+                {% if session %}
+                    <td>
+                        <a href="{{ url_for('question_delete', question_id=question['id']) }}" title="Delete question" class="thumbs">
+                            <i class="far fa-trash-alt icon"></i>
+                        </a>
+                    </td>
+                {% endif %}
+                </tr>
             {% endfor %}
-
-            {% if session %}
-                <td>
-                    <a href="{{ url_for('question_delete', question_id=question['id']) }}" title="Delete question" class="thumbs">
-                        <i class="far fa-trash-alt icon"></i>
-                    </a>
-                </td>
-            {% endif %}
-            </tr>
-        {% endfor %}
-    </tbody>
-    {% if session %}
-        <tfoot>
-            <tr>
-                <td></td><td></td><td></td><td></td>
-                <td>
-                    <a href="{{ url_for("question_add") }}" title="Add a new question"><i class="fas fa-plus"></i></a>
-                </td>
-            </tr>
-        </tfoot>
-    {% endif %}
-</table>
-
+        </tbody>
+        {% if session %}
+            <tfoot>
+                <tr>
+                    <td></td><td></td><td></td><td></td>
+                    <td>
+                        <a href="{{ url_for("question_add") }}" title="Add a new question"><i class="fas fa-plus"></i></a>
+                    </td>
+                </tr>
+            </tfoot>
+        {% endif %}
+    </table>
+</div>
 </body>
 </html>

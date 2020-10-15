@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request, send_from_directory, session, flash
+from flask import Flask, render_template, redirect, url_for, request, send_from_directory, session, flash, make_response
 from data_manager import *
 from util import parse_search_phrase, format_search_results
 import datetime
@@ -8,6 +8,8 @@ from urllib.parse import unquote
 from werkzeug.utils import secure_filename
 from database import db, queries
 import bcrypt
+import base64
+from functools import wraps
 
 
 UPLOAD_DIR = 'uploaded/'
@@ -15,6 +17,19 @@ UPLOAD_DIR = 'uploaded/'
 app = Flask(__name__)
 app.secret_key = os.urandom(16)
 app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024
+
+
+def login_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if 'user_id' in session:
+            print('user logged in')
+            return func(*args, **kwargs)
+        print('user is not logged in')
+        return redirect(url_for('login'))
+
+    return wrapper
+
 
 if not os.path.exists(os.path.join(UPLOAD_DIR, 'questions')):
     os.makedirs(os.path.join(UPLOAD_DIR, 'questions'))
@@ -44,8 +59,10 @@ def main_page():
     index = table_headers['keys'].index('submission_time')
     table_headers['directions'][index] = 'desc'
 
-    return render_template('main_page.html', headers=table_headers, questions=latest_questions, order_by=order_by)
+    response = make_response(render_template('main_page.html', headers=table_headers, questions=latest_questions, order_by=order_by))
+    response.set_cookie('prev_page', base64_encode(url_for('main_page')))
 
+    return response
 
 # List questions
 @app.route('/list')
@@ -73,8 +90,12 @@ def question_list():
         index = table_headers['keys'].index('submission_time')
         table_headers['directions'][index] = 'desc'
 
-    return render_template('list.html', headers=table_headers, questions=questions_sorted, order_by=order_by,
-                           order_direction=order_direction)
+    response = make_response(render_template('list.html', headers=table_headers, questions=questions_sorted, order_by=order_by,
+                           order_direction=order_direction))
+
+    response.set_cookie('prev_page', base64_encode(url_for('question_list')))
+
+    return response
 
 
 # Display a question
@@ -97,27 +118,32 @@ def question_details(question_id):
         if answer['image'] is not None:
             answer['image'] = answer['image'].split(';')
 
-    #tags
-    tag_id_row = db.execute_query(queries.read_tag_id_by_question_id, {'question_id':question_id})
+    # tags
+    tag_id_row = db.execute_query(queries.read_tag_id_by_question_id, {'question_id': question_id})
     question_tags = {}
     for t_row in tag_id_row:
-       tag_id = t_row['tag_id']
-       question_tag_row = db.execute_query(queries.read_tag_by_id, {'tag_id':tag_id})
-       for qt_row in question_tag_row:
-           question_tags[tag_id] = qt_row['name']
+        tag_id = t_row['tag_id']
+        question_tag_row = db.execute_query(queries.read_tag_by_id, {'tag_id': tag_id})
+        for qt_row in question_tag_row:
+            question_tags[tag_id] = qt_row['name']
 
             # question_tags.append(qt_row['name'])
 
-    return render_template('question-details.html',
+    response = make_response(render_template('question-details.html',
                            question_id=question_id,
                            question_data=question,
                            answers_data=answers,
                            question_tags=question_tags,
-                           comments=comments)
+                           comments=comments))
+
+    response.set_cookie('prev_page', base64_encode(url_for('question_details', question_id=question_id)))
+
+    return response
 
 
 # Ask a question
 @app.route('/add-question', methods=["GET", "POST"])
+@login_required
 def question_add():
     warnings = {
         'title': None,
@@ -155,6 +181,7 @@ def question_add():
 
 # post answer
 @app.route('/question/<int:question_id>/new-answer', methods=["GET", "POST"])
+@login_required
 def answer_post(question_id):
     warnings = {
         'message': None
@@ -189,6 +216,7 @@ def answer_post(question_id):
 
 # Delete question
 @app.route('/question/<int:question_id>/delete')
+@login_required
 def question_delete(question_id):
     question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
     quest_answers = db.execute_query(queries.read_answers_by_question_id, {'question_id': question_id})
@@ -212,6 +240,7 @@ def question_delete(question_id):
 
 # Edit a question
 @app.route('/question/<int:question_id>/edit', methods=["GET", "POST"])
+@login_required
 def question_edit(question_id):
     output = edit_engine(table='question', id=question_id)
 
@@ -225,6 +254,7 @@ def question_edit(question_id):
 
 # Edit an answer
 @app.route('/answer/<int:answer_id>/edit', methods=["GET", "POST"])
+@login_required
 def answer_edit(answer_id):
     output = edit_engine(table='answer', id=answer_id)
 
@@ -307,6 +337,7 @@ def edit_engine(table, id):
 
 # Delete an answer
 @app.route('/answers/<int:answer_id>/delete')
+@login_required
 def answer_delete(answer_id):
     answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
 
@@ -321,6 +352,7 @@ def answer_delete(answer_id):
 
 # Vote-up a question
 @app.route('/question/<int:question_id>/vote_up')
+@login_required
 def question_vote_up(question_id):
     if 'user_id' in session:
         question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
@@ -343,6 +375,7 @@ def question_vote_up(question_id):
 
 # Vote-down a question
 @app.route('/question/<question_id>/vote_down')
+@login_required
 def question_vote_down(question_id):
     if 'user_id' in session:
         question = db.execute_query(queries.read_question_by_id, {'id': question_id})[0]
@@ -364,6 +397,7 @@ def question_vote_down(question_id):
 
 # Vote-up an answer
 @app.route('/answer/<answer_id>/vote_up')
+@login_required
 def answer_vote_up(answer_id):
     if 'user_id' in session:
         answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
@@ -387,6 +421,7 @@ def answer_vote_up(answer_id):
 
 # Vote-down an answer
 @app.route('/answer/<answer_id>/vote_down')
+@login_required
 def answer_vote_down(answer_id):
     if 'user_id' in session:
         answer = db.execute_query(queries.read_answer_by_id, {'id': answer_id})[0]
@@ -406,7 +441,9 @@ def answer_vote_down(answer_id):
 
     return redirect(url_for('question_details', question_id=answer['question_id']))
 
+
 @app.route("/question/<question_id>/new-tag", methods=["POST", "GET"])
+@login_required
 def new_tag(question_id):
 
     all_tags = []
@@ -437,19 +474,20 @@ def new_tag(question_id):
                 tag_id = db.execute_query(queries.read_tag_id_by_name, {'name': name})[0]['id']
                 db.execute_query(queries.link_tag_question, {'question_id': question_id, 'tag_id': tag_id})
 
-
         return redirect(url_for('question_details', question_id=question_id))
 
     else:
 
         return render_template("new_tag.html", question_id=question_id, all_tags=all_tags)
 
+
 @app.route('/question/<question_id>/tag/<tag_id>/delete', methods=['POST', "GET"])
+@login_required
 def delete_tag(question_id, tag_id):
     db.execute_query(queries.delete_question_tag_links_by_tag_id_question_id, {'question_id':question_id, 'tag_id':tag_id})
 
-
     return redirect(url_for('question_details', question_id=question_id))
+
 
 @app.route('/registration', methods=['GET', 'POST'])
 def register():
@@ -524,13 +562,23 @@ def login():
             session['username'] = user['username']
             session['user_id'] = user['user_id']
 
-            return redirect(url_for('main_page'))
+            return redirect(get_prev_url())
 
         warnings['not_valid'] = "Your user name and/or password is not valid."
 
         return render_template('login.html', warnings=warnings)
 
-    return render_template('login.html', warnings=None)
+    response = make_response(render_template('login.html', warnings=None))
+
+    prev_url = request.referrer
+    if prev_url:
+        response.set_cookie('prev_page', base64_encode(prev_url))
+    else:
+        prev_url = url_for('main_page')
+        response.set_cookie('prev_page', base64_encode(prev_url))
+
+    return response
+    # return render_template('login.html', warnings=None)
 
 
 @app.route('/logout')
@@ -539,7 +587,15 @@ def logout():
         session.pop('username')
         session.pop('user_id')
 
-    return redirect(url_for('main_page'))
+    prev_url = request.cookies.get('prev_page')
+    if prev_url:
+        prev_url = base64_decode(prev_url)
+    else:
+        prev_url = url_for('main_page')
+
+    return redirect(prev_url)
+
+    # return redirect(url_for('main_page'))
 
 
 @app.route('/user/<int:user_id>')
@@ -550,8 +606,12 @@ def user_details(user_id):
     answers_number = db.execute_query(queries.number_of_answers_by_user_id, {'user_id': user_id})[0]['answers_num']
     user = db.execute_query(queries.get_user_by_user_id, {'user_id': user_id})[0]
 
-    return render_template('user_page.html', questions=questions, answers=answers, questions_number=questions_number,
-                           answers_number=answers_number, user=user)
+    response = make_response(render_template('user_page.html', questions=questions, answers=answers, questions_number=questions_number,
+                           answers_number=answers_number, user=user))
+
+    response.delete_cookie('prev_page')
+
+    return response
 
 
 def update_image_files(type):
@@ -596,6 +656,23 @@ def file_size(directory, file_name):
     return file_size_kb
 
 
+def base64_encode(message):
+    return base64.b64encode(message.encode('utf-8'))
+
+
+def base64_decode(message):
+    return base64.b64decode(message).decode('utf-8')
+
+
+def get_prev_url():
+    prev_url = request.cookies.get('prev_page')
+
+    if prev_url:
+        return base64_decode(prev_url)
+
+    return url_for('main_page')
+
+
 @app.route('/get_file/<directory>/<file_name>')
 def get_image(directory, file_name):
     return send_from_directory(os.path.join(UPLOAD_DIR, directory), filename=file_name)
@@ -628,7 +705,10 @@ def search_question():
                 item['title'] = format_search_results(item['title'], quoted_copy)
             item['message'] = format_search_results(item['message'], quoted_copy)
 
-    return render_template('search-results.html', questions=questions, answers=answers)
+    response = make_response(render_template('search-results.html', questions=questions, answers=answers))
+    response.set_cookie('prev_page', base64_encode(url_for('search_question', q=search_phrase)))
+
+    return response
 
 
 @app.context_processor
@@ -660,7 +740,7 @@ def add_comment_to_question(question_id):
 
         db.execute_query(queries.add_comment_to_question, comment)
 
-        return redirect(url_for('question_list'))
+        return redirect(url_for('question_details', question_id=question_id))
 
     else:
         return render_template('add-comment-to-question.html', warnings=None, comment=None, question_id=question_id)
@@ -685,14 +765,17 @@ def add_comment_to_answer(answer_id):
         # If at least one warning is set, a new response is rendered with warnings argument
         # that allow to format problematic form fields.
         if warnings["message"] is not None:
-            return render_template('add-comment-to-answer.html', warnings=warnings, comment=comment, answer_id=answer_id)
+            return render_template('add-comment-to-answer.html', warnings=warnings, comment=comment, answer=answer)
 
         db.execute_query(queries.add_comment_to_answer, comment)
 
-        return redirect(url_for('question_list'))
+        return redirect(url_for('question_details', question_id=answer['question_id']))
 
     else:
-        return render_template('add-comment-to-answer.html', warnings=None, comment=None, answer_id=answer_id)
+        return render_template('add-comment-to-answer.html', warnings=None, comment=None, answer=answer)
+
+
+
 
 
 if __name__ == '__main__':

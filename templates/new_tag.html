@@ -2,20 +2,31 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link type="text/css" rel="stylesheet" href="{{ url_for("static", filename="add-question.css") }}">
     <title>New Tag</title>
 </head>
 <body>
-<h1>New Tag</h1>
-<form action="" method="POST">
-<select name="select_tag">
-    <option selected="selected"></option>
-    {% for tag in all_tags %}
-        <option value={{ tag }}>{{ tag }}</option>
-    {% endfor %}
-</select>
-or add new:
-<input type="text" name="add_tag">
-<button type="submit">Submit</button>
-</form>
+<div class="body">
+    <div id="container">
+        <div class="title">
+            <h3 class="center">Add tag</h3>
+        </div>
+
+        <form action="" method="POST">
+            <span class="center tag-txt">Choose a tag:</span>
+            <select class="input center" name="select_tag">
+                <option selected="selected"></option>
+                {% for tag in all_tags %}
+                    <option value={{ tag }}>{{ tag }}</option>
+                {% endfor %}
+            </select>
+            <span class="center tag-txt">... or add a new one:</span>
+            <input class="input center" type="text" name="add_tag"><br>
+            <button type="submit" class="center button">Submit</button>
+        </form>
+    </div>
+</div>
+
+
 </body>
 </html>

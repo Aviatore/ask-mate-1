@@ -1,0 +1,71 @@
+#h-container {
+    position: relative;
+    width: 100%;
+    height: 100px;
+    background-image: url("img/header.png");
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position-y: 10px;
+    background-color: #685454;
+    box-sizing: border-box;
+    padding: 10px 10px;
+    margin-bottom: 0px;
+}
+.h-list {
+    margin: 0;
+    padding: 0;
+    background: #685454;
+    list-style-type: none;
+
+    font-family: sans-serif;
+}
+.h-list-item {
+    background: #685454;
+    display: inline-block;
+    padding: 20px;
+    color: white;
+}
+.h-list-item:hover, .h-list-vert-item:hover {
+    color: #18d918;
+}
+.right {
+    position: absolute;
+    right: 0;
+}
+.dropdown:hover .dropdown-content {
+    height: 200px;
+}
+.dropdown > a {
+    color: #18d918;
+}
+.dropdown-content {
+    position: absolute;
+    right: 0;
+
+    width: 200px;
+    height: 0px;
+    overflow: hidden;
+    transition: height .5s;
+}
+.h-list-vert {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    margin-bottom: 10px;
+    font-family: sans-serif;
+    z-index: 1;
+    right: 0;
+}
+.h-list-vert-item {
+    position: relative;
+    background: #836e6e;
+    padding: 5px;
+    color: white;
+}
+.user {
+    font-size: 12px;
+}
+.user:hover + ul {
+    display: block;
+}
