@@ -23,6 +23,7 @@
             <span class="center tag-txt">... or add a new one:</span>
             <input class="input center" type="text" name="add_tag"><br>
             <button type="submit" class="center button">Submit</button>
+            <button type="button" class="center button" onclick="window.location.href='{{ url_for('question_details', question_id=question_id) }}';">Back to question details</button>
         </form>
     </div>
 </div>
