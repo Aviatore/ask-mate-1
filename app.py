@@ -23,9 +23,7 @@ def login_required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         if 'user_id' in session:
-            print('user logged in')
             return func(*args, **kwargs)
-        print('user is not logged in')
         return redirect(url_for('login'))
 
     return wrapper
