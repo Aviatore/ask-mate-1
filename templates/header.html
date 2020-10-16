@@ -1,0 +1,45 @@
+<div id="h-container">
+</div>
+<div id="h-menu">
+
+    <ul class="h-list right">
+        {% if session %}
+             <li class="h-list-item user">
+                <div class="dropdown">
+                    <a href="{{ url_for('register') }}">Logged in: {{ session['username'] }}</a>
+                    <div class="dropdown-content">
+                        <ul class="h-list-vert " >
+                            <a href="{{ url_for('user_details', user_id=session['user_id']) }}"><li class="h-list-vert-item" >User details</li></a>
+                            <a href="{{ url_for('users_list') }}"><li class="h-list-vert-item">All users</li></a>
+                            <a href="{{ url_for('logout') }}"><li class="h-list-vert-item" >Logout</li></a>
+                        </ul>
+                    </div>
+                </div>
+            </li>
+        {% else %}
+            <a href="{{ url_for('login') }}"><li class="h-list-item">Login</li></a>
+            <a href="{{ url_for('register') }}"><li class="h-list-item">Register</li></a>
+
+
+        {% endif %}
+    </ul>
+
+
+    <ul class="h-list">
+        <a href="{{ url_for('main_page') }}"><li class="h-list-item">Main page</li></a>
+        <a href="{{ url_for('question_list') }}"><li class="h-list-item">Question list</li></a>
+
+    </ul>
+
+    {% include 'search-field.html' %}
+</div>
+
+<script>
+    function showDropDown() {
+        document.getElementsByClassName("h-list-vert")[0].style.display = 'block';
+    }
+    function hideDropDown() {
+        document.getElementsByClassName("h-list-vert")[0].style.display = 'none';
+    }
+
+</script>

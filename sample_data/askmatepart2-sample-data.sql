@@ -23,7 +23,10 @@ CREATE TABLE users (
     email text,
     password bytea,
     registration_date timestamp default current_timestamp,
-    reputation integer default 0
+    reputation integer default 0,
+    asked_questions integer default 0,
+    answers integer default 0,
+    comments integer default 0
 );
 
 DROP TABLE IF EXISTS public.question;

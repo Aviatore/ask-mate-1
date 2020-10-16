@@ -120,5 +120,20 @@ img:hover {
 }
 #checkbox-container label {
     position: relative;
-    vartical-align: sub;
+}
+.title {
+    position: relative;
+    top: 0;
+    margin-top: 0;
+    padding-top: 0;
+    background: #685454;
+    border: 1px solid #685454;
+    box-sizing: border-box;
+}
+.title > h3 {
+    color: white;
+}
+.tag-txt {
+    font-family: sans-serif;
+    margin-top: 10px;
 }

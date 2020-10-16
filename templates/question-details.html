@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <script src='https://kit.fontawesome.com/a076d05399.js'></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='question-details.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='header.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='search-field.css') }}">
     <title>Question details</title>
 </head>
 <body>
 <div class="body">
+    {% include 'header.html' %}
+
     <div class="container">
         <h3 class="center">{{ question_data['title'] }}</h3>
 
@@ -22,29 +26,47 @@
         <span class="pub-time">{{ time_to_utc(question_data['submission_time']) }}
             {% if session %}
                 {% if session['user_id'] == question_data['user_id'] %}
-                    <a href="javascript:voteSameUser_alert('question');"><button id="vote_up_question"><b>+</b></button></a>
-                    <a href="javascript:voteSameUser_alert('question');"><button id="vote_down_question"><b>-</b></button></a>
+                    <a href="#"><button class="vote_up_question"><b>+</b></button></a>
+                    <a href="#"><button class="vote_down_question"><b>-</b></button></a>
                 {% elif session['user_id'] in question_data.users_id_that_vote %}
-                    <a href="javascript:vote_alert('question');"><button id="vote_up_question"><b>+</b></button></a>
-                    <a href="javascript:vote_alert('question');"><button id="vote_down_question"><b>-</b></button></a>
+                    <a href="#"><button class="vote_up_question"><b>+</b></button></a>
+                    <a href="#"><button class="vote_down_question"><b>-</b></button></a>
                 {% else %}
                     <a href="{{ url_for('question_vote_up', question_id=question_data['id'])}}"><button id="vote_up_question"><b>+</b></button></a>
                     <a href="{{ url_for('question_vote_down', question_id=question_data['id'])}}"><button id="vote_down_question"><b>-</b></button></a>
                 {% endif %}
             {% else %}
-                <button id="vote_up_question"><b>+</b></button>
-                <button id="vote_down_question"><b>-</b></button>
+                <a href="#"><button class="vote_up_question"><b>+</b></button></a>
+                <a href="#"><button class="vote_down_question"><b>-</b></button></a>
             {% endif %}
         {{ question_data['vote_number'] }}
-        </span><br/>
+        </span>
+        <span class="tag-txt warning">
+            {% if session['user_id'] == question_data['user_id'] %}
+                You cannot vote for your question!
+            {% elif session['user_id'] in question_data.users_id_that_vote %}
+                You have already voted for that question!
+            {% else %}
+                You must be logged in to vote!
+            {% endif %}
+        </span>
+        <br/>
     <span>
-        tags:
+        <span class="tag-txt">tags:</span>
+
         {% for tag in question_tags.items() %}
-        {{ tag[1] }} <a href="{{ url_for('delete_tag', question_id=question_id, tag_id=tag[0]) }}">x</a>
+            <div class="tag">{{ tag[1] }}
+                {% if session %}
+                    <a href="{{ url_for('delete_tag', question_id=question_id, tag_id=tag[0]) }}"><i class="fas fa-times"></i></a>
+                {% endif %}
+            </div>
         {% endfor %}
-        <a href="{{ url_for('new_tag', question_id=question_id) }}">Add</a>
+
+        {% if session %}
+            <a href="{{ url_for('new_tag', question_id=question_id) }}"><div class="new-tag">Add</div></a>
+        {% endif %}
     </span>
-        <p id="message">{{ question_data['message'] }}</p>
+        <p class="message">{{ question_data['message'] }}</p>
         {% if question_data['image'] is not none %}
             {% for image_url in question_data['image'] %}
                 <img src="{{ url_for('get_image', directory='questions', file_name=image_url) }}">
@@ -52,14 +74,17 @@
             {% endfor %}
         {% endif %}
 
-        <a href="{{ url_for('add_comment_to_question', question_id=question_data['id'])}}"><button id="comment"><b>Add comment</b></button></a>
+        {% if session %}
+            <a href="{{ url_for('add_comment_to_question', question_id=question_data['id'])}}"><button class="btn-comment"><b>Add comment</b></button></a>
+        {% endif %}
 
         {# COMMENT #}
         {% for comment in comments%}
             {% if comment['answer_id'] is none %}
-            <div class="comment-container" style="background-color: aquamarine">
-                <span id="pub-time">{{ time_to_utc(comment['submission_time']) }}</span><br>
-                {{ comment['message'] }}
+            <div class="comment-container">
+                <span class="pub-time">{{ time_to_utc(comment['submission_time']) }}</span><br>
+                <p class="message">{{ comment['message'] }}</p>
+
             </div>
             {% endif %}
         {% endfor %}
@@ -77,14 +102,18 @@
                     </div>
                 {% endif %}
             </div>
-            <a href="{{ url_for('answer_edit', answer_id=answer['id']) }}">
+            {% if session and session['user_id'] == answer['user_id'] %}
+                <a href="{{ url_for('answer_edit', answer_id=answer['id']) }}">
+                    <i class="far fa-edit"></i>
+                </a>
+            {% else %}
                 <i class="far fa-edit"></i>
-            </a>
+            {% endif %}
 
             <span class="pub-time">author:</span><span class="author"><a href="{{ url_for('user_details', user_id=answer['user_id']) }}">{{ answer['username'] }}</a></span>
             <span class="pub-time">{{ time_to_utc(answer['submission_time']) }}</span>
 
-            <p id="message">{{ answer['message'] }}</p>
+            <p class="message">{{ answer['message'] }}</p>
             {% if answer['image'] is not none %}
                 {% for image_url in answer['image'] %}
                     <img src="{{ url_for('get_image', directory='answers', file_name=image_url) }}">
@@ -95,31 +124,43 @@
                 Was it helpful?
                 {% if session %}
                     {% if session['user_id'] == answer['user_id'] %}
-                        <a href="javascript:voteSameUser_alert('answer');"><button id="vote_up_answer"><b>+</b></button></a>
-                        <a href="javascript:voteSameUser_alert('answer');"><button id="vote_down_answer"><b>-</b></button></a>
+                        <a href="#"><button class="vote_up_answer"><b>+</b></button></a>
+                        <a href="#"><button class="vote_down_answer"><b>-</b></button></a>
                     {% elif session['user_id'] in answer.users_id_that_vote %}
-                        <a href="javascript:vote_alert('answer');"><button id="vote_up_answer"><b>+</b></button></a>
-                        <a href="javascript:vote_alert('answer');"><button id="vote_down_answer"><b>-</b></button></a>
+                        <a href="#"><button class="vote_up_answer"><b>+</b></button></a>
+                        <a href="#"><button class="vote_down_answer"><b>-</b></button></a>
                     {% else %}
-                        <a href="{{ url_for('answer_vote_up', answer_id=answer['id'])}}"><button id="vote_up_answer"><b>+</b></button></a>
-                        <a href="{{ url_for('answer_vote_down', answer_id=answer['id'])}}"><button id="vote_down_answer"><b>-</b></button></a>
+                        <a href="{{ url_for('answer_vote_up', answer_id=answer['id'])}}"><button class="vote_up_answer"><b>+</b></button></a>
+                        <a href="{{ url_for('answer_vote_down', answer_id=answer['id'])}}"><button class="vote_down_answer"><b>-</b></button></a>
                     {% endif %}
                 {% else %}
-                    <button id="vote_up_answer"><b>+</b></button>
-                    <button id="vote_down_answer"><b>-</b></button>
+                    <a href="#"><button class="vote_up_answer"><b>+</b></button></a>
+                    <a href="#"><button class="vote_down_answer"><b>-</b></button></a>
                 {% endif %}
 
                 {{ answer['vote_number'] }}
-            </span><br>
+            </span>
+            <span class="tag-txt warning">
+                {% if session['user_id'] == answer['user_id'] %}
+                    You cannot vote for your answer!
+                {% elif session['user_id'] in answer.users_id_that_vote %}
+                    You have already voted for that answer!
+                {% else %}
+                    You must be logged in to vote!
+                {% endif %}
+            </span>
+            <br>
 
-        <a href="{{ url_for('add_comment_to_answer', answer_id=answer['id'])}}"><button id="comment"><b>Add comment</b></button></a>
+        {% if session %}
+            <a href="{{ url_for('add_comment_to_answer', answer_id=answer['id'])}}"><button class="btn-comment"><b>Add comment</b></button></a>
+        {% endif %}
 
         {# COMMENT DISPLAY #}
         {% for comment in comments%}
             {% if comment['answer_id'] == answer['id'] %}
-            <div class="comment-container" style="background-color: aquamarine">
-                <span id="pub-time">{{ time_to_utc(comment['submission_time']) }}</span><br>
-                {{ comment['message'] }}
+            <div class="comment-container">
+                <span class="pub-time">{{ time_to_utc(comment['submission_time']) }}</span><br>
+                <p class="message">{{ comment['message'] }}</p>
             </div>
             {% endif %}
         {% endfor %}
@@ -134,13 +175,55 @@
 </div>
 
 <script>
-    function vote_alert(type) {
-        alert('You have already voted for ' + type + '.');
+
+document.getElementsByClassName("vote_up_question")[0].addEventListener(
+    "click",
+    function() {
+        let element = this.parentNode.parentNode.nextElementSibling;
+        element.style.opacity = 1;
+        setTimeout(fadeOut, 2000, element);
+    }
+);
+
+document.getElementsByClassName("vote_down_question")[0].addEventListener(
+    "click",
+    function() {
+        let element = this.parentNode.parentNode.nextElementSibling;
+        element.style.opacity = 1;
+        setTimeout(fadeOut, 2000, element);
+    }
+);
+
+{% for answer in answers_data %}
+
+    for (let element of document.getElementsByClassName("vote_up_answer")) {
+        element.addEventListener(
+            "click",
+            function() {
+                let element = this.parentNode.parentNode.nextElementSibling;
+                element.style.opacity = 1;
+                setTimeout(fadeOut, 2000, element);
+            }
+        );
     }
 
-    function voteSameUser_alert(type) {
-        alert('You cannot vote for your ' + type + '.');
+    for (let element of document.getElementsByClassName("vote_down_answer")) {
+        element.addEventListener(
+            "click",
+            function() {
+                let element = this.parentNode.parentNode.nextElementSibling;
+                element.style.opacity = 1;
+                setTimeout(fadeOut, 2000, element);
+            }
+        );
     }
+
+{% endfor %}
+
+
+function fadeOut(element) {
+    element.style.opacity = 0;
+}
 </script>
 </body>
 </html>

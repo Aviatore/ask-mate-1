@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Users list</title>
+    <script src='https://kit.fontawesome.com/a076d05399.js'></script>
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='list.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='header.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='search-field.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='question-details.css') }}">
+</head>
+<body>
+    <div class="body">
+        {% include 'header.html' %}
+    <div class="block-header">
+        <span class="block-header-title">Questions</span>
+    </div>
+        <table>
+            <thead>
+                <tr>
+                    {% for header in headers['headers'] %}
+                        <th>
+                            {{ header }}
+                        </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>
+                            <div class="user_id" style="text-align: center">{{ user['user_id'] }}</div>
+                        </td>
+                    {% for key in headers['keys'][1:] %}
+                        <td>{{ user[key] if key != 'registration_date' else time_to_utc(user[key]) }}</td>
+                    {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

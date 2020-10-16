@@ -8,7 +8,10 @@
 <body>
 <div id="body">
 <div id="container">
-    <h3 class="center">Registration form</h3>
+    <div class="title">
+        <h3 class="center">Registration form</h3>
+    </div>
+
     <form action="{{ url_for('register') }}" method="post">
         <input type="text" name="username" placeholder="User name" class="input center {{ "warning" if warnings['username'] }}" />
         {% if warnings['username'] %}
@@ -24,6 +27,9 @@
         {% endif %}
         <br>
         <button type="submit" class="center button">Register</button>
+        <button type="button" class="center button" onclick="window.location.href='{{ prev_url }}';">
+            Back
+        </button>
     </form>
 </div>
     </div>

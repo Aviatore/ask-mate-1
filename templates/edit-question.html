@@ -10,7 +10,10 @@
 <body>
 <div id="body">
     <div id="container">
-        <h3 class="center">Edit Question</h3>
+        <div class="title">
+            <h3 class="center">Edit Question</h3>
+        </div>
+
         <form id="form" action="" method="post" enctype="multipart/form-data">
             <input id="title" name="title" type="text" size="40" placeholder="Question title" class="input center {{ "warning" if warnings['title'] }}" value="{{ question['title'] }}">
             {% if warnings['title'] %}
@@ -42,7 +45,7 @@
             </div><br>
 
             <button type="submit" class="center button">Submit</button>
-            <button type="button" class="center button" onclick="window.location.href='{{ url_for('question_list') }}';">Back to questions list</button>
+            <button type="button" class="center button" onclick="window.location.href='{{ url_for('question_details', question_id=question['id']) }}';">Back to question details</button>
         </form>
     </div>
 

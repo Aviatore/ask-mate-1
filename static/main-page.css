@@ -1,0 +1,55 @@
+.welcome_container {
+    position: relative;
+    width: 100%;
+    height: 450px;
+    background-image: url("img/main-bcg.jpg");
+    background-size: cover;
+    background-position: bottom;
+    font-family: sans-serif;
+}
+.welcome_content {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: left;
+
+    position: absolute;
+    margin-left: 0px;
+    width: 100%;
+}
+.welcome_content h1 {
+    font-size: 5em;
+}
+.welcome-msgs {
+    margin-top: 30px;
+    column-count: 2;
+    column-rule-style: groove;
+    column-rule-width: 2px;
+    column-gap: 50px;
+    display: inline-block;
+    height: 300px;
+    width: 80%;
+}
+.welcome-msg {
+    flex-grow: 0;
+    margin-left: 50px;
+}
+.welcome-msg-txt {
+    margin-left: 50px;
+    margin-right: 50px;
+    left: 400px;
+    width: 50%;
+}
+.welcome-msg > h1 {
+    margin: 0;
+    padding: 0;
+}
+.welcome-txt {
+    height: 300px;
+    width: 600px;
+    position: relative;
+    bottom: 185px;
+    border: 1px solid blue;
+    display: inline-block;
+    margin-left: 50px;
+}
