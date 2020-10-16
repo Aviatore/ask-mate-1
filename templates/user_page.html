@@ -56,12 +56,6 @@
                 <span class="pub-time">author:</span><span class="author"><a href="{{ url_for('user_details', user_id=question['user_id']) }}">{{ user['username'] }}</a></span>
                 <span class="pub-time">{{ time_to_utc(question['submission_time']) }}</span>
                 <p id="message">{{ question['message'] }}</p>
-                {% if question['image'] is not none %}
-                    {% for image_url in question['image'] %}
-                        <img src="{{ url_for('get_image', directory='questions', file_name=image_url) }}">
-                        <figcaption>{{ image_url }} ({{ file_size('questions', image_url) }} kb)</figcaption>
-                    {% endfor %}
-                {% endif %}
             </div>
         {% endfor %}
     {% endif %}
