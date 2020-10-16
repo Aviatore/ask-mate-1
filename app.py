@@ -100,6 +100,7 @@ def question_list():
 
 # List users
 @app.route('/users')
+@login_required
 def users_list():
     table_headers = {
         'headers': ['User id', 'Username', 'Registration date', 'Reputation', 'Questions asked', 'Answers added', 'Commented posts'],
@@ -514,6 +515,7 @@ def register():
         'email': None,
         'password': None
     }
+    prev_url = get_prev_url()
 
     if request.method == 'POST':
         new_user['username'] = request.form.get('username')
@@ -542,9 +544,12 @@ def register():
 
         db.execute_query(queries.add_new_user, params=new_user)
 
-        return redirect(url_for('main_page'))
+        return redirect(prev_url)
 
-    return render_template('register.html', warnings=None)
+    response = make_response(render_template('register.html', warnings=None, prev_url=prev_url))
+    response.set_cookie('prev_page', base64_encode(prev_url))
+
+    return response
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -581,14 +586,9 @@ def login():
 
         return render_template('login.html', warnings=warnings)
 
-    response = make_response(render_template('login.html', warnings=None))
-
-    prev_url = request.referrer
-    if prev_url:
-        response.set_cookie('prev_page', base64_encode(prev_url))
-    else:
-        prev_url = url_for('main_page')
-        response.set_cookie('prev_page', base64_encode(prev_url))
+    prev_url = get_prev_url()
+    response = make_response(render_template('login.html', warnings=None, prev_url=prev_url))
+    response.set_cookie('prev_page', base64_encode(prev_url))
 
     return response
     # return render_template('login.html', warnings=None)
