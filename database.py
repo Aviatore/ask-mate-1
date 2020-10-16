@@ -45,11 +45,11 @@ class Queries:
         self.delete_answer_by_id = 'DELETE FROM answer WHERE id = %(id)s'
         self.delete_question_by_id = 'DELETE FROM question WHERE id = %(id)s'
         self.read_answer_by_id = 'SELECT id, question_id, message, vote_number, submission_time, image FROM answer WHERE id = %(id)s'
-        self.add_comment_to_question = 'INSERT INTO comment (question_id, message, submission_time, edited_count)' \
-                                       'VALUES (%(question_id)s, %(message)s, %(submission_time)s, %(edited_count)s)'
+        self.add_comment_to_question = 'INSERT INTO comment (question_id, message, submission_time, edited_count, user_id)' \
+                                       'VALUES (%(question_id)s, %(message)s, %(submission_time)s, %(edited_count)s, %(user_id)s)'
         self.read_comments_by_question_id = 'SELECT * FROM comment WHERE question_id=%(question_id)s'
-        self.add_comment_to_answer = 'INSERT INTO comment (question_id, answer_id, message, submission_time, edited_count)' \
-                                     'VALUES (%(question_id)s, %(answer_id)s, %(message)s, %(submission_time)s, %(edited_count)s)'
+        self.add_comment_to_answer = 'INSERT INTO comment (question_id, answer_id, message, submission_time, edited_count, user_id)' \
+                                     'VALUES (%(question_id)s, %(answer_id)s, %(message)s, %(submission_time)s, %(edited_count)s, %(user_id)s)'
         self.read_comments_by_answer_id = 'SELECT * FROM comment WHERE answer_id=%(answer_id)s'
 
         self.read_tag_id_by_question_id = 'SELECT tag_id FROM question_tag WHERE question_id=%(question_id)s'
@@ -74,7 +74,9 @@ class Queries:
         self.get_user_by_username = 'SELECT user_id, username, email, password, registration_date, reputation ' \
                                     'FROM users WHERE username = %(username)s'
         self.get_user_by_user_id = 'SELECT user_id, username, email, registration_date, reputation ' \
-                                    'FROM users WHERE user_id = %(user_id)s'
+                                   'FROM users WHERE user_id = %(user_id)s'
+        self.get_all_users = 'SELECT user_id, username, registration_date, reputation ' \
+                             'FROM users'
         self.add_new_user = 'INSERT INTO users (username, email, password)' \
                             'VALUES (%(username)s, %(email)s, %(password)s)'
         self.get_all_questions_by_user_id = 'SELECT id, title, message, view_number, vote_number, submission_time, image, user_id ' \
@@ -90,10 +92,32 @@ class Queries:
         self.number_of_answers_by_user_id = 'SELECT COUNT(*) as "answers_num" ' \
                                             'FROM answer ' \
                                             'WHERE user_id = %(user_id)s'
+        self.number_of_comments_by_user_id = 'SELECT COUNT(*) as "comment_num" ' \
+                                             'FROM comment ' \
+                                             'WHERE user_id = %(user_id)s'
         self.read_latest_five_questions = 'SELECT id, title, message, view_number, vote_number, submission_time, image FROM question ORDER BY {order_by} DESC LIMIT 5'
         self.add_reputation = 'UPDATE users SET reputation = (reputation + %(rep_value)s) WHERE user_id = %(user_id)s'
         self.read_user_id_by_question_id = 'SELECT user_id FROM question WHERE id = %(id)s'
         self.read_user_id_by_answer_id = 'SELECT user_id FROM answer WHERE id = %(id)s'
+        self.get_id_by_questions = 'SELECT DISTINCT user_id FROM question'
+        self.get_questions_count_by_user_id = 'SELECT users.user_id, COUNT(question.user_id) AS question_count ' \
+                                              'FROM users INNER JOIN question ' \
+                                              '     ON users.user_id = question.user_id ' \
+                                              'GROUP BY users.user_id ' \
+                                              'ORDER BY users.user_id'
+        self.get_answers_count_by_user_id = 'SELECT users.user_id, COUNT(answer.user_id) AS answer_count ' \
+                                            'FROM users ' \
+                                            'INNER JOIN answer ' \
+                                            '    ON users.user_id = answer.user_id ' \
+                                            'GROUP BY users.user_id '  \
+                                            'ORDER BY users.user_id'
+        self.get_comments_count_by_user_id = 'SELECT users.user_id, COUNT(comment.user_id) AS comment_count ' \
+                                             'FROM users ' \
+                                             'INNER JOIN comment ' \
+                                             '    ON users.user_id = comment.user_id ' \
+                                             'GROUP BY users.user_id ' \
+                                             'ORDER BY users.user_id '
+
 class DB:
     def __init__(self):
         self.host = os.environ.get("DATABASE_HOST")
