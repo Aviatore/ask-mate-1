@@ -6,20 +6,22 @@
     <script src='https://kit.fontawesome.com/a076d05399.js'></script>
     <script src="{{ url_for('static', filename='scripts.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='list.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='header.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='search-field.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='question-details.css') }}">
 </head>
 <body>
-    <div class="users_list">
+    <div class="body">
+        {% include 'header.html' %}
+    <div class="block-header">
+        <span class="block-header-title">Questions</span>
+    </div>
         <table>
             <thead>
                 <tr>
                     {% for header in headers['headers'] %}
                         <th>
                             {{ header }}
-                            {% if headers['directions'][loop.index0] == 'asc' %}
-                                <i class="fas fa-sort-down"></i>
-                                {% elif headers['directions'][loop.index0] == 'desc' %}
-                                <i class="fas fa-sort-up"></i>
-                            {% endif %}
                         </th>
                     {% endfor %}
                 </tr>
@@ -31,22 +33,11 @@
                             <div class="user_id" style="text-align: center">{{ user['user_id'] }}</div>
                         </td>
                     {% for key in headers['keys'][1:] %}
-                        <td>{{ user[key] if key != 'submission_time' else time_to_utc(user[key]) }}</td>
-{#                        <td>{{ question_count|selectattr('user_id', user['user_id']) }}</td>#}
-{#                        <td>{{ answer_count|selectattr('user_id', user['user_id']) }}</td>#}
-{#                        <td>{{ comment_count|selectattr('user_id', user['user_id']) }}</td>#}
+                        <td>{{ user[key] if key != 'registration_date' else time_to_utc(user[key]) }}</td>
                     {% endfor %}
                     </tr>
                 {% endfor %}
             </tbody>
-        <tfoot>
-            <tr>
-                <td></td><td></td><td></td>
-                <td>
-                    <a href="{{ url_for("main_page") }}" title="Back to main menu">Back to main menu <i class="fas fa-undo"></i></a>
-                </td>
-            </tr>
-        </tfoot>
         </table>
     </div>
 </body>

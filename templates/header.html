@@ -10,7 +10,7 @@
                     <div class="dropdown-content">
                         <ul class="h-list-vert " >
                             <a href="{{ url_for('user_details', user_id=session['user_id']) }}"><li class="h-list-vert-item" >User details</li></a>
-                            <a href="#"><li class="h-list-vert-item">All users</li></a>
+                            <a href="{{ url_for('users_list') }}"><li class="h-list-vert-item">All users</li></a>
                             <a href="{{ url_for('logout') }}"><li class="h-list-vert-item" >Logout</li></a>
                         </ul>
                     </div>

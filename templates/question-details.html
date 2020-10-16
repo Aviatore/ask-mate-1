@@ -74,7 +74,9 @@
             {% endfor %}
         {% endif %}
 
-        <a href="{{ url_for('add_comment_to_question', question_id=question_data['id'])}}"><button class="btn-comment"><b>Add comment</b></button></a>
+        {% if session %}
+            <a href="{{ url_for('add_comment_to_question', question_id=question_data['id'])}}"><button class="btn-comment"><b>Add comment</b></button></a>
+        {% endif %}
 
         {# COMMENT #}
         {% for comment in comments%}
@@ -149,7 +151,9 @@
             </span>
             <br>
 
-        <a href="{{ url_for('add_comment_to_answer', answer_id=answer['id'])}}"><button class="btn-comment"><b>Add comment</b></button></a>
+        {% if session %}
+            <a href="{{ url_for('add_comment_to_answer', answer_id=answer['id'])}}"><button class="btn-comment"><b>Add comment</b></button></a>
+        {% endif %}
 
         {# COMMENT DISPLAY #}
         {% for comment in comments%}

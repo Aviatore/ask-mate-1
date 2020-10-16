@@ -99,24 +99,21 @@ class Queries:
         self.add_reputation = 'UPDATE users SET reputation = (reputation + %(rep_value)s) WHERE user_id = %(user_id)s'
         self.read_user_id_by_question_id = 'SELECT user_id FROM question WHERE id = %(id)s'
         self.read_user_id_by_answer_id = 'SELECT user_id FROM answer WHERE id = %(id)s'
-        self.get_id_by_questions = 'SELECT DISTINCT user_id FROM question'
-        self.get_questions_count_by_user_id = 'SELECT users.user_id, COUNT(question.user_id) AS question_count ' \
-                                              'FROM users INNER JOIN question ' \
-                                              '     ON users.user_id = question.user_id ' \
-                                              'GROUP BY users.user_id ' \
-                                              'ORDER BY users.user_id'
-        self.get_answers_count_by_user_id = 'SELECT users.user_id, COUNT(answer.user_id) AS answer_count ' \
-                                            'FROM users ' \
-                                            'INNER JOIN answer ' \
-                                            '    ON users.user_id = answer.user_id ' \
-                                            'GROUP BY users.user_id '  \
-                                            'ORDER BY users.user_id'
-        self.get_comments_count_by_user_id = 'SELECT users.user_id, COUNT(comment.user_id) AS comment_count ' \
-                                             'FROM users ' \
-                                             'INNER JOIN comment ' \
-                                             '    ON users.user_id = comment.user_id ' \
-                                             'GROUP BY users.user_id ' \
-                                             'ORDER BY users.user_id '
+        self.users_activity_stats = 'SELECT user_id, a.username, a.registration_date, a.reputation, q.questions_num, a.answers_num, c.comments_num ' \
+                                    'FROM (SELECT u.user_id, u.username, u.registration_date, u.reputation, count(a.id) as "answers_num" ' \
+                                        'FROM users AS u ' \
+                                        'LEFT JOIN answer AS a USING (user_id) ' \
+                                        'GROUP BY u.user_id) AS a ' \
+                                    'LEFT JOIN (select u.user_id, count(q.id) as "questions_num" ' \
+                                        'FROM users AS u ' \
+                                        'LEFT JOIN question AS q USING (user_id) ' \
+                                        'GROUP BY u.user_id) AS q USING (user_id) ' \
+                                    'LEFT JOIN (select u.user_id, count(c.id) as "comments_num" ' \
+                                        'FROM users AS u ' \
+                                        'LEFT JOIN comment AS c USING (user_id) ' \
+                                        'GROUP BY u.user_id) AS c USING (user_id) ' \
+                                    'ORDER BY user_id'
+
 
 class DB:
     def __init__(self):
