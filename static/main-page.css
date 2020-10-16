@@ -8,22 +8,37 @@
     font-family: sans-serif;
 }
 .welcome_content {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: left;
+
     position: absolute;
-    margin-left: 50px;
+    margin-left: 0px;
+    width: 100%;
 }
 .welcome_content h1 {
     font-size: 5em;
 }
-.welcome-msg {
+.welcome-msgs {
     margin-top: 30px;
     column-count: 2;
     column-rule-style: groove;
     column-rule-width: 2px;
     column-gap: 50px;
-    border: 0px solid red;
     display: inline-block;
     height: 300px;
     width: 80%;
+}
+.welcome-msg {
+    flex-grow: 0;
+    margin-left: 50px;
+}
+.welcome-msg-txt {
+    margin-left: 50px;
+    margin-right: 50px;
+    left: 400px;
+    width: 50%;
 }
 .welcome-msg > h1 {
     margin: 0;
